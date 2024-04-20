@@ -12,7 +12,7 @@ export async function getStaticPaths() {
   const res = await fetch("http://localhost:3000/v1/apps");
   const apps = await res.json();
 
-  const paths = apps.items.map((app) => ({
+  const paths = apps.items.map((app: any) => ({
     params: { code: app.code },
   }));
 

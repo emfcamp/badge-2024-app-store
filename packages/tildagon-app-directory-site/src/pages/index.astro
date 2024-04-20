@@ -15,7 +15,7 @@ const copy = {
     <h1>{copy.title}</h1>
     <ul role="list" class="link-card-grid">
       {
-        data.items.map((app) => (
+        data.items.map((app: any) => (
           <Card
             title={app.manifest.app.name}
             description={app.manifest.metadata.description}
