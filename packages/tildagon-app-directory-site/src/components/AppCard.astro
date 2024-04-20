@@ -1,0 +1,22 @@
+---
+import Card from "./Card.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  owner: string;
+  code: string;
+}
+
+const { title, description, owner, code } = Astro.props;
+---
+
+<Card title={title} href={`/apps/${code}`}>
+  <p>
+    {description}
+  </p>
+  <dl>
+    <dt>Owner</dt>
+    <dd>{owner}</dd>
+  </dl>
+</Card>

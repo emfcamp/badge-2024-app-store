@@ -1,0 +1,28 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card.astro";
+
+const copy = {
+  title: "Tildagon on GitHub",
+};
+
+const repos = [
+  {
+    name: "badge-2024-hardware",
+    description: "The source code for this website",
+    url: "https://github.com/emfcamp/badge-2024-hardware",
+  },
+];
+---
+
+<Layout title={copy.title}>
+  <ul role="list" class="linked-card-list">
+    {
+      repos.map((repo) => (
+        <Card title={repo.name} href={repo.url}>
+          {repo.description}
+        </Card>
+      ))
+    }
+  </ul>
+</Layout>

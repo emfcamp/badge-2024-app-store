@@ -1,0 +1,21 @@
+{
+  "name": "badge-2024-app-store",
+  "version": "0.0.1",
+  "description": "App Store for Tildagon",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "emfcamp",
+    "tildagon"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emfcamp/badge-2024-app-store.git"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "author": "Hugh Rawlinson",
+  "license": "ISC"
+}

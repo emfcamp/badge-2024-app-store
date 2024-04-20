@@ -1,0 +1,86 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Tildagon App Directory" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" type="text/css" href="/global.css" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div id="emf-container">
+      <header role="banner">
+        <a aria-label="Electromagnetic Field" href="/" id="main-logo">
+          <img
+            id="logomark"
+            style="height: 120px; width: 40px;"
+            src="/static/images/brand/2024/logomark-2024-4f87dc608c19738bdb138e9bc592a7ff.svg"
+            alt=""
+          />
+          Electromagnetic Field
+        </a>
+        <div id="header-text">
+          May 30<sup>th</sup>–June 2<sup>nd</sup> 2024
+          <br />
+          Eastnor, UK
+        </div>
+
+        <button id="menu-button" data-toggle="menu-container" aria-label="Menu">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            width="28"
+            height="28"
+            alt="Menu"
+          >
+            <path
+              fill="white"
+              fill-rule="evenodd"
+              d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"
+              style="--darkreader-inline-fill: #e8e6e3;"
+              data-darkreader-inline-fill=""
+            >
+            </path>
+          </svg>
+        </button>
+        <div id="menu-container" role="navigation" aria-label="Main">
+          <ul class="menu" role="menu">
+            <li role="presentation">
+              <a role="menuitem" href="/">Apps</a>
+            </li>
+            <li role="presentation">
+              <a role="menuitem" href="/github">GitHub</a>
+            </li>
+            <!--
+
+            <li role="presentation">
+              <a role="menuitem" href="/cfp">Call for Participation</a>
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="/schedule/">Talks</a>
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="/sponsor">Sponsor</a>
+            </li> -->
+          </ul>
+        </div>
+        <div style="clear: both"></div>
+      </header>
+      <div class="main-row emf-row">
+        <slot />
+      </div>
+    </div>
+  </body>
+</html>

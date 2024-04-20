@@ -1,0 +1,38 @@
+---
+import Layout from "../../layouts/Layout.astro";
+
+const { code } = Astro.params;
+
+const app = await fetch(`http://localhost:3000/v1/apps/${code}`);
+const data = await app.json();
+
+console.log(JSON.stringify(data, null, 2));
+
+export async function getStaticPaths() {
+  const res = await fetch("http://localhost:3000/v1/apps");
+  const apps = await res.json();
+
+  const paths = apps.items.map((app) => ({
+    params: { code: app.code },
+  }));
+
+  return paths;
+}
+---
+
+<Layout title="Tildagon App Directory">
+  <main>
+    <h1>{data.manifest.app.name}</h1>
+    <dl>
+      <dt>Code</dt>
+      <dd>{data.code}</dd>
+      <dt>Author</dt>
+      <dd>{data.manifest.metadata.author}</dd>
+      <dt>Version</dt>
+      <dd>{data.manifest.metadata.version}</dd>
+      <dt>License</dt>
+      <dd>{data.manifest.metadata.license}</dd>
+    </dl>
+    <p>Installation instructions will go here.</p>
+  </main>
+</Layout>

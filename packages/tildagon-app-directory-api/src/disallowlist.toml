@@ -1,0 +1,3 @@
+disallowedApps = [
+  "hughrawlinson/tildagon-demo"
+]

@@ -1,0 +1,29 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/AppCard.astro";
+
+const directory = await fetch("http://localhost:3000/v1/apps");
+const data = await directory.json();
+
+const copy = {
+  title: "Tildagon App Directory",
+};
+---
+
+<Layout title={copy.title}>
+  <main>
+    <h1>{copy.title}</h1>
+    <ul role="list" class="link-card-grid">
+      {
+        data.items.map((app) => (
+          <Card
+            title={app.manifest.app.name}
+            description={app.manifest.metadata.description}
+            code={app.code}
+            owner={app.manifest.metadata.author}
+          />
+        ))
+      }
+    </ul>
+  </main>
+</Layout>

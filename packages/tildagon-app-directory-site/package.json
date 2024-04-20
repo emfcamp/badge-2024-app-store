@@ -1,0 +1,23 @@
+{
+  "name": "tildagon-app-directory-site",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "pull-css": "curl https://www.emfcamp.org/static/css/main-4ea2a04cb955c834fd84796b0110a908.css -o ./public/global.css",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.5.10",
+    "@fontsource/raleway": "^5.0.18",
+    "astro": "^4.5.12",
+    "typescript": "^5.4.3"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "prettier-plugin-astro": "^0.13.0"
+  }
+}
