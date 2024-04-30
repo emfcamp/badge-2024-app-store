@@ -22,23 +22,7 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
       - name: Run directory
-        run: npm run --workspace tildagon-app-directory-api dev & echo $! > .api_pid
-      - name: Echo pid
-        run: echo $(cat .api_pid)
-      - name: Wait for directory to start
-        run: npx wait-on http://localhost:3000
-      - name: check PORT var
-        run: echo $PORT
-      - name: Check directory is up
-        run: curl http://localhost:3000/v1/apps
-      - name: Install, build, and upload your site
-        uses: withastro/action@v2
-        with:
-          path: ./packages/tildagon-app-directory-site # The root location of your Astro project inside the repository. (optional)
-          # node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
-          package-manager: npm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
-      - name: Stop directory
-        run: kill $(cat .api_pid) || true
+        run: ./scripts/build.sh
 
   deploy:
     needs: build

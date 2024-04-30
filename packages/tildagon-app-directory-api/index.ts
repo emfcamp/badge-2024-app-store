@@ -55,4 +55,7 @@ const server = Bun.serve({
   },
 });
 
+const pidFile = `${process.cwd()}/.server.pid`;
+Bun.write(pidFile, process.pid.toString());
+console.log(`Server process pid: ${process.pid}`);
 console.log(`Server running at ${server.port}`);
