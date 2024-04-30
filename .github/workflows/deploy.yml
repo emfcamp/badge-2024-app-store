@@ -23,6 +23,14 @@ jobs:
         uses: oven-sh/setup-bun@v1
       - name: Run directory
         run: npm run --workspace tildagon-app-directory-api dev & echo $! > .api_pid
+      - name: Echo pid
+        run: echo $(cat .api_pid)
+      - name: Wait for directory to start
+        run: sleep 10
+      - name: Check directory is up
+        run: curl http://localhost:3000/v1/apps
+      - name: check PORT var
+        run: echo $PORT
       - name: Install, build, and upload your site
         uses: withastro/action@v2
         with:
