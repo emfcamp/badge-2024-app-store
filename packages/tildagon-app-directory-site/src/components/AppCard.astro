@@ -11,7 +11,7 @@ interface Props {
 const { title, description, owner, code } = Astro.props;
 ---
 
-<Card title={title} href={`${import.meta.env.BASE_URL}/apps/${code}`}>
+<Card title={title} href={`${import.meta.env.BASE_URL}apps/${code}`}>
   <p>
     {description}
   </p>
