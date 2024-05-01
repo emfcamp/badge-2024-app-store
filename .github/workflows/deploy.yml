@@ -30,7 +30,7 @@ jobs:
       - name: Upload site artifact
         uses: actions/upload-artifact@v2
         with:
-          name: github-pages.tar.gz
+          name: github-pages
           path: ./packages/tildagon-app-directory-site/dist
 
   deploy:
