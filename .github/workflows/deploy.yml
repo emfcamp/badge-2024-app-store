@@ -27,10 +27,18 @@ jobs:
         run: ./scripts/build.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: github-pages.tar.gz
+          path: .
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
