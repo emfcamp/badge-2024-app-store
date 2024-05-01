@@ -7,7 +7,7 @@
     "dump-apps": "bun run bin/dump_apps.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.1.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

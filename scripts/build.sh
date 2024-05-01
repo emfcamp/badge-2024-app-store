@@ -20,6 +20,5 @@ npm run --workspace tildagon-app-directory-site build
 
 # kill $DIRECTORY_PID
 # rm .server.pid
-tar -cvzf github-pages.tar.gz -C ./packages/tildagon-app-directory-site/dist .
 
 kill $(pidof bun)
