@@ -2,7 +2,7 @@
 
 npm run --workspace tildagon-app-directory-api dev &
 
-sleep 2
+sleep 5
 
 # DIRECTORY_PID=$(cat .server.pid)
 # echo $DIRECTORY_PID
