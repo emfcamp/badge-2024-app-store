@@ -23,6 +23,8 @@ jobs:
         uses: oven-sh/setup-bun@v1
       - name: Run directory
         run: ./scripts/build.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: build
