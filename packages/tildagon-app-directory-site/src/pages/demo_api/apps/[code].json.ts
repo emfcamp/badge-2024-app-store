@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ params }) => {
   const directory = await fetch(`http://localhost:3000/v1/apps/${params.code}`);
   const data = await directory.json();
   return new Response(JSON.stringify(data));
