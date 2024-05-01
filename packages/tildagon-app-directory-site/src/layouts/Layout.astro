@@ -59,10 +59,12 @@ const { title } = Astro.props;
         <div id="menu-container" role="navigation" aria-label="Main">
           <ul class="menu" role="menu">
             <li role="presentation">
-              <a role="menuitem" href="/">Apps</a>
+              <a role="menuitem" href={`${import.meta.env.BASE_URL}/`}>Apps</a>
             </li>
             <li role="presentation">
-              <a role="menuitem" href="/github">GitHub</a>
+              <a role="menuitem" href={`${import.meta.env.BASE_URL}/github`}
+                >GitHub</a
+              >
             </li>
             <!--
 
