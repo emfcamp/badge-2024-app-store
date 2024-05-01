@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-npm run --workspace tildagon-app-directory-api dev &
+bun --filter='tildagon-app-directory-api' run dev &
 
 sleep 5
 
@@ -9,7 +9,7 @@ sleep 5
 
 curl http://localhost:3000/v1/apps
 
-npm run --workspace tildagon-app-directory-site build
+bun --filter='tildagon-app-directory-site' run build
 
 # pkill -P $$
 
