@@ -4,5 +4,5 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   output: "static",
   site: "https://emfcamp.github.io/",
-  base: "badge-2024-app-store",
+  base: "/badge-2024-app-store",
 });
