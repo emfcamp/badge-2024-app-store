@@ -16,7 +16,7 @@ const { title } = Astro.props;
     <link
       rel="stylesheet"
       type="text/css"
-      href="/badge-2024-app-store/global.css"
+      href={`${import.meta.env.BASE_URL}/global.css`}
     />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
@@ -28,7 +28,7 @@ const { title } = Astro.props;
           <img
             id="logomark"
             style="height: 120px; width: 40px;"
-            src="/badge-2024-app-store/static/images/brand/2024/logomark-2024-4f87dc608c19738bdb138e9bc592a7ff.svg"
+            src={`${import.meta.env.BASE_URL}/static/images/brand/2024/logomark-2024-4f87dc608c19738bdb138e9bc592a7ff.svg`}
             alt=""
           />
           Electromagnetic Field
