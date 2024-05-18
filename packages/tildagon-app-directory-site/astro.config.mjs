@@ -4,5 +4,5 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   output: "static",
   site: "https://emfcamp.github.io/",
-  base: process.env.CI ? "/badge-2024-app-store" : undefined,
+  //base: process.env.CI ? "/badge-2024-app-store" : undefined,
 });
