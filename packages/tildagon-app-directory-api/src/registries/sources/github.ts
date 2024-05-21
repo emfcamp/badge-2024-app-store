@@ -107,19 +107,47 @@ async function getTildagonApps(): Promise<
           if (value.type === "failure") {
             return value;
           }
-          return {
-            type: "success",
-            value: {
-              id: {
-                service: "github",
-                owner: value.value.owner.login,
-                title: value.value.name,
-                releaseHash: value.value.releases.nodes[0].tagCommit.oid,
+          if (!value.value.releases.nodes.length) {
+            return {
+              type: "failure",
+              failure: {
+                id: {
+                  service: "github",
+                  owner: value.value.owner.login,
+                  title: value.value.name,
+                },
+                reason: "No releases found",
               },
-              releaseTime: value.value.releases.nodes[0].createdAt,
-              tarballUrl: value.value.releases.nodes[0].tagCommit.tarballUrl,
-            },
-          };
+            };
+          }
+
+          try {
+            return {
+              type: "success",
+              value: {
+                id: {
+                  service: "github",
+                  owner: value.value.owner.login,
+                  title: value.value.name,
+                  releaseHash: value.value.releases.nodes[0].tagCommit.oid,
+                },
+                releaseTime: value.value.releases.nodes[0].createdAt,
+                tarballUrl: value.value.releases.nodes[0].tagCommit.tarballUrl,
+              },
+            };
+          } catch (e) {
+            return {
+              type: "failure",
+              failure: {
+                id: {
+                  service: "github",
+                  owner: "Badge Team",
+                  title: "GitHub Response Parsing",
+                },
+                reason: `Failed to parse github repository: ${value.value.nameWithOwner}`,
+              },
+            };
+          }
         }
       )
   );
