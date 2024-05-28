@@ -17,5 +17,9 @@
     "packages/*"
   ],
   "author": "Hugh Rawlinson",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@iconify-json/openmoji": "^1.1.51",
+    "astro-icon": "^1.1.0"
+  }
 }

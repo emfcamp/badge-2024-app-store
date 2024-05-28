@@ -1,0 +1,99 @@
+---
+import { Icon } from "astro-icon/components";
+
+const { digit } = Astro.props;
+const descriptions = [
+  "top",
+  "top-right",
+  "bottom-right",
+  "bottom",
+  "bottom-left",
+  "top-left",
+];
+---
+
+<article>
+  {
+    digit < 0 || digit > 5 ? (
+      <p>
+        The badge has no button at position {digit}. Please report a bug to the
+        badge team.
+      </p>
+    ) : null
+  }
+  <p class="visually-hidden">
+    Press the {descriptions[digit]} button on the badge
+  </p>
+  <span class="button-indicator">
+    <Icon size={26} name="openmoji:backhand-index-pointing-down" />
+  </span>
+  <div class="badge-container">
+    <div class="hex"></div>
+    <span>{digit}</span>
+  </div>
+</article>
+
+<style>
+  article {
+    aspect-ratio: 1 / 1;
+    border: 1px solid #afc944;
+    padding: 20px 20px 40px 20px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .badge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+
+    span {
+      color: #030303;
+    }
+  }
+
+  .visually-hidden:not(:focus):not(:active) {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: auto;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+    white-space: nowrap;
+  }
+
+  .hex:before {
+    content: " ";
+    width: 0;
+    height: 0;
+    border-bottom: calc((30 / 104) * var(--width)) solid #afc944;
+    border-left: calc(var(--width) / 2) solid transparent;
+    border-right: calc(var(--width) / 2) solid transparent;
+    position: absolute;
+    top: calc(-1 * (30 / 104) * var(--width));
+  }
+
+  .hex {
+    --width: 63px;
+    margin-top: calc((30 / 104) * var(--width));
+    width: var(--width);
+    height: calc((60 / 104) * var(--width));
+    background-color: #afc944;
+    position: relative;
+  }
+
+  .hex:after {
+    content: "";
+    width: 0;
+    position: absolute;
+    bottom: calc(-1 * (30 / 104) * var(--width));
+    border-top: calc((30 / 104) * var(--width)) solid #afc944;
+    border-left: calc(var(--width) / 2) solid transparent;
+    border-right: calc(var(--width) / 2) solid transparent;
+  }
+</style>

@@ -1,6 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Card from "../components/AppCard.astro";
+import AppCard from "../components/AppCard.astro";
 
 const directory = await fetch("http://localhost:3000/v1/apps");
 const data = await directory.json();
@@ -13,10 +13,10 @@ const copy = {
 <Layout title={copy.title}>
   <main class="col-md-12">
     <h1>{copy.title}</h1>
-    <ul role="list" class="link-card-grid">
+    <section role="list" class="apps">
       {
         data.items.map((app: any) => (
-          <Card
+          <AppCard
             title={app.manifest.app.name}
             description={app.manifest.metadata.description}
             code={app.code}
@@ -24,6 +24,18 @@ const copy = {
           />
         ))
       }
-    </ul>
+    </section>
   </main>
 </Layout>
+
+<style>
+  .apps {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 1rem;
+    margin: none;
+    padding: none;
+    flex-wrap: wrap;
+  }
+</style>

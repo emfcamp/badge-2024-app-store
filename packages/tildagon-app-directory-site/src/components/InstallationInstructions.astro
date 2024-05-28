@@ -1,0 +1,28 @@
+---
+import HexDigit from "./HexDigit.astro";
+
+const { code } = Astro.props;
+const digits: Number[] = code.split("").map(Number);
+---
+
+<div class="installation-instructions">
+  <div class="row">
+    {digits.slice(4).map((digit) => <HexDigit digit={digit} />)}
+  </div>
+  <div class="row">
+    {digits.slice(4, 8).map((digit) => <HexDigit digit={digit} />)}
+  </div>
+</div>
+
+<style>
+  div.installation-instructions {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  div.row {
+    display: flex;
+    justify-content: space-evenly;
+    padding: 0px 30px;
+  }
+</style>

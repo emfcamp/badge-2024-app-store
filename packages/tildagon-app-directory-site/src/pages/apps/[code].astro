@@ -1,4 +1,5 @@
 ---
+import InstallationInstructions from "../../components/InstallationInstructions.astro";
 import Layout from "../../layouts/Layout.astro";
 
 const { code } = Astro.params;
@@ -33,6 +34,11 @@ export async function getStaticPaths() {
       <dt>License</dt>
       <dd>{data.manifest.metadata.license}</dd>
     </dl>
-    <p>Installation instructions will go here.</p>
+    <h2>Installation</h2>
+    <p>
+      To install {data.manifest.app.name} on your badge, launch the App Store app
+      and select "CodeInstall". Use the buttons as shown to enter the app code.
+    </p>
+    <InstallationInstructions code={data.code} />
   </main>
 </Layout>
