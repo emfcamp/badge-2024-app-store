@@ -17,9 +17,7 @@ export const CachedRegistryManager = {
     await Promise.all(
       SOURCES.map(async (source) => {
         return await Promise.all(
-          (
-            await source.list()
-          )
+          (await source.list())
             .map((result) => {
               if (result.type === "failure") {
                 ErrorCache.set(
@@ -39,7 +37,7 @@ export const CachedRegistryManager = {
                 // Early exit if we already have this release
                 if (AppCache.has(code)) {
                   const cachedApp = AppCache.get(code);
-                  if (!Bun.deepEquals(cachedApp, result.value.id)) {
+                  if (!Bun.deepEquals(cachedApp?.id, result.value.id)) {
                     ErrorCache.set(code, {
                       id: result.value.id,
                       reason: `Hash collision with ${code} - ${cachedApp?.manifest.app.name}`,
