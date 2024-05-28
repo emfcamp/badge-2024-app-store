@@ -38,7 +38,7 @@ export type GitHubRegistryListQueryResult = z.infer<
 
 const LIST_QUERY = `
  {
-  search(query: "topic:tildagon-app", type: REPOSITORY, first: 100) {
+  search(query: "topic:tildagon-app fork:true", type: REPOSITORY, first: 100) {
     repositoryCount
     nodes {
       ... on Repository {
