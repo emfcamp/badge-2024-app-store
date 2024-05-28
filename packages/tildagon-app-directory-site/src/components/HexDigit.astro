@@ -24,20 +24,20 @@ const descriptions = [
   <p class="visually-hidden">
     Press the {descriptions[digit]} button on the badge
   </p>
-  <span class="button-indicator">
+  <span class="button-indicator" style={`--digit: ${digit}`}>
     <Icon size={26} name="openmoji:backhand-index-pointing-down" />
   </span>
   <div class="badge-container">
     <div class="hex"></div>
-    <span>{digit}</span>
+    <h2>{digit}</h2>
   </div>
 </article>
 
 <style>
   article {
     aspect-ratio: 1 / 1;
-    border: 1px solid #afc944;
-    padding: 20px 20px 40px 20px;
+    border: 1px solid #528329;
+    padding: 10px 10px 50px 10px;
     border-radius: 5px;
     display: flex;
     flex-direction: column;
@@ -50,9 +50,15 @@ const descriptions = [
     align-items: center;
     position: relative;
 
-    span {
+    h2 {
+      z-index: 999;
       color: #030303;
     }
+  }
+
+  .button-indicator {
+    transform: rotate(calc(360deg / 6 * var(--digit)));
+    transform-origin: 50% 68px;
   }
 
   .visually-hidden:not(:focus):not(:active) {
@@ -79,12 +85,12 @@ const descriptions = [
   }
 
   .hex {
-    --width: 63px;
+    --width: 67px;
     margin-top: calc((30 / 104) * var(--width));
     width: var(--width);
     height: calc((60 / 104) * var(--width));
     background-color: #afc944;
-    position: relative;
+    position: absolute;
   }
 
   .hex:after {
