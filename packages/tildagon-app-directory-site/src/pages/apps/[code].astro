@@ -36,6 +36,8 @@ export async function getStaticPaths() {
       <dt>Source Code Repository</dt>
       <dd><a href={data.manifest.metadata.url}>{data.manifest.metadata.url}</a></dd>
     </dl>
+    <h2>Description</h2>
+    <p>{data.manifest.metadata.description}</p>
     <h2>Installation</h2>
     <p>
       To install {data.manifest.app.name} on your badge, launch the App Store app
