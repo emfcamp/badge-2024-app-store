@@ -6,6 +6,8 @@ import {
 import type { RegistrySourceFailure } from "./RegistrySource";
 import { GitHubRegistry } from "./sources/github";
 
+import { disallowedApps } from './disallowlist';
+
 // TODO: Move cache to KV
 const AppCache = new Map<string, TildagonAppRelease>();
 const ErrorCache = new Map<string, RegistrySourceFailure>();
@@ -18,6 +20,7 @@ export const CachedRegistryManager = {
       SOURCES.map(async (source) => {
         return await Promise.all(
           (await source.list())
+            
             .map((result) => {
               if (result.type === "failure") {
                 ErrorCache.set(
@@ -33,6 +36,20 @@ export const CachedRegistryManager = {
                 const code = TildagonAppReleaseIdentifier.toAppCode(
                   result.value.id
                 );
+
+                const disallowReason = disallowedApps.find(disallowSpec => {
+                  return Object.entries(disallowSpec).every(([key, value]) => {
+                    return result.value.id.hasOwnProperty(key) ? result.value.id[key as keyof typeof result.value.id] === value : true
+                  })
+                })
+
+                if (disallowReason) {
+                  ErrorCache.set(code, {
+                    id: result.value.id,
+                    reason: `Ban: ${JSON.stringify(disallowReason, null, 2)}`
+                  });
+                  return "done"
+                }
 
                 // Early exit if we already have this release
                 if (AppCache.has(code)) {
