@@ -1,9 +1,9 @@
 ---
-const {kind, info} = Astro.props
+const {kind} = Astro.props
 ---
 
-<div className={`alert alert-${kind}`}>
-  
+<div class={`alert alert-${kind}`}>
+  <slot/>
 </div>
 
 <style>
