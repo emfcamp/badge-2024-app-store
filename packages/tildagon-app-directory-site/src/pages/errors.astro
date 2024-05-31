@@ -1,6 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Alert from "../components/Alert.astro";
 
 const directory = await fetch("http://localhost:3000/v1/failures");
 const data = await directory.json();
