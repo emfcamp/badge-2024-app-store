@@ -78,7 +78,9 @@ export const CachedRegistryManager = {
       })
     );
 
-    return Array.from(AppCache.values());
+    return Array.from(AppCache.values()).toSorted((a, b) => 
+      a.manifest.app.name.toLowerCase().localeCompare(b.manifest.app.name.toLowerCase())
+    );
   },
 
   async getApp(
