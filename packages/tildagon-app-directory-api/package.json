@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run index.ts",
+    "start": "bun run index.ts",
     "dump-apps": "bun run bin/dump_apps.ts"
   },
   "devDependencies": {

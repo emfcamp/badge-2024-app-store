@@ -1,0 +1,22 @@
+---
+const {kind, info} = Astro.props
+---
+
+<div className={`alert alert-${kind}`}>
+  
+</div>
+
+<style>
+  .alert {
+    border: 1px solid black;
+    padding: 20px;
+  }
+
+  .alert-danger {
+    border-color: #F55089
+  }
+
+  .alert-info {
+    border-color: #2EADD9
+  }
+</style>

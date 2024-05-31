@@ -1,10 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import AppCard from "../components/AppCard.astro";
 import Alert from "../components/Alert.astro";
 
-const directory = await fetch("http://localhost:3000/v1/apps");
+const directory = await fetch("http://localhost:3000/v1/failures");
 const data = await directory.json();
+console.log(data);
 
 const copy = {
   title: "Tildagon App Directory",
@@ -15,14 +15,17 @@ const copy = {
   <main class="col-md-12">
     <h1>{copy.title}</h1>
     <section role="list" class="apps">
+      {data.items.length ?
+      <h1>No errors</h1>
+      <p>The app store doesn't currently see any apps that it wasn't able to make available. Did you tag your repo with the `tildagon-app` topic?</p>
+      :null}
       {
         data.items.map((app: any) => (
-          <AppCard
-            title={app.manifest.app.name}
-            description={app.manifest.metadata.description}
-            code={app.code}
-            owner={app.manifest.metadata.author}
-          />
+          <article>
+            <p>App: {app.name}</p>
+            <p>Error:</p>
+            <code><pre>app.reason</pre></code>
+          </article>
         ))
       }
     </section>
