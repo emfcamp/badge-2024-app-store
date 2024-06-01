@@ -159,55 +159,62 @@ async function getTildagonApp(
   code: string,
   found: Omit<TildagonAppRelease, "manifest">
 ): Promise<Result<TildagonAppRelease, RegistrySourceFailure>> {
-  const response = await octokit.rest.repos.getContent({
-    ref: found.id.releaseHash,
-    owner: found.id.owner,
-    repo: found.id.title,
-    path: "tildagon.toml",
-  });
+  try {
+    const response = await octokit.rest.repos.getContent({
+      ref: found.id.releaseHash,
+      owner: found.id.owner,
+      repo: found.id.title,
+      path: "tildagon.toml",
+    });
 
-  if (
-    response.status === 200 &&
-    !Array.isArray(response.data) &&
-    response.data.type === "file"
-  ) {
-    try {
-      const content = Buffer.from(response.data.content, "base64").toString();
+    if (
+      response.status === 200 &&
+      !Array.isArray(response.data) &&
+      response.data.type === "file"
+    ) {
+      try {
+        const content = Buffer.from(response.data.content, "base64").toString();
 
-      const app = TildagonAppManifestSchema.safeParse(TOML.parse(content));
+        const app = TildagonAppManifestSchema.safeParse(TOML.parse(content));
 
-      if (!app.success) {
+        if (!app.success) {
+          return {
+            type: "failure",
+            failure: { id: found.id, reason: app.error.message },
+          };
+        }
+
+        return {
+          type: "success",
+          value: {
+            code,
+            id: found.id,
+            releaseTime: found.releaseTime,
+            tarballUrl: found.tarballUrl,
+            manifest: app.data,
+          },
+        };
+      } catch (e) {
         return {
           type: "failure",
-          failure: { id: found.id, reason: app.error.message },
+          failure: {
+            id: found.id,
+            reason: "Failed to parse contents of tildagon.toml",
+          },
         };
       }
+    }
 
-      return {
-        type: "success",
-        value: {
-          code,
-          id: found.id,
-          releaseTime: found.releaseTime,
-          tarballUrl: found.tarballUrl,
-          manifest: app.data,
-        },
-      };
-    } catch (e) {
-      return {
-        type: "failure",
-        failure: {
-          id: found.id,
-          reason: "Failed to parse contents of tildagon.toml",
-        },
-      };
+    return {
+      type: "failure",
+      failure: { id: found.id, reason: "No tildagon.toml file found" },
+    };
+  } catch (e) {
+    return {
+      type: "failure",
+      failure: {id: found.id, reason: "GitHub says there's no repository content"}
     }
   }
-
-  return {
-    type: "failure",
-    failure: { id: found.id, reason: "No tildagon.toml file found" },
-  };
 }
 
 export const GitHubRegistry: RegistrySource<{
