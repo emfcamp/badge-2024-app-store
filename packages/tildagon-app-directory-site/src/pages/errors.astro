@@ -13,17 +13,17 @@ const copy = {
 <Layout title={copy.title}>
   <main class="col-md-12">
     <h1>{copy.title}</h1>
-    <section role="list" class="apps">
+    <section>
       {!data.items.length ?
       <h1>No errors</h1>
       <p>The app store doesn't currently see any apps that it wasn't able to make available. Did you tag your repo with the `tildagon-app` topic?</p>
       :null}
       {
         data.items.map((app: any) => (
-          <article>
-            <p>App: {app.name}</p>
+          <article class="failure">
+            <h3>App: {app.id.service}/{app.id.owner}/{app.id.title}/{app.id.releaseHash}</h3>
             <p>Error:</p>
-            <code><pre>app.reason</pre></code>
+            <code><pre>{app.reason}</pre></code>
           </article>
         ))
       }
@@ -32,13 +32,15 @@ const copy = {
 </Layout>
 
 <style>
-  .apps {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    gap: 1rem;
-    margin: none;
-    padding: none;
-    flex-wrap: wrap;
+  .failure {
+    background-color: #cfccc0;
+    color: #1e1e1e;
+    border: 1px solid #528329;
+    margin-bottom: 40px;
+    padding: 30px;
+
+    h3 {
+      color: #1e1e1e;
+    }
   }
 </style>
