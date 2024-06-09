@@ -1,13 +1,14 @@
 # Tildagon App Store
 
-Here's the implementation of the app store for Tildagon, the EMFcamp 2024 badge.
+Here's the implementation of the [app store](https://apps.badge.emfcamp.org/) for 
+[Tildagon](https://tildagon.badge.emfcamp.org/), the EMFcamp 2024 badge.
 
 ## Submitting an app
 
-To make an app available in the badge app store, first follow the (tbd) app dev
-instructions and put the app in a repository on GitHub. Currently only GitHub is
-supported - if you'd like to contribute support for another platform, see
-"Hacking the App Store" below
+To make an app available in the badge app store, first follow the [app dev
+instructions](https://tildagon.badge.emfcamp.org/tildagon-apps/) and put the app in 
+a repository on GitHub. Currently only GitHub is supported - if you'd like to contribute 
+support for another platform, see "Hacking the App Store" below
 
 Once your app is in a repository, add the `tildagon-app` topic to your repo.
 
