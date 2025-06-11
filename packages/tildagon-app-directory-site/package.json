@@ -15,7 +15,7 @@
     "@fontsource/raleway": "^5.0.18",
     "@iconify-json/openmoji": "^1.1.51",
     "astro": "^4.5.12",
-    "astro-icon": "^1.1.0",
+    "astro-icon": "^1.1.5",
     "typescript": "^5.4.3"
   },
   "devDependencies": {

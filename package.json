@@ -20,7 +20,7 @@
   "license": "ISC",
   "dependencies": {
     "@iconify-json/openmoji": "^1.1.51",
-    "astro-icon": "^1.1.0"
+    "astro-icon": "^1.1.5"
   },
   "packageManager": "bun@1.2.15",
   "private": "true"
