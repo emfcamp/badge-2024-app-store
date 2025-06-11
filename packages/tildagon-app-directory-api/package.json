@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "bun run index.ts",
     "start": "bun run index.ts",
-    "dump-apps": "bun run bin/dump_apps.ts"
+    "dump-apps": "bun run bin/dump_apps.ts",
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/bun": "^1.1.1"
