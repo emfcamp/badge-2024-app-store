@@ -21,5 +21,7 @@
   "dependencies": {
     "@iconify-json/openmoji": "^1.1.51",
     "astro-icon": "^1.1.0"
-  }
+  },
+  "packageManager": "bun@1.2.15",
+  "private": "true"
 }
