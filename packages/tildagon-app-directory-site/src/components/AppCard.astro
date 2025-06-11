@@ -4,9 +4,10 @@ interface Props {
   description: string;
   owner: string;
   code: string;
+  category?: string;
 }
 
-const { title, description, owner, code } = Astro.props;
+const { title, description, owner, code, category } = Astro.props;
 ---
 
 <a href={`${import.meta.env.BASE_URL}apps/${code}`}>
@@ -19,6 +20,13 @@ const { title, description, owner, code } = Astro.props;
         {description}
       </p>
       <span><b>Owner:</b> {owner}</span>
+      {
+        category && (
+          <span>
+            <b>Category:</b> {category}
+          </span>
+        )
+      }
     </div>
   </article>
 </a>

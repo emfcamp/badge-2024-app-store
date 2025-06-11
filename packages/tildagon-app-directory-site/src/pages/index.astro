@@ -22,12 +22,15 @@ const copy = {
             description={app.manifest.metadata.description}
             code={app.code}
             owner={app.manifest.metadata.author}
+            category={app.manifest.app.category}
           />
         ))
       }
     </section>
     <Alert kind="info">
-      Can't find your app? <a href="/errors">Check if the app store has a problem parsing it.</a>
+      Can't find your app? <a href="/errors"
+        >Check if the app store has a problem parsing it.</a
+      >
     </Alert>
   </main>
 </Layout>

@@ -63,6 +63,11 @@ const { title } = Astro.props;
         <div id="menu-container" role="navigation" aria-label="Main">
           <ul class="menu" role="menu">
             <li role="presentation">
+              <a role="menuitem" href={`https://tildagon.badge.emfcamp.org/`}
+                >Documentation</a
+              >
+            </li>
+            <li role="presentation">
               <a role="menuitem" href={`${import.meta.env.BASE_URL}`}>Apps</a>
             </li>
             <li role="presentation">
@@ -71,7 +76,9 @@ const { title } = Astro.props;
               >
             </li>
             <li role="presentation">
-              <a role="menuitem" href={`https://tildagon.badge.emfcamp.org/tildagon-apps/publish/`}
+              <a
+                role="menuitem"
+                href={`https://tildagon.badge.emfcamp.org/tildagon-apps/publish/`}
                 >Publish</a
               >
             </li>
