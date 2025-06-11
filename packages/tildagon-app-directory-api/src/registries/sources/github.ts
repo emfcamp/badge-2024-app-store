@@ -1,11 +1,11 @@
 import { Octokit } from "octokit";
 import type { GraphQlQueryResponseData } from "@octokit/graphql";
-import { TildagonAppManifestSchema } from "../../models";
-import type {
-  TildagonAppRelease,
-  Result,
+import type { Result } from "../../models";
+import {
+  TildagonAppManifestSchema,
   TildagonAppReleaseIdentifier,
-} from "../../models";
+  type TildagonAppRelease,
+} from "tildagon-app";
 import { z } from "zod";
 import { TOML } from "bun";
 import type { RegistrySource, RegistrySourceFailure } from "../RegistrySource";
@@ -212,8 +212,11 @@ async function getTildagonApp(
   } catch (e) {
     return {
       type: "failure",
-      failure: {id: found.id, reason: "GitHub says there's no repository content"}
-    }
+      failure: {
+        id: found.id,
+        reason: "GitHub says there's no repository content",
+      },
+    };
   }
 }
 

@@ -1,9 +1,8 @@
+import type { PartialBy, Result } from "../models";
 import type {
-  PartialBy,
-  Result,
   TildagonAppRelease,
   TildagonAppReleaseIdentifier,
-} from "../models";
+} from "tildagon-app";
 
 /**
  * Describes failures to fetch apps from a registry source.
