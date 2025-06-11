@@ -1,0 +1,17 @@
+{
+  "name": "tildagon-app",
+  "module": "build/index.js",
+  "types": "./build/index.d.ts",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "bunx tsc",
+    "check-types": "tsc --noEmit"
+  },
+  "type": "module",
+  "private": "true"
+}

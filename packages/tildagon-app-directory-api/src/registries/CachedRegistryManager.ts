@@ -1,12 +1,12 @@
-import {
-  TildagonAppReleaseIdentifier,
-  Result,
-  type TildagonAppRelease,
-} from "../models";
+import { Result } from "../models";
 import type { RegistrySourceFailure } from "./RegistrySource";
 import { GitHubRegistry } from "./sources/github";
+import {
+  TildagonAppReleaseIdentifier,
+  type TildagonAppRelease,
+} from "tildagon-app";
 
-import { disallowedApps } from './disallowlist';
+import { disallowedApps } from "./disallowlist";
 
 // TODO: Move cache to KV
 const AppCache = new Map<string, TildagonAppRelease>();
@@ -20,7 +20,7 @@ export const CachedRegistryManager = {
       SOURCES.map(async (source) => {
         return await Promise.all(
           (await source.list())
-            
+
             .map((result) => {
               if (result.type === "failure") {
                 ErrorCache.set(
@@ -37,18 +37,21 @@ export const CachedRegistryManager = {
                   result.value.id
                 );
 
-                const disallowReason = disallowedApps.find(disallowSpec => {
+                const disallowReason = disallowedApps.find((disallowSpec) => {
                   return Object.entries(disallowSpec).every(([key, value]) => {
-                    return result.value.id.hasOwnProperty(key) ? result.value.id[key as keyof typeof result.value.id] === value : true
-                  })
-                })
+                    return result.value.id.hasOwnProperty(key)
+                      ? result.value.id[key as keyof typeof result.value.id] ===
+                          value
+                      : true;
+                  });
+                });
 
                 if (disallowReason) {
                   ErrorCache.set(code, {
                     id: result.value.id,
-                    reason: `Ban: ${JSON.stringify(disallowReason, null, 2)}`
+                    reason: `Ban: ${JSON.stringify(disallowReason, null, 2)}`,
                   });
-                  return "done"
+                  return "done";
                 }
 
                 // Early exit if we already have this release
@@ -78,8 +81,10 @@ export const CachedRegistryManager = {
       })
     );
 
-    return Array.from(AppCache.values()).toSorted((a, b) => 
-      a.manifest.app.name.toLowerCase().localeCompare(b.manifest.app.name.toLowerCase())
+    return Array.from(AppCache.values()).toSorted((a, b) =>
+      a.manifest.app.name
+        .toLowerCase()
+        .localeCompare(b.manifest.app.name.toLowerCase())
     );
   },
 

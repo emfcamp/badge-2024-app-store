@@ -1,6 +1,3 @@
-export * from "./TildagonAppManifest";
-export * from "./TildagonAppRelease";
-
 export type Result<Success, Error> =
   | { type: "success"; value: Success }
   | { type: "failure"; failure: Error };
