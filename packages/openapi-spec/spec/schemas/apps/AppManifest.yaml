@@ -1,0 +1,41 @@
+title: AppManifest
+description: The author provided app manifest
+properties:
+  app:
+    type: object
+    description: The app's manifest
+    properties:
+      name:
+        type: string
+        description: The name of the app
+      category:
+        type: string
+        description: The category of the app
+    required:
+      - name
+      - category
+  metadata:
+    type: object
+    properties:
+      author:
+        type: string
+        description: The author of the app
+      license:
+        type: string
+        description: The license of the app
+      url:
+        type: string
+        format: uri
+        description: The URL of the app's homepage
+      description:
+        type: string
+        description: A short description of the app
+      version:
+        type: string
+        description: The version of the app
+    required:
+      - author
+      - license
+      - url
+      - description
+      - version

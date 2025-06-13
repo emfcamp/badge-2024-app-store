@@ -1,0 +1,21 @@
+title: "AppId"
+description: "A group of properties that uniquely identify an app release in the Tildagon App Store."
+type: object
+properties:
+  service:
+    description: "The service that the app was published on"
+    type: string
+  owner:
+    description: "The username of the account that published the app on the service"
+    type: string
+  title:
+    description: "The title of the app"
+    type: string
+  releaseHash:
+    description: "The unique hash of the app build bundle"
+    type: string
+required:
+  - "service"
+  - "owner"
+  - "title"
+  - "releaseHash"

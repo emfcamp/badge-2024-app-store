@@ -1,0 +1,20 @@
+get:
+  summary: List all release failures
+  operationId: listReleaseFailures
+  tags:
+    - Monitoring
+  responses:
+    "200":
+      description: A list of apps
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  $ref: "../schemas/monitoring/ReleaseFailure.yaml"
+              count:
+                type: integer
+                description: The total number of apps available

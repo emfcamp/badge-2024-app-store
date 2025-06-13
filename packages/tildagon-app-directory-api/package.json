@@ -17,7 +17,8 @@
   "dependencies": {
     "octokit": "^3.1.2",
     "zod": "^3.22.4",
-    "tildagon-app": "workspace:*"
+    "tildagon-app": "workspace:*",
+    "openapi-spec": "workspace:*"
   },
   "private": "true"
 }

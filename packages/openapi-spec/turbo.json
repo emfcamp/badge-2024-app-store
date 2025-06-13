@@ -1,0 +1,16 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "generate:spec": {
+      "outputs": ["./build/spec.yaml"]
+    },
+    "generate:types": {
+      "dependsOn": ["generate:spec"],
+      "outputs": ["./build/schema.d.ts"]
+    },
+    "build": {
+      "dependsOn": ["generate:types"],
+      "outputs": ["build/index.d.ts", "build/index.js"]
+    }
+  }
+}
