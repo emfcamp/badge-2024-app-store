@@ -1,0 +1,8 @@
+title: ReleaseFailure
+description: Contains information about a release that was identified but not successfully published to the Tildagon App Store.
+properties:
+  id:
+    $ref: "../apps/AppId.yaml"
+  reason:
+    type: string
+    description: The reason why the release failed to be published

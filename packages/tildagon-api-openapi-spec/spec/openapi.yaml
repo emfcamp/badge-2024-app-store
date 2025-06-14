@@ -1,0 +1,12 @@
+openapi: "3.1.0"
+info:
+  title: Tildagon App Directory API
+  description: Interact with the Tildagon App Store
+  version: "1.0.0"
+paths:
+  /v1/apps:
+    $ref: "./paths/listApps.yaml"
+  /v1/apps/{appId}:
+    $ref: "./paths/appById.yaml"
+  /v1/failures:
+    $ref: "./paths/listFailures.yaml"

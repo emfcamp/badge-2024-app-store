@@ -1,0 +1,19 @@
+get:
+  summary: Get a specific app given its ID
+  operationId: appById
+  tags:
+    - Apps
+  parameters:
+    - name: appId
+      in: path
+      required: true
+      description: The ID of the app to retrieve
+      schema:
+        type: string
+  responses:
+    "200":
+      description: An app with the specified ID
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/apps/App.yaml"
