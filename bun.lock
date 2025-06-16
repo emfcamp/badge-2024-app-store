@@ -24,10 +24,23 @@
         "typescript": "^5.0.0",
       },
     },
+    "packages/tildagon-api-openapi-spec": {
+      "name": "tildagon-api-openapi-spec",
+      "dependencies": {
+        "@redocly/cli": "^1.34.3",
+        "openapi-typescript": "^7.8.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.1.1",
+      },
+      "peerDependencies": {
+        "typescript": "^5.0.0",
+      },
+    },
     "packages/tildagon-app": {
       "name": "tildagon-app",
       "dependencies": {
-        "zod": "^3.22.4",
+        "zod": "^3.25.64",
       },
       "peerDependencies": {
         "typescript": "^5.0.0",
@@ -39,7 +52,7 @@
         "octokit": "^3.1.2",
         "openapi-spec": "workspace:*",
         "tildagon-app": "workspace:*",
-        "zod": "^3.22.4",
+        "zod": "^3.25.64",
       },
       "devDependencies": {
         "@types/bun": "^1.1.1",
@@ -1416,6 +1429,8 @@
 
     "tar-stream": ["tar-stream@3.1.7", "", { "dependencies": { "b4a": "^1.6.4", "fast-fifo": "^1.2.0", "streamx": "^2.15.0" } }, "sha512-qJj60CXt7IU1Ffyc3NJMjh6EkuCFej46zUqJ4J7pqYlThyd9bO0XBTmcOIhSzZJVWfsLks0+nle/j538YAW9RQ=="],
 
+    "tildagon-api-openapi-spec": ["tildagon-api-openapi-spec@workspace:packages/tildagon-api-openapi-spec"],
+
     "tildagon-app": ["tildagon-app@workspace:packages/tildagon-app"],
 
     "tildagon-app-directory-api": ["tildagon-app-directory-api@workspace:packages/tildagon-app-directory-api"],
@@ -1590,7 +1605,7 @@
 
     "yocto-queue": ["yocto-queue@1.0.0", "", {}, "sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g=="],
 
-    "zod": ["zod@3.25.62", "", {}, "sha512-YCxsr4DmhPcrKPC9R1oBHQNlQzlJEyPAId//qTau/vBee9uO8K6prmRq4eMkOyxvBfH4wDPIPdLx9HVMWIY3xA=="],
+    "zod": ["zod@3.25.64", "", {}, "sha512-hbP9FpSZf7pkS7hRVUrOjhwKJNyampPgtXKc3AN6DsWtoHsg2Sb4SQaS4Tcay380zSwd2VPo9G9180emBACp5g=="],
 
     "zod-to-json-schema": ["zod-to-json-schema@3.22.5", "", { "peerDependencies": { "zod": "^3.22.4" } }, "sha512-+akaPo6a0zpVCCseDed504KBJUQpEW5QZw7RMneNmKw+fGaML1Z9tUNLnHHAC8x6dzVRO1eB2oEMyZRnuBZg7Q=="],
 
