@@ -15,7 +15,7 @@
     "@astrojs/check": "^0.5.10",
     "@fontsource/raleway": "^5.0.18",
     "@iconify-json/openmoji": "^1.1.51",
-    "astro": "^4.5.12",
+    "astro": "^5.12.9",
     "astro-icon": "^1.1.5",
     "typescript": "^5.4.3"
   },
