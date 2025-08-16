@@ -12,7 +12,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@astrojs/check": "^0.5.10",
+    "@astrojs/check": "^0.9.4",
     "@fontsource/raleway": "^5.0.18",
     "@iconify-json/openmoji": "^1.1.51",
     "astro": "^4.5.12",
