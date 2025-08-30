@@ -7,6 +7,7 @@ const TildagonAppCategory = z.union([
   z.literal("Apps"),
   z.literal("Games"),
   z.literal("Background"),
+  z.literal("Pattern"),
 ]);
 
 export const TildagonAppManifestSchema = z.object({
