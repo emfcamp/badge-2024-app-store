@@ -19,7 +19,7 @@
   "author": "Hugh Rawlinson",
   "license": "ISC",
   "dependencies": {
-    "@iconify-json/openmoji": "^1.1.51",
+    "@iconify-json/openmoji": "^1.2.16",
     "astro-icon": "^1.1.5"
   },
   "devDependencies": {
