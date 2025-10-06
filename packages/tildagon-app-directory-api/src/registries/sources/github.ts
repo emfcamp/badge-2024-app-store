@@ -27,7 +27,7 @@ const GitHubRegistryListQueryResultSchema = z.object({
           oid: z.string(),
           tarballUrl: z.string(),
         }),
-      })
+      }),
     ),
   }),
 });
@@ -66,9 +66,8 @@ const LIST_QUERY = `
 
 type ListResult = { id: TildagonAppReleaseIdentifier } & Pick<
   TildagonAppRelease,
-  "releaseTime"
-> &
-  Pick<TildagonAppRelease, "tarballUrl">;
+  "releaseTime" | "tarballUrl"
+>;
 
 async function getTildagonApps(): Promise<
   Result<ListResult, RegistrySourceFailure>[]
@@ -79,7 +78,7 @@ async function getTildagonApps(): Promise<
     response.search.nodes
       .map(
         (
-          node: unknown
+          node: unknown,
         ): Result<GitHubRegistryListQueryResult, RegistrySourceFailure> => {
           // TODO: throw specific error if the repo exists but there is no release
           const parseResult =
@@ -98,11 +97,11 @@ async function getTildagonApps(): Promise<
             };
           }
           return { type: "success", value: parseResult.data };
-        }
+        },
       )
       .map(
         (
-          value: Result<GitHubRegistryListQueryResult, RegistrySourceFailure>
+          value: Result<GitHubRegistryListQueryResult, RegistrySourceFailure>,
         ): Result<ListResult, RegistrySourceFailure> => {
           if (value.type === "failure") {
             return value;
@@ -148,8 +147,8 @@ async function getTildagonApps(): Promise<
               },
             };
           }
-        }
-      )
+        },
+      ),
   );
 
   return apps;
@@ -157,7 +156,7 @@ async function getTildagonApps(): Promise<
 
 async function getTildagonApp(
   code: string,
-  found: Omit<TildagonAppRelease, "manifest">
+  found: Omit<TildagonAppRelease, "manifest">,
 ): Promise<Result<TildagonAppRelease, RegistrySourceFailure>> {
   try {
     const response = await octokit.rest.repos.getContent({
