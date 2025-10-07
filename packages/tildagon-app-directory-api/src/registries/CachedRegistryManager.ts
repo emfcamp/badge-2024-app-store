@@ -1,6 +1,7 @@
 import { Result } from "../models";
 import type { RegistrySourceFailure } from "./RegistrySource";
 import { GitHubRegistry } from "./sources/github";
+import { DummyRegistry } from "./sources/dummy";
 import {
   TildagonAppReleaseIdentifier,
   type TildagonAppRelease,
@@ -12,7 +13,7 @@ import { disallowedApps } from "./disallowlist";
 const AppCache = new Map<string, TildagonAppRelease>();
 const ErrorCache = new Map<string, RegistrySourceFailure>();
 
-const SOURCES = [GitHubRegistry];
+const SOURCES = process.env.APP_STORE_MOCK ? [DummyRegistry] : [GitHubRegistry];
 
 export const CachedRegistryManager = {
   async listApps() {
@@ -25,7 +26,7 @@ export const CachedRegistryManager = {
               if (result.type === "failure") {
                 ErrorCache.set(
                   TildagonAppReleaseIdentifier.toAppCode(result.failure.id),
-                  result.failure
+                  result.failure,
                 );
               }
               return result;
@@ -34,7 +35,7 @@ export const CachedRegistryManager = {
             .map(async (result) => {
               if (result.type === "success") {
                 const code = TildagonAppReleaseIdentifier.toAppCode(
-                  result.value.id
+                  result.value.id,
                 );
 
                 const disallowReason = disallowedApps.find((disallowSpec) => {
@@ -76,20 +77,20 @@ export const CachedRegistryManager = {
                 }
               }
               return "done";
-            })
+            }),
         );
-      })
+      }),
     );
 
     return Array.from(AppCache.values()).toSorted((a, b) =>
       a.manifest.app.name
         .toLowerCase()
-        .localeCompare(b.manifest.app.name.toLowerCase())
+        .localeCompare(b.manifest.app.name.toLowerCase()),
     );
   },
 
   async getApp(
-    key: string
+    key: string,
   ): Promise<Result<TildagonAppRelease, RegistrySourceFailure>> {
     const cachedValue = AppCache.get(key);
     if (cachedValue) {
