@@ -37,6 +37,13 @@ mise install
 bun install
 ```
 
+Some packages within the monorepo are libraries that have a build step. To build
+those, run:
+
+```bash
+bun --filter='*' run build
+```
+
 Then you can run the site locally with:
 
 ```bash
@@ -44,6 +51,15 @@ Then you can run the site locally with:
 export GITHUB_TOKEN=your_github_token_here
 # Then run the site
 bun --filter='*' run dev
+```
+
+If you would like to avoid having to provide a GitHub token, for example you
+intend to work only on the frontend, you can set the following environment
+variable, which will have the backend provide a dataset pulled from the
+production app store on 2025-10-07.
+
+```bash
+export APP_STORE_MOCK=true
 ```
 
 #### API

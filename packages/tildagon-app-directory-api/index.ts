@@ -14,7 +14,7 @@ async function handleApps(urlSegments: string[], request: Request) {
       {
         status: app.type === "success" ? 200 : 404,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 
@@ -34,16 +34,20 @@ async function routeAPI(urlSegments: string[], request: Request) {
       const failures = await CachedRegistryManager.listErrors();
       return new Response(
         JSON.stringify({ items: failures, count: failures.length }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
+        { status: 200, headers: { "Content-Type": "application/json" } },
       );
     default:
       return new Response("Not found", { status: 404 });
   }
 }
 
+const PORT = process.env.PORT || 3000;
 const server = Bun.serve({
-  port: process.env.PORT || 3000,
+  port: PORT,
   async fetch(request) {
+    console.log(
+      `\U0001f3d5\ufe0f tildagon-app-directory-api listening on ${PORT}`,
+    );
     const urlSegments = parseUrlSegments(request.url);
 
     switch (urlSegments[0]) {

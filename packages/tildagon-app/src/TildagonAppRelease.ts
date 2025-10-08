@@ -41,7 +41,7 @@ export const TildagonAppReleaseIdentifier = {
   },
 };
 
-const TildagonAppReleaseSchema = z.object({
+export const TildagonAppReleaseSchema = z.object({
   code: z.string(),
   id: TildagonAppReleaseIdentifierSchema,
   releaseTime: z.string(),

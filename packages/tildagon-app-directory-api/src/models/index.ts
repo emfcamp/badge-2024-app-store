@@ -7,9 +7,12 @@ export const Result = {
     return result.type === "success";
   },
   isNotOk<T>(
-    result: Result<any, T>
+    result: Result<any, T>,
   ): result is { type: "failure"; failure: T } {
     return result.type === "failure";
+  },
+  Ok<T>(value: T): Result<T, any> {
+    return { type: "success", value: value };
   },
 };
 
