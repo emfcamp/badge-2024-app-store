@@ -1,0 +1,74 @@
+---
+import type { GetStaticPaths } from "astro";
+import Layout from "../../layouts/Layout.astro";
+import Alert from "../../components/Alert.astro";
+import AppsListing from "../../components/AppsListing.astro";
+
+const directory = await fetch("http://localhost:3000/v1/apps");
+const data = await directory.json();
+
+const { category } = Astro.params;
+
+if (!category) {
+  throw new Error("A category must be provided");
+}
+
+const categories = new Set<string>(
+  data.items.map((app: any) => app.manifest.app.category),
+);
+
+if (category != undefined && !categories.has(category)) {
+  console.log(categories);
+  throw Error(`${category} is not a valid category`);
+}
+
+export const getStaticPaths = (async () => {
+  const directory = await fetch("http://localhost:3000/v1/apps");
+  const data = await directory.json();
+
+  const categories = new Set<string>(
+    data.items.map((app: any) => app.manifest.app.category),
+  );
+
+  return Array.from(categories).map((category) => ({
+    params: { category },
+  }));
+}) satisfies GetStaticPaths;
+---
+
+<Layout title={category}>
+  <nav class="category-nav">
+    {
+      Array.from(categories)
+        .sort()
+        .map((category) => <a href={`/categories/${category}`}>{category}</a>)
+    }
+  </nav>
+  <main class="col-md-12">
+    <h1>{category}</h1>
+    <AppsListing
+      data={{
+        items: data.items.filter(
+          (app: any) => app.manifest.app.category === category,
+        ),
+      }}
+    />
+    <Alert kind="info">
+      Can't find your app? <a href="/errors"
+        >Check if the app store has a problem parsing it.</a
+      >
+    </Alert>
+  </main>
+</Layout>
+
+<style>
+  .category-nav {
+    display: flex;
+    gap: 16px;
+    padding: 8px 16px;
+
+    a {
+      font-size: 1.8em;
+    }
+  }
+</style>
