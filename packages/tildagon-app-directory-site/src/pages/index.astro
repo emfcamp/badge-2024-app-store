@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import Alert from "../components/Alert.astro";
 import AppsListing from "../components/AppsListing.astro";
+import AppCategoryNav from "../components/AppCategoryNav.astro";
 
 const directory = await fetch("http://localhost:3000/v1/apps");
 const data = await directory.json();
@@ -9,20 +10,10 @@ const data = await directory.json();
 const copy = {
   title: "Tildagon App Directory",
 };
-
-const categories = new Set(
-  data.items.map((app: any) => app.manifest.app.category),
-);
 ---
 
 <Layout title={copy.title}>
-  <nav class="category-nav">
-    {
-      Array.from(categories)
-        .sort()
-        .map((category) => <a href={`/categories/${category}`}>{category}</a>)
-    }
-  </nav>
+  <AppCategoryNav data={data} />
   <main class="col-md-12">
     <h1>{copy.title}</h1>
     <AppsListing data={data} />
@@ -33,15 +24,3 @@ const categories = new Set(
     </Alert>
   </main>
 </Layout>
-
-<style>
-  .category-nav {
-    display: flex;
-    gap: 16px;
-    padding: 8px 16px;
-
-    a {
-      font-size: 1.8em;
-    }
-  }
-</style>

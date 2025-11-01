@@ -1,0 +1,31 @@
+---
+interface Props {
+  data: any;
+}
+const { data } = Astro.props;
+
+const categories = new Set(
+  data.items.map((app: any) => app.manifest.app.category),
+);
+---
+
+<nav class="category-nav">
+  {
+    Array.from(categories)
+      .sort()
+      .map((category) => <a href={`/categories/${category}`}>{category}</a>)
+  }
+</nav>
+<style>
+  .category-nav {
+    display: flex;
+    gap: 16px;
+    padding: 8px 16px;
+
+    a {
+      font-size: 1.8em;
+      color: #fff;
+      font-family: Raleway, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+  }
+</style>

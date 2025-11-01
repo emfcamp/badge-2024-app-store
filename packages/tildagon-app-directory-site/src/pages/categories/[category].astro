@@ -3,6 +3,7 @@ import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import Alert from "../../components/Alert.astro";
 import AppsListing from "../../components/AppsListing.astro";
+import AppCategoryNav from "../../components/AppCategoryNav.astro";
 
 const directory = await fetch("http://localhost:3000/v1/apps");
 const data = await directory.json();
@@ -37,13 +38,7 @@ export const getStaticPaths = (async () => {
 ---
 
 <Layout title={category}>
-  <nav class="category-nav">
-    {
-      Array.from(categories)
-        .sort()
-        .map((category) => <a href={`/categories/${category}`}>{category}</a>)
-    }
-  </nav>
+  <AppCategoryNav data={data} />
   <main class="col-md-12">
     <h1>{category}</h1>
     <AppsListing
