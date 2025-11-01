@@ -3,7 +3,7 @@
   "module": "build/index.js",
   "types": "./build/index.d.ts",
   "dependencies": {
-    "zod": "^3.25.64"
+    "zod": "4.1.12"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

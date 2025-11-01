@@ -1,7 +1,11 @@
 ---
+import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import AppsListing from "../../components/AppsListing.astro";
 import Alert from "../../components/Alert.astro";
+
+let { author } = Astro.params;
+author = decodeURIComponent(author);
 
 const directory = await fetch("http://localhost:3000/v1/apps");
 const data = await directory.json();
@@ -9,12 +13,31 @@ const data = await directory.json();
 const copy = {
   title: "Tildagon App Directory",
 };
+
+export const getStaticPaths = (async () => {
+  const directory = await fetch("http://localhost:3000/v1/apps");
+  const data = await directory.json();
+
+  const authors = new Set<string>(
+    data.items.map((app: any) => app.manifest.metadata.author),
+  );
+
+  return Array.from(authors).map((author) => ({
+    params: { author: author },
+  }));
+}) satisfies GetStaticPaths;
 ---
 
 <Layout title={copy.title}>
   <main class="col-md-12">
     <h1>{copy.title}</h1>
-    <AppsListing data={data}/>
+    <AppsListing
+      data={{
+        items: data.items.filter(
+          (app: any) => app.manifest.metadata.author === author,
+        ),
+      }}
+    />
     <Alert kind="info">
       Can't find your app? <a href="/errors"
         >Check if the app store has a problem parsing it.</a
@@ -34,4 +57,3 @@ const copy = {
     flex-wrap: wrap;
   }
 </style>
-
