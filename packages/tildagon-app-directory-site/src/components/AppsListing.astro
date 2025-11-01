@@ -1,0 +1,30 @@
+---
+import AppCard from "./AppCard.astro";
+const { data } = Astro.props;
+---
+
+<section role="list" class="apps">
+  {
+    data.items.map((app: any) => (
+      <AppCard
+        title={app.manifest.app.name}
+        description={app.manifest.metadata.description}
+        code={app.code}
+        owner={app.manifest.metadata.author}
+        category={app.manifest.app.category}
+      />
+    ))
+  }
+</section>
+
+<style>
+  .apps {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 1rem;
+    margin: none;
+    padding: none;
+    flex-wrap: wrap;
+  }
+</style>

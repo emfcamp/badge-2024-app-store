@@ -1,0 +1,37 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AppsListing from "../../components/AppsListing.astro";
+import Alert from "../../components/Alert.astro";
+
+const directory = await fetch("http://localhost:3000/v1/apps");
+const data = await directory.json();
+
+const copy = {
+  title: "Tildagon App Directory",
+};
+---
+
+<Layout title={copy.title}>
+  <main class="col-md-12">
+    <h1>{copy.title}</h1>
+    <AppsListing data={data}/>
+    <Alert kind="info">
+      Can't find your app? <a href="/errors"
+        >Check if the app store has a problem parsing it.</a
+      >
+    </Alert>
+  </main>
+</Layout>
+
+<style>
+  .apps {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 1rem;
+    margin: none;
+    padding: none;
+    flex-wrap: wrap;
+  }
+</style>
+

@@ -1,7 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import AppCard from "../components/AppCard.astro";
 import Alert from "../components/Alert.astro";
+import AppsListing from "../components/AppsListing.astro";
 
 const directory = await fetch("http://localhost:3000/v1/apps");
 const data = await directory.json();
@@ -9,24 +9,23 @@ const data = await directory.json();
 const copy = {
   title: "Tildagon App Directory",
 };
+
+const categories = new Set(
+  data.items.map((app: any) => app.manifest.app.category),
+);
 ---
 
 <Layout title={copy.title}>
+  <nav class="category-nav">
+    {
+      Array.from(categories)
+        .sort()
+        .map((category) => <a href={`/categories/${category}`}>{category}</a>)
+    }
+  </nav>
   <main class="col-md-12">
     <h1>{copy.title}</h1>
-    <section role="list" class="apps">
-      {
-        data.items.map((app: any) => (
-          <AppCard
-            title={app.manifest.app.name}
-            description={app.manifest.metadata.description}
-            code={app.code}
-            owner={app.manifest.metadata.author}
-            category={app.manifest.app.category}
-          />
-        ))
-      }
-    </section>
+    <AppsListing data={data} />
     <Alert kind="info">
       Can't find your app? <a href="/errors"
         >Check if the app store has a problem parsing it.</a
@@ -36,13 +35,13 @@ const copy = {
 </Layout>
 
 <style>
-  .apps {
+  .category-nav {
     display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    gap: 1rem;
-    margin: none;
-    padding: none;
-    flex-wrap: wrap;
+    gap: 16px;
+    padding: 8px 16px;
+
+    a {
+      font-size: 1.8em;
+    }
   }
 </style>
