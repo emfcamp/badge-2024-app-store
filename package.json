@@ -19,11 +19,11 @@
   "author": "Hugh Rawlinson",
   "license": "ISC",
   "dependencies": {
-    "@iconify-json/openmoji": "^1.1.51",
+    "@iconify-json/openmoji": "^1.2.17",
     "astro-icon": "^1.1.5"
   },
   "devDependencies": {
-    "turbo": "^2.5.4"
+    "turbo": "^2.6.0"
   },
   "packageManager": "bun@1.2.15",
   "private": "true"
