@@ -37,9 +37,13 @@ export type GitHubRegistryListQueryResult = z.infer<
 >;
 
 const LIST_QUERY = `
- {
-  search(query: "topic:tildagon-app fork:true", type: REPOSITORY, first: 100) {
+ query ListTildagonAppsQuery($after: String){
+  search(query: "topic:tildagon-app fork:true", type: REPOSITORY, first: 100, after: $after) {
     repositoryCount
+    pageInfo {
+      endCursor,
+      hasNextPage
+    }
     nodes {
       ... on Repository {
         nameWithOwner
@@ -64,92 +68,122 @@ const LIST_QUERY = `
   }
 }`;
 
+async function* pageThroughResource<T>(
+  getter: (after?: string) => Promise<T>,
+  getAfter: (result: T) => string | null,
+): AsyncIterableIterator<T> {
+  async function* recurse(after?: string): AsyncIterableIterator<T> {
+    const result = await getter(after);
+    const newAfter = getAfter(result);
+    yield result;
+    if (newAfter) {
+      yield* recurse(newAfter);
+    }
+  }
+  yield* recurse();
+}
+
 type ListResult = { id: TildagonAppReleaseIdentifier } & Pick<
   TildagonAppRelease,
-  "releaseTime" | "tarballUrl"
->;
+  "releaseTime"
+> &
+  Pick<TildagonAppRelease, "tarballUrl">;
 
 async function getTildagonApps(): Promise<
   Result<ListResult, RegistrySourceFailure>[]
 > {
-  const response: GraphQlQueryResponseData = await octokit.graphql(LIST_QUERY);
+  let apps: Result<ListResult, RegistrySourceFailure>[] = [];
 
-  const apps: Result<ListResult, RegistrySourceFailure>[] = await Promise.all(
-    response.search.nodes
-      .map(
-        (
-          node: unknown,
-        ): Result<GitHubRegistryListQueryResult, RegistrySourceFailure> => {
-          // TODO: throw specific error if the repo exists but there is no release
-          const parseResult =
-            GitHubRegistryListQueryResultSchema.safeParse(node);
-          if (!parseResult.success) {
-            return {
-              type: "failure",
-              failure: {
-                id: {
-                  service: "github",
-                  owner: "Badge Team",
-                  title: "GitHub Response Parsing",
+  for await (const page of pageThroughResource<GraphQlQueryResponseData>(
+    async (after?: string) => {
+      return await octokit.graphql(LIST_QUERY, { parameters: { after } });
+    },
+    (result: any): string | null => {
+      if (result.search.pageInfo.hasNextPage) {
+        return result.search.pageInfo.endCursor;
+      }
+      return null;
+    },
+  )) {
+    const pageApps = await Promise.all(
+      page.search.nodes
+        .map(
+          (
+            node: unknown,
+          ): Result<GitHubRegistryListQueryResult, RegistrySourceFailure> => {
+            // TODO: throw specific error if the repo exists but there is no release
+            const parseResult =
+              GitHubRegistryListQueryResultSchema.safeParse(node);
+            if (!parseResult.success) {
+              return {
+                type: "failure",
+                failure: {
+                  id: {
+                    service: "github",
+                    owner: "Badge Team",
+                    title: "GitHub Response Parsing",
+                  },
+                  reason: parseResult.error.message,
                 },
-                reason: parseResult.error.message,
-              },
-            };
-          }
-          return { type: "success", value: parseResult.data };
-        },
-      )
-      .map(
-        (
-          value: Result<GitHubRegistryListQueryResult, RegistrySourceFailure>,
-        ): Result<ListResult, RegistrySourceFailure> => {
-          if (value.type === "failure") {
-            return value;
-          }
-          if (!value.value.releases.nodes.length) {
-            return {
-              type: "failure",
-              failure: {
-                id: {
-                  service: "github",
-                  owner: value.value.owner.login,
-                  title: value.value.name,
+              };
+            }
+            return { type: "success", value: parseResult.data };
+          },
+        )
+        .map(
+          (
+            value: Result<GitHubRegistryListQueryResult, RegistrySourceFailure>,
+          ): Result<ListResult, RegistrySourceFailure> => {
+            if (value.type === "failure") {
+              return value;
+            }
+            if (!value.value.releases.nodes.length) {
+              return {
+                type: "failure",
+                failure: {
+                  id: {
+                    service: "github",
+                    owner: value.value.owner.login,
+                    title: value.value.name,
+                  },
+                  reason: "No releases found",
                 },
-                reason: "No releases found",
-              },
-            };
-          }
+              };
+            }
 
-          try {
-            return {
-              type: "success",
-              value: {
-                id: {
-                  service: "github",
-                  owner: value.value.owner.login,
-                  title: value.value.name,
-                  releaseHash: value.value.releases.nodes[0].tagCommit.oid,
+            try {
+              return {
+                type: "success",
+                value: {
+                  id: {
+                    service: "github",
+                    owner: value.value.owner.login,
+                    title: value.value.name,
+                    releaseHash: value.value.releases.nodes[0].tagCommit.oid,
+                  },
+                  releaseTime: value.value.releases.nodes[0].createdAt,
+                  tarballUrl:
+                    value.value.releases.nodes[0].tagCommit.tarballUrl,
                 },
-                releaseTime: value.value.releases.nodes[0].createdAt,
-                tarballUrl: value.value.releases.nodes[0].tagCommit.tarballUrl,
-              },
-            };
-          } catch (e) {
-            return {
-              type: "failure",
-              failure: {
-                id: {
-                  service: "github",
-                  owner: "Badge Team",
-                  title: "GitHub Response Parsing",
+              };
+            } catch (e) {
+              return {
+                type: "failure",
+                failure: {
+                  id: {
+                    service: "github",
+                    owner: "Badge Team",
+                    title: "GitHub Response Parsing",
+                  },
+                  reason: `Failed to parse github repository: ${value.value.nameWithOwner}`,
                 },
-                reason: `Failed to parse github repository: ${value.value.nameWithOwner}`,
-              },
-            };
-          }
-        },
-      ),
-  );
+              };
+            }
+          },
+        ),
+    );
+    apps.push(...pageApps);
+  }
 
   return apps;
 }
