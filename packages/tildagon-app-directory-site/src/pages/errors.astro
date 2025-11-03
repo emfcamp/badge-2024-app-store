@@ -3,7 +3,6 @@ import Layout from "../layouts/Layout.astro";
 
 const directory = await fetch("http://localhost:3000/v1/failures");
 const data = await directory.json();
-console.log(data);
 
 const copy = {
   title: "Tildagon App Directory",

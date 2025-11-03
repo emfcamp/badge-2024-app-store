@@ -7,8 +7,6 @@ const { code } = Astro.params;
 const app = await fetch(`http://localhost:3000/v1/apps/${code}`);
 const data = await app.json();
 
-console.log(JSON.stringify(data, null, 2));
-
 export async function getStaticPaths() {
   const res = await fetch("http://localhost:3000/v1/apps");
   const apps = await res.json();

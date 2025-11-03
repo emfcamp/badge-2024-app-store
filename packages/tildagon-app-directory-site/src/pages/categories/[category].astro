@@ -19,7 +19,6 @@ const categories = new Set<string>(
 );
 
 if (category != undefined && !categories.has(category)) {
-  console.log(categories);
   throw Error(`${category} is not a valid category`);
 }
 

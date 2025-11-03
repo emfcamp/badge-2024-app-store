@@ -1,0 +1,41 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Alert from "../../components/Alert.astro";
+import AppsListing from "../../components/AppsListing.astro";
+import AppCategoryNav from "../../components/AppCategoryNav.astro";
+
+const directory = await fetch("http://localhost:3000/v1/apps");
+const data = await directory.json();
+
+const copy = {
+  title: "Latest apps",
+};
+---
+
+<Layout title={copy.title}>
+  <AppCategoryNav data={data} />
+  <main class="col-md-12">
+    <h1>{copy.title}</h1>
+    <AppsListing
+      data={{
+        items: data.items.sort((a, b) => {
+          const dateA = new Date(a.releaseTime);
+          const dateB = new Date(b.releaseTime);
+          if (dateA === dateB) {
+            return 0;
+          }
+          if (dateA > dateB) {
+            return -1;
+          } else {
+            return 1;
+          }
+        }),
+      }}
+    />
+    <Alert kind="info">
+      Can't find your app? <a href="/errors"
+        >Check if the app store has a problem parsing it.</a
+      >
+    </Alert>
+  </main>
+</Layout>
