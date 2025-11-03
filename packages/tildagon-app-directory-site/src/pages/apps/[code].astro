@@ -30,12 +30,15 @@ export async function getStaticPaths() {
       <dt>Author</dt>
       <dd>
         <a href={`/author/${encodeURIComponent(data.manifest.metadata.author)}`}
-          >{data.manifest.metadata.author}</a>
+          >{data.manifest.metadata.author}</a
+        >
       </dd>
       <dt>Version</dt>
       <dd>{data.manifest.metadata.version}</dd>
       <dt>License</dt>
       <dd>{data.manifest.metadata.license}</dd>
+      <dt>Released at</dt>
+      <dd>{new Date(data.releaseTime).toLocaleDateString()}</dd>
       <dt>Source Code Repository</dt>
       <dd>
         <a href={data.manifest.metadata.url}>{data.manifest.metadata.url}</a>
