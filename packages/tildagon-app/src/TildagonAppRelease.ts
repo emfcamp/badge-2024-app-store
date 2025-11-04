@@ -4,7 +4,10 @@ import { TildagonAppManifestSchema } from ".";
 /**
  * This union should contain the identifiers of each registry backend service.
  */
-const TildagonDirectoryBackendServiceSchema = z.literal("github");
+const TildagonDirectoryBackendServiceSchema = z.union([
+  z.literal("github"),
+  z.literal("codeberg"),
+]);
 
 export type TildagonDirectoryBackendService = z.infer<
   typeof TildagonDirectoryBackendServiceSchema
