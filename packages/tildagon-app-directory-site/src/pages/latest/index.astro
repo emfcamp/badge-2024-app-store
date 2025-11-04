@@ -18,18 +18,20 @@ const copy = {
     <h1>{copy.title}</h1>
     <AppsListing
       data={{
-        items: data.items.sort((a, b) => {
-          const dateA = new Date(a.releaseTime);
-          const dateB = new Date(b.releaseTime);
-          if (dateA === dateB) {
-            return 0;
-          }
-          if (dateA > dateB) {
-            return -1;
-          } else {
-            return 1;
-          }
-        }),
+        items: data.items.sort(
+          (a: { releaseTime: string }, b: { releaseTime: string }) => {
+            const dateA = new Date(a.releaseTime);
+            const dateB = new Date(b.releaseTime);
+            if (dateA === dateB) {
+              return 0;
+            }
+            if (dateA > dateB) {
+              return -1;
+            } else {
+              return 1;
+            }
+          },
+        ),
       }}
     />
     <Alert kind="info">
