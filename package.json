@@ -20,7 +20,8 @@
   "license": "ISC",
   "dependencies": {
     "@iconify-json/openmoji": "^1.2.17",
-    "astro-icon": "^1.1.5"
+    "astro-icon": "^1.1.5",
+    "forgejo-js": "^11.0.0"
   },
   "devDependencies": {
     "turbo": "^2.6.0"
