@@ -11,7 +11,7 @@
     "lint": "bunx -p @seriousme/openapi-schema-validator spec/openapi.yaml"
   },
   "devDependencies": {
-    "@types/bun": "^1.1.1"
+    "@types/bun": "^1.3.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
