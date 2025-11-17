@@ -17,7 +17,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@redocly/cli": "2.10.0",
+    "@redocly/cli": "2.11.1",
     "openapi-typescript": "^7.8.0"
   },
   "private": "true",
