@@ -23,7 +23,7 @@
     "astro-icon": "^1.1.5"
   },
   "devDependencies": {
-    "turbo": "^2.6.0"
+    "turbo": "^2.6.1"
   },
   "packageManager": "bun@1.2.15",
   "private": "true"
