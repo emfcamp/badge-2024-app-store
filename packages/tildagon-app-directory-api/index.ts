@@ -57,6 +57,7 @@ const server = Bun.serve({
         return new Response("Not found", { status: 404 });
     }
   },
+  idleTimeout: 120,
 });
 
 const pidFile = `${process.cwd()}/.server.pid`;
