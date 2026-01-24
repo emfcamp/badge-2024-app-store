@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
 bun --filter='tildagon-app' run build
 
@@ -12,6 +12,7 @@ sleep 5
 curl http://localhost:3000/v1/apps
 
 bun --filter='tildagon-app-directory-site' run build
+BUILD_STATUS=$?
 
 # pkill -P $$
 
@@ -23,4 +24,6 @@ bun --filter='tildagon-app-directory-site' run build
 # kill $DIRECTORY_PID
 # rm .server.pid
 
-kill $(pidof bun)
+kill "$(pidof bun)"
+
+exit "$BUILD_STATUS"
