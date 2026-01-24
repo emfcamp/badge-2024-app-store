@@ -8,12 +8,15 @@ import {
 } from "tildagon-app";
 
 import { disallowedApps } from "./disallowlist";
+import { CodebergRegistry } from "./sources/codeberg";
 
 // TODO: Move cache to KV
 const AppCache = new Map<string, TildagonAppRelease>();
 const ErrorCache = new Map<string, RegistrySourceFailure>();
 
-const SOURCES = process.env.APP_STORE_MOCK ? [DummyRegistry] : [GitHubRegistry];
+const SOURCES = process.env.APP_STORE_MOCK
+  ? [DummyRegistry]
+  : [GitHubRegistry, CodebergRegistry];
 
 export const CachedRegistryManager = {
   async listApps() {
