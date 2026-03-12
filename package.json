@@ -24,7 +24,7 @@
     "forgejo-js": "^11.0.0"
   },
   "devDependencies": {
-    "turbo": "^2.6.0"
+    "turbo": "^2.6.1"
   },
   "packageManager": "bun@1.2.15",
   "private": "true"
