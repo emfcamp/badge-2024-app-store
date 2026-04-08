@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export APP_STORE_MOCK=true
+
 bun --filter='tildagon-app' run build
 
 bun --filter='tildagon-app-directory-api' run dev &
