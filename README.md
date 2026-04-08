@@ -62,6 +62,28 @@ production app store on 2025-10-07.
 export APP_STORE_MOCK=true
 ```
 
+#### Running from a container
+
+There's a `Containerfile` and some `make` targets to make building all this slightly easier:
+
+Presuming you have [Podman](https://podman.io/) installed,
+
+```
+make build
+make run
+```
+
+and then from the container:
+
+```
+make install  # you only need do this once
+make serve
+```
+
+And you should have the [API](http://localhost:3000/v1/apps) and [frontend](http://localhost:4321/) working
+
+> This uses `APP_STORE_MOCK=true` to give you fake Github data, sweeten to taste if you need live data
+
 ##### Implementing a Registry Source
 
 `RegistrySource` is the name for a common interface we implement to let the app
