@@ -96,7 +96,8 @@ async function getTildagonApps(): Promise<
 
   for await (const page of pageThroughResource<GraphQlQueryResponseData>(
     async (after?: string) => {
-      return await octokit.graphql(LIST_QUERY, { parameters: { after } });
+      console.log(`Making GitHub List Page Query`);
+      return await octokit.graphql(LIST_QUERY, { after });
     },
     (result: any): string | null => {
       if (result.search.pageInfo.hasNextPage) {
@@ -193,6 +194,7 @@ async function getTildagonApp(
   found: Omit<TildagonAppRelease, "manifest">,
 ): Promise<Result<TildagonAppRelease, RegistrySourceFailure>> {
   try {
+    console.log(`Making GitHub Single App Query ${code}`);
     const response = await octokit.rest.repos.getContent({
       ref: found.id.releaseHash,
       owner: found.id.owner,

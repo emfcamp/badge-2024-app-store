@@ -2,7 +2,7 @@
 
 bun --filter='tildagon-app' run build
 
-bun --filter='tildagon-app-directory-api' run dev &
+bun --filter='tildagon-app-directory-api' --elide-lines=0 run dev &
 
 sleep 5
 
