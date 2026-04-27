@@ -106,6 +106,7 @@ async function getTildagonApps(): Promise<
       return null;
     },
   )) {
+    console.log(page);
     console.log(
       `Reading GitHub Search Result Page ${page.search.pageInfo.cursor} with ${page.search.nodes.length} matching repositories`,
     );
