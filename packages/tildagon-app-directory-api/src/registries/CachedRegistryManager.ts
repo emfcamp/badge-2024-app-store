@@ -33,17 +33,16 @@ export const CachedRegistryManager = {
         SOURCES.map(async (source) => {
           return await Promise.all(
             (await source.list())
-
-              .map((result) => {
+              .filter((result) => {
                 if (result.type === "failure") {
                   ErrorCache.set(
                     TildagonAppReleaseIdentifier.toAppCode(result.failure.id),
                     result.failure,
                   );
+                  return false;
                 }
-                return result;
+                return true;
               })
-              .filter((result) => result.type === "success")
               .map(async (result) => {
                 if (result.type === "success") {
                   const code = TildagonAppReleaseIdentifier.toAppCode(
