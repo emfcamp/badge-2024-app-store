@@ -1,10 +1,11 @@
 {
   "lockfileVersion": 1,
+  "configVersion": 0,
   "workspaces": {
     "": {
       "name": "badge-2024-app-store",
       "dependencies": {
-        "@iconify-json/openmoji": "^1.2.17",
+        "@iconify-json/openmoji": "^1.2.23",
         "astro-icon": "^1.1.5",
         "forgejo-js": "^11.0.0",
       },
@@ -55,7 +56,7 @@
       "dependencies": {
         "@astrojs/check": "0.9.5",
         "@fontsource/raleway": "^5.2.8",
-        "@iconify-json/openmoji": "^1.2.17",
+        "@iconify-json/openmoji": "^1.2.23",
         "astro": "5.15.9",
         "astro-icon": "^1.1.5",
         "typescript": "^5.9.3",
@@ -183,7 +184,7 @@
 
     "@humanwhocodes/momoa": ["@humanwhocodes/momoa@2.0.4", "", {}, "sha512-RE815I4arJFtt+FVeU1Tgp9/Xvecacji8w/V6XtXsWWH/wz/eNkNbhb+ny/+PlVZjV0rxQpRSQKNKE3lcktHEA=="],
 
-    "@iconify-json/openmoji": ["@iconify-json/openmoji@1.2.17", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-e0NibzGUuMgLNHaInRZouzx4a2RBR4sXiSgNYhQZnhpUQlFbNSQ4VMIS02RtAyYvkyjlRYDzuhLOHSboVo/JzQ=="],
+    "@iconify-json/openmoji": ["@iconify-json/openmoji@1.2.23", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-ppgoydoehDJ08pEtuyYF+X1FXvbvAvOcFDI+Gtb+7o1SVxP7EbO2xMCDjY8aNW98a5PBs57PJuv1iopdV+75oA=="],
 
     "@iconify/tools": ["@iconify/tools@4.1.2", "", { "dependencies": { "@iconify/types": "^2.0.0", "@iconify/utils": "^2.3.0", "@types/tar": "^6.1.13", "axios": "^1.8.3", "cheerio": "1.0.0", "domhandler": "^5.0.3", "extract-zip": "^2.0.1", "local-pkg": "^0.5.1", "pathe": "^1.1.2", "svgo": "^3.3.2", "tar": "^6.2.1" } }, "sha512-q6NzLQYEN9zkDfcyBqD3vItHcZw97w/s++3H3TBxUORr57EfHxj6tOW6fyufDjMq+Vl56WXWaPx1csBPYlI5CA=="],
 
