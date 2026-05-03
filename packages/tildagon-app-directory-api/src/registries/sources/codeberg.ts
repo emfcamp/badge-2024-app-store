@@ -20,6 +20,7 @@ async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> 
   const results = await api.repos.repoSearch({
     q: "tildagon-app",
     topic: true,
+    archived: false,
   });
 
   return await Promise.all(
