@@ -38,7 +38,7 @@ export type GitHubRegistryListQueryResult = z.infer<
 
 const LIST_QUERY = `
  query ListTildagonAppsQuery($after: String){
-  search(query: "topic:tildagon-app fork:true", type: REPOSITORY, first: 100, after: $after) {
+  search(query: "topic:tildagon-app fork:true archived:false", type: REPOSITORY, first: 100, after: $after) {
     repositoryCount
     pageInfo {
       endCursor,
