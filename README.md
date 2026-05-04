@@ -77,12 +77,26 @@ and then from the container:
 
 ```
 make install  # you only need do this once
-make serve
 ```
 
-And you should have the [API](http://localhost:3000/v1/apps) and [frontend](http://localhost:4321/) working
+and then try one of these:
 
-> This uses `APP_STORE_MOCK=true` to give you fake Github data, sweeten to taste if you need live data
+```
+make serve-api
+make serve-all
+make mock-serve-api
+make mock-serve-all
+```
+
+##### Credentials
+
+The first two targets there require an API token, as described above. They expect to find an `env` file at `${HOME}/.config/emf/tildagon` (`${HOME}/.config/` gets mounted into the container at `/root/.config`) with an entry like
+
+```
+export GITHUB_TOKEN=ghp_token_here
+```
+
+Depending on which targets you ran, you should have the [API](http://localhost:3000/v1/apps) and [frontend](http://localhost:4321/) working.
 
 ##### Implementing a Registry Source
 
