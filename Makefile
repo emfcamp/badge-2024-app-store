@@ -1,5 +1,6 @@
 PROJECT = $(shell basename $(shell pwd))
 ID = emfcamp/${PROJECT}
+SHELL := /bin/bash
 
 build:
 	podman build \
@@ -32,12 +33,12 @@ install:
 	bun install
 
 serve-all:
-	. /root/.config/emf/tildagon && \
-	GITHUB_TOKEN=${GITHUB_TOKEN} bun --filter='*' run dev --host="0.0.0.0"
+	source /root/.config/emf/tildagon && \
+	bun --filter='*' run dev --host="0.0.0.0"
 
 serve-api:
-	. /root/.config/emf/tildagon && \
-	GITHUB_TOKEN=${GITHUB_TOKEN} bun --filter='tildagon-app-directory-api' run dev --host="0.0.0.0"
+	source /root/.config/emf/tildagon && \
+	bun --filter='tildagon-app-directory-api' run dev --host="0.0.0.0"
 
 mock-serve-all:
 	APP_STORE_MOCK=true bun --filter='*' run dev --host="0.0.0.0"
