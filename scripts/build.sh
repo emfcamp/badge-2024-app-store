@@ -29,6 +29,6 @@ BUILD_STATUS=$?
 # kill $DIRECTORY_PID
 # rm .server.pid
 
-kill "$(pidof bun)"
+kill $(pidof bun)
 
 exit "$BUILD_STATUS"
