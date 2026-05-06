@@ -1,7 +1,10 @@
-import { CachedRegistryManager } from "./src/registries";
+export { CachedRegistryManager } from "./src/registries/index.ts";
+import { CachedRegistryManager } from "./src/registries/index.ts";
+import { createServer } from "node:http";
+import { writeFileSync } from "node:fs";
 
 function parseUrlSegments(url: string) {
-  const urlSegments = new URL(url).pathname.split("/");
+  const urlSegments = new URL(`http://example.com${url}`).pathname.split("/");
   return urlSegments.slice(1);
 }
 
@@ -41,26 +44,38 @@ async function routeAPI(urlSegments: string[], request: Request) {
   }
 }
 
-const PORT = process.env.PORT || 3000;
-const server = Bun.serve({
-  port: PORT,
-  async fetch(request) {
-    console.log(
-      `\U0001f3d5\ufe0f tildagon-app-directory-api listening on ${PORT}`,
+// Only start the server if this file is run directly (not imported)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const PORT = process.env.PORT || 3000;
+  const server = createServer(async (req, res) => {
+    const urlSegments = parseUrlSegments(req.url!);
+
+    const response = await (async () => {
+      switch (urlSegments[0]) {
+        case "v1":
+          return await routeAPI(
+            urlSegments.slice(1),
+            new Request(`http://${req.headers.host}${req.url!}`, { method: req.method, headers: req.headers }),
+          );
+        default:
+          return new Response("Not found", { status: 404 });
+      }
+    })();
+
+    res.statusCode = response.status;
+    res.setHeader(
+      "Content-Type",
+      response.headers.get("Content-Type") || "text/plain",
     );
-    const urlSegments = parseUrlSegments(request.url);
+    res.end(await response.text());
+  });
 
-    switch (urlSegments[0]) {
-      case "v1":
-        return await routeAPI(urlSegments.slice(1), request);
-      default:
-        return new Response("Not found", { status: 404 });
-    }
-  },
-  idleTimeout: 120,
-});
+  server.listen(PORT, () => {
+    const pidFile = `${process.cwd()}/.server.pid`;
+    writeFileSync(pidFile, process.pid.toString());
+    console.log(`Server process pid: ${process.pid}`);
+    console.log(`Server running at ${PORT}`);
+  });
 
-const pidFile = `${process.cwd()}/.server.pid`;
-Bun.write(pidFile, process.pid.toString());
-console.log(`Server process pid: ${process.pid}`);
-console.log(`Server running at ${server.port}`);
+  server.setTimeout(120000);
+}

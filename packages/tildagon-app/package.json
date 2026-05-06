@@ -1,5 +1,6 @@
 {
   "name": "tildagon-app",
+  "main": "build/index.js",
   "module": "build/index.js",
   "types": "./build/index.d.ts",
   "dependencies": {
@@ -9,7 +10,7 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "build": "bunx tsc",
+    "build": "tsc",
     "check-types": "tsc --noEmit"
   },
   "type": "module",

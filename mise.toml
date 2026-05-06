@@ -1,2 +1,21 @@
 [tools]
-bun = "1.2.15"
+node = "latest"
+
+[env]
+# Required for GitHub API access in the app directory API
+GITHUB_TOKEN = ""
+
+# Optional: Set to "true" to use mock data instead of real GitHub API
+APP_STORE_MOCK = ""
+
+# Optional: Port for the API server (default: 3000)
+PORT = "3000"
+
+# Optional: GitHub Actions workspace directory (used by dump_apps.ts script)
+GITHUB_WORKSPACE = ""
+
+# Optional: Base URL for the site (Astro built-in, typically set via astro.config.mjs)
+BASE_URL = "/"
+
+# Optional: CI environment flag (set automatically by CI systems)
+CI = "false"

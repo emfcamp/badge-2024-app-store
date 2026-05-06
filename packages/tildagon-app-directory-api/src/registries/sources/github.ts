@@ -7,7 +7,7 @@ import {
   type TildagonAppRelease,
 } from "tildagon-app";
 import { z } from "zod";
-import { TOML } from "bun";
+import TOML from "@ltd/j-toml";
 import type { RegistrySource, RegistrySourceFailure } from "../RegistrySource";
 
 const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -100,6 +100,10 @@ async function getTildagonApps(): Promise<
       return await octokit.graphql(LIST_QUERY, { after });
     },
     (result: any): string | null => {
+      if (!result || !result.search) {
+        console.error("Unexpected GitHub API response:", JSON.stringify(result, null, 2));
+        throw new Error("GitHub API returned unexpected response structure - missing 'search' property");
+      }
       if (result.search.pageInfo.hasNextPage) {
         return result.search.pageInfo.endCursor;
       }

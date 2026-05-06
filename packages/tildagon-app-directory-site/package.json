@@ -17,7 +17,8 @@
     "@iconify-json/openmoji": "^1.2.17",
     "astro": "5.15.9",
     "astro-icon": "^1.1.5",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "tildagon-app-directory-api": "*"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

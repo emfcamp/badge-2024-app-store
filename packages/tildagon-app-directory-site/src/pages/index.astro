@@ -3,9 +3,12 @@ import Layout from "../layouts/Layout.astro";
 import Alert from "../components/Alert.astro";
 import AppsListing from "../components/AppsListing.astro";
 import AppCategoryNav from "../components/AppCategoryNav.astro";
+import { CachedRegistryManager } from "tildagon-app-directory-api";
 
-const directory = await fetch("http://localhost:3000/v1/apps");
-const data = await directory.json();
+// const directory = await fetch("http://localhost:3000/v1/apps");
+// const data = await directory.json();
+
+const data = await CachedRegistryManager.listApps();
 
 const copy = {
   title: "Tildagon App Directory",

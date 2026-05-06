@@ -1,2 +1,2 @@
-export * from "./TildagonAppManifest";
-export * from "./TildagonAppRelease";
+export * from "./TildagonAppManifest.js";
+export * from "./TildagonAppRelease.js";

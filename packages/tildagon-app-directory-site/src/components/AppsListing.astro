@@ -5,7 +5,7 @@ const { data } = Astro.props;
 
 <section role="list" class="apps">
   {
-    data.items.map((app: any) => (
+    data.map((app: any) => (
       <AppCard
         title={app.manifest.app.name}
         description={app.manifest.metadata.description}
