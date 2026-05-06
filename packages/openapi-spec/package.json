@@ -4,14 +4,11 @@
   "types": "schema.d.ts",
   "type": "module",
   "scripts": {
-    "generate:spec": "mkdir -p build & bunx @redocly/cli bundle spec/openapi.yaml > build/spec.yaml",
-    "generate:types": "bunx openapi-typescript build/spec.yaml -o build/schema.d.ts",
+    "generate:spec": "mkdir -p build & npx @redocly/cli bundle spec/openapi.yaml > build/spec.yaml",
+    "generate:types": "npx openapi-typescript build/spec.yaml -o build/schema.d.ts",
     "check-types": "tsc --noEmit",
     "build": "tsc",
     "lint": "npx -p @seriousme/openapi-schema-validator spec/openapi.yaml"
-  },
-  "devDependencies": {
-    "@types/bun": "^1.3.2"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

@@ -3,10 +3,7 @@ FROM node
 ARG PROJECT
 WORKDIR /opt/${PROJECT}
 
-RUN apt-get update && apt-get install -y nginx vim
-
-# YOLO
-RUN curl -fsSL https://bun.com/install | bash
+# RUN apt-get update && apt-get install -y nginx vim
 
 COPY ./ /opt/${PROJECT}
 

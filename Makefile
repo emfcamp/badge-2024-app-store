@@ -29,19 +29,3 @@ exec:
 		${PROJECT} \
 		bash
 
-install:
-	bun install
-
-serve-all:
-	source /root/.config/emf/tildagon && \
-	bun --filter='*' run dev --host="0.0.0.0"
-
-serve-api:
-	source /root/.config/emf/tildagon && \
-	bun --filter='tildagon-app-directory-api' run dev --host="0.0.0.0"
-
-mock-serve-all:
-	APP_STORE_MOCK=true bun --filter='*' run dev --host="0.0.0.0"
-
-mock-serve-api:
-	APP_STORE_MOCK=true bun --filter='tildagon-app-directory-api' run dev --host="0.0.0.0"
