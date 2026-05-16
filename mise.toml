@@ -1,3 +1,5 @@
+env_shell_expand = true
+
 [tools]
 node = "latest"
 podman = "latest"
