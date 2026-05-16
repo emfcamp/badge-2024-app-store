@@ -1,24 +1,20 @@
 [tools]
 node = "latest"
+podman = "latest"
 
 [env]
-# Required for GitHub API access in the app directory API
-GITHUB_TOKEN = ""
-
-# Optional: Set to "true" to use mock data instead of real GitHub API
-APP_STORE_MOCK = ""
-
-# Optional: Port for the API server (default: 3000)
+GITHUB_TOKEN = { value = "", redact = true }
+APP_STORE_MOCK = true
 PORT = "3000"
 
-# Optional: GitHub Actions workspace directory (used by dump_apps.ts script)
-GITHUB_WORKSPACE = ""
+[tasks.build-library]
+description = "Build the library"
+run = "npm --workspace='tildagon-app' run build"
 
-# Optional: Base URL for the site (Astro built-in, typically set via astro.config.mjs)
-BASE_URL = "/"
-
-# Optional: CI environment flag (set automatically by CI systems)
-CI = "false"
+[tasks.build-website]
+description = "Build the website"
+depends = ["build-library"]
+run = "npm --workspace='tildagon-app-directory-site' run build"
 
 [tasks.container-build]
 description = "Run the container"
@@ -32,7 +28,7 @@ description = "Run the container"
 run = """podman run \
 	--name badge-2024-app-store \
 	--hostname badge-2024-app-store \
-	--volume $(shell pwd):/opt/badge-2024-app-store \
+	--volume $(pwd):/opt/badge-2024-app-store \
 	--volume ${HOME}/.config:/root/.config \
 	--interactive \
 	--tty \

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "App Store for Tildagon",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:web": "npm -w='tildagon-app-directory-site' run start"
   },
   "keywords": [
     "emfcamp",

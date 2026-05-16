@@ -7,8 +7,6 @@ function __show_help() {
   echo "Any other command will be executed within the container."
 }
 
-nginx
-
 case ${1} in
 help)
   __show_help
