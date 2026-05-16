@@ -42,19 +42,11 @@ mise install
 npm install
 ```
 
-Some packages within the monorepo are libraries that have a build step. To build
-those, run:
-
-```bash
-mise run build-library
-
-```
-
-To build the website run:
+To run the website run:
 
 ```bash
 # This automatically also builds the library
-mise run build-website
+mise run dev
 ```
 
 By default, in development, we mock the app store data to avoid accidentally
@@ -75,15 +67,6 @@ in order to call the GitHub API.
 
 In case it's interesting, the mock data is currently just the data pulled from
 the production app store on 2025-10-07.
-
-If you would like to avoid having to provide a GitHub token, for example you
-intend to work only on the frontend, you can set the following environment
-variable, which will have the backend provide a dataset pulled from the
-production app store on 2025-10-07.
-
-```bash
-export APP_STORE_MOCK=true
-```
 
 #### Running from a container
 
@@ -111,7 +94,10 @@ make mock-serve-all
 
 ##### Credentials
 
-The first two targets there require an API token, as described above. They expect to find an `env` file at `${HOME}/.config/emf/tildagon` (`${HOME}/.config/` gets mounted into the container at `/root/.config`) with an entry like
+The first two targets there require an API token, as described above. They
+expect to find an `env` file at `${HOME}/.config/emf/tildagon`
+(`${HOME}/.config/` gets mounted into the container at `/root/.config`) with an
+entry like
 
 ```
 export GITHUB_TOKEN=ghp_token_here

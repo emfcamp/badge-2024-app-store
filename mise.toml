@@ -16,6 +16,11 @@ description = "Build the website"
 depends = ["build-library"]
 run = "npm --workspace='tildagon-app-directory-site' run build"
 
+[tasks.dev]
+description = "Serve the website"
+depends = ["build-library"]
+run = "npm --workspace='tildagon-app-directory-site' run dev"
+
 [tasks.container-build]
 description = "Run the container"
 run = """podman build \
