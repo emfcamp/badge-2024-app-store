@@ -1,15 +1,11 @@
 name: Deploy to GitHub Pages
 on:
-  # Trigger the workflow every time you push to the `main` branch
-  # Using a different branch name? Replace `main` with your branch’s name
   push:
-    branches: [main]
+    branches: ["**"]
   schedule:
-    - cron: "*/15 * * * *" 
-  # Allows you to run this workflow manually from the Actions tab on GitHub.
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
-# Allow this job to clone the repo and create a page deployment
 permissions:
   contents: read
   pages: write
@@ -20,24 +16,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
-        uses: actions/checkout@v4
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+        uses: actions/checkout@v6
+      - name: Setup mise
+        uses: jdx/mise-action@v4
       - name: Install dependencies
-        # deps not cached because it's not faster apparently
-        # https://github.com/oven-sh/setup-bun/issues/14#issuecomment-1714116221
-        run: bun install --frozen-lockfile
+        run: npm install
       - name: Run directory
-        run: ./scripts/build.sh
+        run: mise run build-website
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload site artifact
-        uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
         with:
           name: github-pages
           path: ./packages/tildagon-app-directory-site/dist
 
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -49,4 +45,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
