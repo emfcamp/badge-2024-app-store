@@ -3,10 +3,10 @@
 Here's the implementation of the [app store](https://apps.badge.emfcamp.org/) for
 [Tildagon](https://tildagon.badge.emfcamp.org/), the EMFcamp badge.
 
-[!NOTE] This repo is currently undergoing some maintenance in preparation for
-EMFCamp 2026. Work includes containerization, adding new features, and more - so
-check back here for updates to the instructions on running and working on the
-app store.
+> [!WARNING] This repo is undergoing work in preparation for EMFCamp 2026.
+> Work includes containerization, adding new features, and more - so
+> check back here for updates to the instructions on running and working on the
+> app store.
 
 ## Submitting an app
 
@@ -31,11 +31,13 @@ You could add additional app sources, modify the website, or add new features.
 The repo is set up as a monorepo with separate packages for the API and the
 site.
 
-We use [mise](https://mise.jdx.dev/) to manage tools and our development tasks.
+First, clone this repository.
 
-We use node to run code, with tsx for typescript. To get started, install the
-correct version of node. This is specified in mise.toml. You can install
-manually, or with mise.
+We use [mise](https://mise.jdx.dev/) to manage tools and our development tasks.
+Install it using the instructions [here](https://mise.jdx.dev/)
+
+We use node to run code, with tsx for typescript. To get started, install node
+and our node dependencies.
 
 ```bash
 mise install
