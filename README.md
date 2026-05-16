@@ -3,7 +3,8 @@
 Here's the implementation of the [app store](https://apps.badge.emfcamp.org/) for
 [Tildagon](https://tildagon.badge.emfcamp.org/), the EMFcamp badge.
 
-> [!WARNING] This repo is undergoing work in preparation for EMFCamp 2026.
+> [!WARNING]
+> This repo is undergoing work in preparation for EMFCamp 2026.
 > Work includes containerization, adding new features, and more - so
 > check back here for updates to the instructions on running and working on the
 > app store.
