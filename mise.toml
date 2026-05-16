@@ -3,7 +3,7 @@ node = "latest"
 podman = "latest"
 
 [env]
-GITHUB_TOKEN = { value = "", redact = true }
+GITHUB_TOKEN = { value = "${GITHUB_TOKEN}", redact = true }
 APP_STORE_MOCK = true
 PORT = "3000"
 

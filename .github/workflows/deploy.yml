@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v6
+      - name: Configure mise
+        run: cp mise.ci.toml mise.local.toml
       - name: Setup mise
         uses: jdx/mise-action@v4
       - name: Install dependencies
@@ -25,7 +27,6 @@ jobs:
         run: mise run build-website
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APP_STORE_MOCK: false
       - name: Upload site artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v5
