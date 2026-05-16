@@ -101,8 +101,13 @@ async function getTildagonApps(): Promise<
     },
     (result: any): string | null => {
       if (!result || !result.search) {
-        console.error("Unexpected GitHub API response:", JSON.stringify(result, null, 2));
-        throw new Error("GitHub API returned unexpected response structure - missing 'search' property");
+        console.error(
+          "Unexpected GitHub API response:",
+          JSON.stringify(result, null, 2),
+        );
+        throw new Error(
+          "GitHub API returned unexpected response structure - missing 'search' property",
+        );
       }
       if (result.search.pageInfo.hasNextPage) {
         return result.search.pageInfo.endCursor;
@@ -110,9 +115,8 @@ async function getTildagonApps(): Promise<
       return null;
     },
   )) {
-    console.log(page);
     console.log(
-      `Reading GitHub Search Result Page ${page.search.pageInfo.cursor} with ${page.search.nodes.length} matching repositories`,
+      `Reading GitHub Search Result Page ${page.search.pageInfo.endCursor} with ${page.search.nodes.length} matching repositories`,
     );
     const pageApps = await Promise.all(
       page.search.nodes
