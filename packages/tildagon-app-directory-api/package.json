@@ -17,10 +17,11 @@
   },
   "dependencies": {
     "@ltd/j-toml": "^1.38.0",
+    "fast-deep-equal": "^3.1.3",
     "octokit": "5.0.5",
-    "zod": "^3.25.76",
+    "openapi-spec": "*",
     "tildagon-app": "*",
-    "openapi-spec": "*"
+    "zod": "^3.25.76"
   },
   "private": "true"
 }

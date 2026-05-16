@@ -9,6 +9,7 @@ import {
 
 import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
+import equal from "fast-deep-equal/es6";
 
 // TODO: Move cache to KV
 const AppCache = new Map<string, TildagonAppRelease>();
@@ -72,7 +73,7 @@ export const CachedRegistryManager = {
                   // Early exit if we already have this release
                   if (AppCache.has(code)) {
                     const cachedApp = AppCache.get(code);
-                    if (!Bun.deepEquals(cachedApp?.id, result.value.id)) {
+                    if (equal(cachedApp?.id, result.value.id)) {
                       ErrorCache.set(code, {
                         id: result.value.id,
                         reason: `Hash collision with ${code} - ${cachedApp?.manifest.app.name}`,
