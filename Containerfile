@@ -3,7 +3,8 @@ FROM node
 ARG PROJECT
 WORKDIR /opt/${PROJECT}
 
-# RUN apt-get update && apt-get install -y nginx vim
+RUN apt-get update && apt-get install -y vim
+RUN curl https://mise.run | sh
 
 COPY ./ /opt/${PROJECT}
 

@@ -55,7 +55,7 @@ mise run dev
 By default, in development, we mock the app store data to avoid accidentally
 getting our access tokens blocked. If you need to use real data, create a file
 called `mise.local.toml` in the root directory of the repository. This is how
-mise allows for environmental variables to be used safely, without getting
+Mise allows for environmental variables to be used safely, without getting
 committed to the repository. The file should have the following contents:
 
 ```toml
@@ -73,26 +73,29 @@ the production app store on 2025-10-07.
 
 #### Running from a container
 
-Presuming you have [Podman](https://podman.io/) installed,
+Presuming you have [Podman](https://podman.io/) and Mise installed,
 
-```
-make build
-make run
-```
-
-and then from the container:
-
-```
-make install  # you only need do this once
+```bash
+mise run container-build
+mise run container-run
 ```
 
-and then try one of these:
+`mise run` gives you a bash shell inside the container. You should run the
+development commands as normal inside the container
 
+```bash
+mise install
+npm install
+mise run dev
 ```
-make serve-api
-make serve-all
-make mock-serve-api
-make mock-serve-all
+
+The container ports are mapped, so if you run the website with `mise run dev`
+in the container, you will be able to access it on `http://localhost:4321`.
+
+To get an additional shell in the running container you can run:
+
+```bash
+mise run container-exec
 ```
 
 ##### Credentials

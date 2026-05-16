@@ -29,7 +29,7 @@ run = """podman build \
   --tag emfcamp/badge-2024-app-store ."""
 
 [tasks.container-run]
-description = "Run the container"
+description = "Run the container and get a shell"
 run = """podman run \
 	--name badge-2024-app-store \
 	--hostname badge-2024-app-store \
@@ -44,8 +44,8 @@ run = """podman run \
 	bash"""
 
 [tasks.container-exec]
-description = "Get a shell in the container"
-run = """ podman exec \
+description = "Get a shell in the already running container"
+run = """podman exec \
 	--interactive \
 	--tty \
 	badge-2024-app-store \
