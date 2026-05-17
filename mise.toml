@@ -3,10 +3,9 @@ env_shell_expand = true
 
 [tools]
 node = "latest"
-podman = "latest"
 
 [env]
-GITHUB_TOKEN = { value = "${GITHUB_TOKEN}", redact = true }
+GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
 APP_STORE_MOCK = true
 PORT = "3000"
 
@@ -23,33 +22,3 @@ run = "npm --workspace='tildagon-app-directory-site' run build"
 description = "Serve the website"
 depends = ["build-library"]
 run = "npm --workspace='tildagon-app-directory-site' run dev"
-
-[tasks.container-build]
-description = "Run the container"
-run = """podman build \
-	--file Containerfile \
-	--build-arg PROJECT=badge-2024-app-store \
-  --tag emfcamp/badge-2024-app-store ."""
-
-[tasks.container-run]
-description = "Run the container and get a shell"
-run = """podman run \
-	--name badge-2024-app-store \
-	--hostname badge-2024-app-store \
-	--volume $(pwd):/opt/badge-2024-app-store \
-	--volume ${HOME}/.config:/root/.config \
-	--interactive \
-	--tty \
-	--rm \
-	--publish 3000:3000 \
-	--publish 4321:4321 \
-	emfcamp/badge-2024-app-store \
-	bash"""
-
-[tasks.container-exec]
-description = "Get a shell in the already running container"
-run = """podman exec \
-	--interactive \
-	--tty \
-	badge-2024-app-store \
-	bash"""

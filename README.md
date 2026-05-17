@@ -29,6 +29,8 @@ You could add additional app sources, modify the website, or add new features.
 
 ### Development
 
+#### Getting Started
+
 The repo is set up as a monorepo with separate packages for the API and the
 site.
 
@@ -71,47 +73,7 @@ in order to call the GitHub API.
 In case it's interesting, the mock data is currently just the data pulled from
 the production app store on 2025-10-07.
 
-#### Running from a container
-
-Presuming you have [Podman](https://podman.io/) and Mise installed,
-
-```bash
-mise run container-build
-mise run container-run
-```
-
-`mise run` gives you a bash shell inside the container. You should run the
-development commands as normal inside the container
-
-```bash
-mise install
-npm install
-mise run dev
-```
-
-The container ports are mapped, so if you run the website with `mise run dev`
-in the container, you will be able to access it on `http://localhost:4321`.
-
-To get an additional shell in the running container you can run:
-
-```bash
-mise run container-exec
-```
-
-##### Credentials
-
-The first two targets there require an API token, as described above. They
-expect to find an `env` file at `${HOME}/.config/emf/tildagon`
-(`${HOME}/.config/` gets mounted into the container at `/root/.config`) with an
-entry like
-
-```
-export GITHUB_TOKEN=ghp_token_here
-```
-
-Depending on which targets you ran, you should have the [API](http://localhost:3000/v1/apps) and [frontend](http://localhost:4321/) working.
-
-##### Implementing a Registry Source
+#### Implementing a Registry Source
 
 `RegistrySource` is the name for a common interface we implement to let the app
 store fetch apps from elsewhere. Because we have a `RegistrySource`
