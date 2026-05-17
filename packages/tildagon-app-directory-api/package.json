@@ -3,22 +3,25 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run index.ts",
-    "start": "bun run index.ts",
-    "dump-apps": "bun run bin/dump_apps.ts",
+    "dev": "tsx index.ts",
+    "start": "tsx index.ts",
+    "dump-apps": "node bin/dump_apps.ts",
     "check-types": "tsc --noEmit"
   },
+  "main": "./src/registries/index.ts",
   "devDependencies": {
-    "@types/bun": "^1.3.2"
+    "tsx": "^4.21.0"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@ltd/j-toml": "^1.38.0",
+    "fast-deep-equal": "^3.1.3",
     "octokit": "5.0.5",
-    "zod": "^3.25.76",
-    "tildagon-app": "workspace:*",
-    "openapi-spec": "workspace:*"
+    "openapi-spec": "*",
+    "tildagon-app": "*",
+    "zod": "^3.25.76"
   },
   "private": "true"
 }

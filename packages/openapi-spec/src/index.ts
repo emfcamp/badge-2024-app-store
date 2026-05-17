@@ -1,1 +1,1 @@
-export * from "../build/schema";
+export * from "../build/schema.js";

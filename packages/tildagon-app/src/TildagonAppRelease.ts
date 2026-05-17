@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { z } from "zod";
-import { TildagonAppManifestSchema } from ".";
+import { TildagonAppManifestSchema } from "./TildagonAppManifest.js";
 
 /**
  * This union should contain the identifiers of each registry backend service.
@@ -24,20 +25,18 @@ export type TildagonAppReleaseIdentifier = z.infer<
   typeof TildagonAppReleaseIdentifierSchema
 >;
 
-const hasher = new Bun.CryptoHasher("md5");
-
 export const TildagonAppReleaseIdentifier = {
   toAppCode: (identifier: TildagonAppReleaseIdentifier) => {
-    hasher.update(identifier.service);
-    hasher.update(identifier.owner);
-    hasher.update(identifier.title);
-    hasher.update(identifier.releaseHash || "");
-    const hash = new Uint8Array(128);
-    hasher.digest(hash);
+    const hash = createHash("md5");
+    hash.update(identifier.service);
+    hash.update(identifier.owner);
+    hash.update(identifier.title);
+    hash.update(identifier.releaseHash || "");
+    const digest = hash.digest();
     const code = new Array(8)
       .fill("")
       .map((_, i) => {
-        return String.fromCharCode("0".charCodeAt(0) + (hash[i] % 5));
+        return String.fromCharCode("0".charCodeAt(0) + (digest[i] % 5));
       })
       .join("");
     return code;

@@ -4,9 +4,9 @@ import Layout from "../../layouts/Layout.astro";
 import Alert from "../../components/Alert.astro";
 import AppsListing from "../../components/AppsListing.astro";
 import AppCategoryNav from "../../components/AppCategoryNav.astro";
+import { CachedRegistryManager } from "tildagon-app-directory-api";
 
-const directory = await fetch("http://localhost:3000/v1/apps");
-const data = await directory.json();
+const data = await CachedRegistryManager.listApps();
 
 const { category } = Astro.params;
 
@@ -15,7 +15,7 @@ if (!category) {
 }
 
 const categories = new Set<string>(
-  data.items.map((app: any) => app.manifest.app.category),
+  data.map((app: any) => app.manifest.app.category),
 );
 
 if (category != undefined && !categories.has(category)) {
@@ -23,11 +23,10 @@ if (category != undefined && !categories.has(category)) {
 }
 
 export const getStaticPaths = (async () => {
-  const directory = await fetch("http://localhost:3000/v1/apps");
-  const data = await directory.json();
+  const data = await CachedRegistryManager.listApps();
 
   const categories = new Set<string>(
-    data.items.map((app: any) => app.manifest.app.category),
+    data.map((app: any) => app.manifest.app.category),
   );
 
   return Array.from(categories).map((category) => ({
@@ -41,11 +40,9 @@ export const getStaticPaths = (async () => {
   <main class="col-md-12">
     <h1>{category}</h1>
     <AppsListing
-      data={{
-        items: data.items.filter(
-          (app: any) => app.manifest.app.category === category,
-        ),
-      }}
+      data={data.filter(
+        (app: any) => app.manifest.app.category === category,
+      )}
     />
     <Alert kind="info">
       Can't find your app? <a href="/errors"

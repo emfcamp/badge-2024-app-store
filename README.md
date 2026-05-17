@@ -1,68 +1,79 @@
 # Tildagon App Store
 
 Here's the implementation of the [app store](https://apps.badge.emfcamp.org/) for
-[Tildagon](https://tildagon.badge.emfcamp.org/), the EMFcamp 2024 badge.
+[Tildagon](https://tildagon.badge.emfcamp.org/), the EMFcamp badge.
+
+> [!WARNING]
+> This repo is undergoing work in preparation for EMFCamp 2026.
+> Work includes containerization, adding new features, and more - so
+> check back here for updates to the instructions on running and working on the
+> app store.
 
 ## Submitting an app
 
-To make an app available in the badge app store, first follow the [app dev
-instructions](https://tildagon.badge.emfcamp.org/tildagon-apps/) and put the app in
-a repository on GitHub. Currently only GitHub is supported - if you'd like to contribute
-support for another platform, see "Hacking the App Store" below
-
-Once your app is in a repository, add the `tildagon-app` topic to your repo.
+To find out how to write and publish an app for the Tildagon, check out [our
+documentation](https://tildagon.badge.emfcamp.org/tildagon-apps/publish/).
 
 ## Hacking the App Store
 
-The app store is a little typescript monorepo containing two packages:
+The app store is a little typescript monorepo containing some packages:
 
 - _tildagon-app-directory-api_: _a backend that fetches apps from implemented app
   sources and exposes them to the web frontend and to the badges_
 - _tildagon-app-directory-site_: _a web frontend showing apps and installation
   instructions_
+- tildagon-app: a library that is the core location to specify data structures
+  related to the functioning of the app store
 
 You could add additional app sources, modify the website, or add new features.
 
 ### Development
 
+#### Getting Started
+
 The repo is set up as a monorepo with separate packages for the API and the
 site.
 
-We use bun to run code as it supports TypeScript natively. To get started,
-install the correct version of bun. This is specified in mise.toml. You can
-install manually, or with mise.
+First, clone this repository.
+
+We use [mise](https://mise.jdx.dev/) to manage tools and our development tasks.
+Install it using the instructions [here](https://mise.jdx.dev/)
+
+We use node to run code, with tsx for typescript. To get started, install node
+and our node dependencies.
 
 ```bash
 mise install
-bun install
+npm install
 ```
 
-Some packages within the monorepo are libraries that have a build step. To build
-those, run:
+To run the website run:
 
 ```bash
-bun --filter='*' run build
+# This automatically also builds the library
+mise run dev
 ```
 
-Then you can run the site locally with:
+By default, in development, we mock the app store data to avoid accidentally
+getting our access tokens blocked. If you need to use real data, create a file
+called `mise.local.toml` in the root directory of the repository. This is how
+Mise allows for environmental variables to be used safely, without getting
+committed to the repository. The file should have the following contents:
 
-```bash
-# First export a GITHUB_TOKEN environment variable with a GitHub personal access token
-export GITHUB_TOKEN=your_github_token_here
-# Then run the site
-bun --filter='*' run dev
+```toml
+[env]
+APP_STORE_MOCK = false
+GITHUB_TOKEN = "github_pat_[redacted]"
 ```
 
-If you would like to avoid having to provide a GitHub token, for example you
-intend to work only on the frontend, you can set the following environment
-variable, which will have the backend provide a dataset pulled from the
-production app store on 2025-10-07.
+You will need to create a [GitHub access
+token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+in order to call the GitHub API.
 
-```bash
-export APP_STORE_MOCK=true
-```
+In case it's interesting, the mock data is currently just the data pulled from
+the production app store on 2025-10-07.
 
-##### Implementing a Registry Source
+#### Implementing a Registry Source
 
 `RegistrySource` is the name for a common interface we implement to let the app
 store fetch apps from elsewhere. Because we have a `RegistrySource`
@@ -159,10 +170,12 @@ support.
 
 #### API
 
-The API is a bun server that uses zod to specify the domain models for the
-store, and implements upstream app "registries" - where the app store retrieves
-apps from.
+The API is a node server that uses zod to specify the domain models for the
+store, and implements upstream app "registries". The API is not currently used,
+but the code in this repository that interfaces with upstream registries is
+called directly by the website (rather than via the API).
 
 #### Site
 
-The site is an Astro site that uses the API to fetch apps and display them.
+The site is an Astro site that uses the registry library to fetch apps and
+display them.

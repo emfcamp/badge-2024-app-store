@@ -1,17 +1,25 @@
 ---
+import { CachedRegistryManager } from "tildagon-app-directory-api";
 import InstallationInstructions from "../../components/InstallationInstructions.astro";
 import Layout from "../../layouts/Layout.astro";
 
 const { code } = Astro.params;
 
-const app = await fetch(`http://localhost:3000/v1/apps/${code}`);
-const data = await app.json();
+// const app = await fetch(`http://localhost:3000/v1/apps/${code}`);
+const result = await CachedRegistryManager.getApp(code);
+
+if (result.type == "failure") {
+  // do 404
+  // since we're always doing ssg and not ssr, we won't hit this code. we will
+  // need something real for ssr
+  return;
+}
+
+const data = result.value;
 
 export async function getStaticPaths() {
-  const res = await fetch("http://localhost:3000/v1/apps");
-  const apps = await res.json();
-
-  const paths = apps.items.map((app: any) => ({
+  const apps = await CachedRegistryManager.listApps();
+  const paths = apps.map((app: any) => ({
     params: { code: app.code },
   }));
 

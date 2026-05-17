@@ -11,7 +11,7 @@ import {
   type TildagonAppRelease,
   type TildagonAppReleaseIdentifier,
 } from "tildagon-app";
-import { TOML } from "bun";
+import TOML from "@ltd/j-toml";
 
 const API_BASE_URL = "https://codeberg.org";
 const api = forgejoApi(API_BASE_URL);

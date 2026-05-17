@@ -5,7 +5,7 @@ interface Props {
 const { data } = Astro.props;
 
 const categories = new Set(
-  data.items.map((app: any) => app.manifest.app.category),
+  data.map((app: any) => app.manifest.app.category),
 );
 ---
 

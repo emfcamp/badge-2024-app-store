@@ -1,8 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { CachedRegistryManager } from "tildagon-app-directory-api";
 
-const directory = await fetch("http://localhost:3000/v1/failures");
-const data = await directory.json();
+const data = await CachedRegistryManager.listErrors();
 
 const copy = {
   title: "Tildagon App Directory",
@@ -13,12 +13,12 @@ const copy = {
   <main class="col-md-12">
     <h1>{copy.title}</h1>
     <section>
-      {!data.items.length ?
+      {!data.length ?
       <h1>No errors</h1>
       <p>The app store doesn't currently see any apps that it wasn't able to make available. Did you tag your repo with the `tildagon-app` topic?</p>
       :null}
       {
-        data.items.map((app: any) => (
+        data.map((app: any) => (
           <article class="failure">
             <h3>App: {app.id.service}/{app.id.owner}/{app.id.title}/{app.id.releaseHash}</h3>
             <p>Error:</p>
