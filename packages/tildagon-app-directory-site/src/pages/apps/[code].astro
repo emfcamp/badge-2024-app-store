@@ -5,7 +5,6 @@ import Layout from "../../layouts/Layout.astro";
 
 const { code } = Astro.params;
 
-// const app = await fetch(`http://localhost:3000/v1/apps/${code}`);
 const result = await CachedRegistryManager.getApp(code);
 
 if (result.type == "failure") {
@@ -30,6 +29,8 @@ export async function getStaticPaths() {
 <Layout title="Tildagon App Directory">
   <main class="col-md-12">
     <h1>{data.manifest.app.name}</h1>
+    <h2>Description</h2>
+    <p>{data.manifest.metadata.description}</p>
     <dl>
       <dt>Code</dt>
       <dd>{data.code}</dd>
@@ -39,19 +40,24 @@ export async function getStaticPaths() {
           >{data.manifest.metadata.author}</a
         >
       </dd>
+      <dt>Category</dt>
+      <dd>
+        <a
+          href={`/categories/${encodeURIComponent(data.manifest.app.category)}`}
+          >{data.manifest.app.category}</a
+        >
+      </dd>
       <dt>Version</dt>
       <dd>{data.manifest.metadata.version}</dd>
       <dt>License</dt>
       <dd>{data.manifest.metadata.license}</dd>
-      <dt>Released at</dt>
+      <dt>Last Updated</dt>
       <dd>{new Date(data.releaseTime).toLocaleDateString()}</dd>
       <dt>Source Code Repository</dt>
       <dd>
         <a href={data.manifest.metadata.url}>{data.manifest.metadata.url}</a>
       </dd>
     </dl>
-    <h2>Description</h2>
-    <p>{data.manifest.metadata.description}</p>
     <h2>Installation</h2>
     <p>
       To install {data.manifest.app.name} on your badge, launch the App Store app
@@ -64,5 +70,9 @@ export async function getStaticPaths() {
 <style>
   a {
     color: #528329;
+  }
+
+  dd {
+    margin-bottom: 8px;
   }
 </style>

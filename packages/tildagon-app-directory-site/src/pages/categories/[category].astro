@@ -5,22 +5,22 @@ import Alert from "../../components/Alert.astro";
 import AppsListing from "../../components/AppsListing.astro";
 import AppCategoryNav from "../../components/AppCategoryNav.astro";
 import { CachedRegistryManager } from "tildagon-app-directory-api";
+import { TildagonAppCategory } from "tildagon-app";
+import type { TildagonAppManifest } from "tildagon-app";
 
 const data = await CachedRegistryManager.listApps();
 
-const { category } = Astro.params;
+const { category: param_category } = Astro.params;
 
-if (!category) {
+if (!param_category) {
   throw new Error("A category must be provided");
 }
 
-const categories = new Set<string>(
-  data.map((app: any) => app.manifest.app.category),
-);
-
-if (category != undefined && !categories.has(category)) {
-  throw Error(`${category} is not a valid category`);
+if (TildagonAppCategory.safeParse(param_category).error) {
+  throw new Error(`${param_category} is not a valid category`);
 }
+
+const category = TildagonAppCategory.parse(param_category);
 
 export const getStaticPaths = (async () => {
   const data = await CachedRegistryManager.listApps();
@@ -33,16 +33,28 @@ export const getStaticPaths = (async () => {
     params: { category },
   }));
 }) satisfies GetStaticPaths;
+
+const categoryDescriptionCopy: Record<
+  TildagonAppManifest["app"]["category"],
+  string
+> = {
+  Badge: "Displays the name of the user",
+  Music: "Music related apps",
+  Media: "Video, social, news, canvas and sculpture",
+  Apps: "General purpose Tildagon apps",
+  Games: "DOOM probably",
+  Background: "Visualisations that run behind the badge menu",
+  Pattern: "Colors and animations for the Tildagon's RGB LEDs",
+};
 ---
 
 <Layout title={category}>
   <AppCategoryNav data={data} />
   <main class="col-md-12">
     <h1>{category}</h1>
+    <p>{categoryDescriptionCopy[category]}</p>
     <AppsListing
-      data={data.filter(
-        (app: any) => app.manifest.app.category === category,
-      )}
+      data={data.filter((app: any) => app.manifest.app.category === category)}
     />
     <Alert kind="info">
       Can't find your app? <a href="/errors"
