@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const TildagonAppCategory = z.union([
+export const TildagonAppCategory = z.union([
   z.literal("Badge"),
   z.literal("Music"),
   z.literal("Media"),
