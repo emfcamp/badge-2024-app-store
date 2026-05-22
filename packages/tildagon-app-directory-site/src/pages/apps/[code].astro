@@ -29,6 +29,8 @@ export async function getStaticPaths() {
 <Layout title="Tildagon App Directory">
   <main class="col-md-12">
     <h1>{data.manifest.app.name}</h1>
+    <h2>Description</h2>
+    <p>{data.manifest.metadata.description}</p>
     <dl>
       <dt>Code</dt>
       <dd>{data.code}</dd>
@@ -56,8 +58,6 @@ export async function getStaticPaths() {
         <a href={data.manifest.metadata.url}>{data.manifest.metadata.url}</a>
       </dd>
     </dl>
-    <h2>Description</h2>
-    <p>{data.manifest.metadata.description}</p>
     <h2>Installation</h2>
     <p>
       To install {data.manifest.app.name} on your badge, launch the App Store app
@@ -70,5 +70,9 @@ export async function getStaticPaths() {
 <style>
   a {
     color: #528329;
+  }
+
+  dd {
+    margin-bottom: 8px;
   }
 </style>

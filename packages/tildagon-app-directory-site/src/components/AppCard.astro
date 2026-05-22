@@ -35,6 +35,22 @@ const { title, description, owner, code, category } = Astro.props;
   a {
     display: block;
     flex: 1 1 400px;
+    text-decoration-color: #528329;
+
+    transition: all 0.15s ease;
+  }
+
+  a:hover,
+  a:focus {
+    text-decoration: none;
+    position: relative;
+    transform: translate(-2px, -2px);
+
+    .panel-heading h4 {
+      text-decoration: underline;
+      text-decoration-color: #528329;
+      text-decoration-thickness: 2px;
+    }
   }
 
   article {
@@ -58,11 +74,5 @@ const { title, description, owner, code, category } = Astro.props;
   .panel-heading {
     margin: none;
     background-color: #d6c8a0;
-
-    h4 {
-      text-decoration: underline;
-      text-decoration-color: #528329;
-      text-decoration-thickness: 2px;
-    }
   }
 </style>
