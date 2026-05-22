@@ -5,7 +5,6 @@ import Layout from "../../layouts/Layout.astro";
 
 const { code } = Astro.params;
 
-// const app = await fetch(`http://localhost:3000/v1/apps/${code}`);
 const result = await CachedRegistryManager.getApp(code);
 
 if (result.type == "failure") {
@@ -39,11 +38,18 @@ export async function getStaticPaths() {
           >{data.manifest.metadata.author}</a
         >
       </dd>
+      <dt>Category</dt>
+      <dd>
+        <a
+          href={`/categories/${encodeURIComponent(data.manifest.app.category)}`}
+          >{data.manifest.app.category}</a
+        >
+      </dd>
       <dt>Version</dt>
       <dd>{data.manifest.metadata.version}</dd>
       <dt>License</dt>
       <dd>{data.manifest.metadata.license}</dd>
-      <dt>Released at</dt>
+      <dt>Last Updated</dt>
       <dd>{new Date(data.releaseTime).toLocaleDateString()}</dd>
       <dt>Source Code Repository</dt>
       <dd>
