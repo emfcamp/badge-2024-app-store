@@ -21,7 +21,7 @@
     "octokit": "5.0.5",
     "openapi-spec": "*",
     "tildagon-app": "*",
-    "zod": "^3.25.76"
+    "zod": "^4.4.3"
   },
   "private": "true"
 }
