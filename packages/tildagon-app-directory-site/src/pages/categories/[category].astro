@@ -7,6 +7,7 @@ import AppCategoryNav from "../../components/AppCategoryNav.astro";
 import { CachedRegistryManager } from "tildagon-app-directory-api";
 import { TildagonAppCategory } from "tildagon-app";
 import type { TildagonAppManifest } from "tildagon-app";
+import { CategoryColors } from "../../features/categories";
 
 const data = await CachedRegistryManager.listApps();
 
@@ -50,9 +51,10 @@ const categoryDescriptionCopy: Record<
 
 <Layout title={category}>
   <AppCategoryNav data={data} />
-  <main class="col-md-12">
+  <main class="col-md-12" style=`--badge-bg: ${CategoryColors[category]}`>
     <h1>{category}</h1>
     <p>{categoryDescriptionCopy[category]}</p>
+    <hr />
     <AppsListing
       data={data.filter((app: any) => app.manifest.app.category === category)}
     />
@@ -73,5 +75,10 @@ const categoryDescriptionCopy: Record<
     a {
       font-size: 1.8em;
     }
+  }
+
+  hr {
+    border-color: var(--badge-bg);
+    border-width: 8px;
   }
 </style>

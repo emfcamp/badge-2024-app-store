@@ -2,6 +2,7 @@
 import { CachedRegistryManager } from "tildagon-app-directory-api";
 import InstallationInstructions from "../../components/InstallationInstructions.astro";
 import Layout from "../../layouts/Layout.astro";
+import { CategoryColors } from "../../features/categories";
 
 const { code } = Astro.params;
 
@@ -31,33 +32,45 @@ export async function getStaticPaths() {
     <h1>{data.manifest.app.name}</h1>
     <h2>Description</h2>
     <p>{data.manifest.metadata.description}</p>
-    <dl>
-      <dt>Code</dt>
-      <dd>{data.code}</dd>
-      <dt>Author</dt>
-      <dd>
-        <a href={`/author/${encodeURIComponent(data.manifest.metadata.author)}`}
-          >{data.manifest.metadata.author}</a
+    <ul>
+      <li><span class="badge">Code: {data.code}</span></li>
+      <li>
+        <span class="badge"
+          >Author: <a
+            href={`/author/${encodeURIComponent(data.manifest.metadata.author)}`}
+            >{data.manifest.metadata.author}</a
+          >
+        </span>
+      </li>
+      <li>
+        <span
+          class="badge badge-colored"
+          style=`--badge-bg: ${CategoryColors[data.manifest.app.category]}`
+          >Category: <a
+            href={`/categories/${encodeURIComponent(data.manifest.app.category)}`}
+            >{data.manifest.app.category}</a
+          >
+        </span>
+      </li>
+      <li>
+        <span class="badge">Version: {data.manifest.metadata.version}</span>
+      </li>
+      <li>
+        <span class="badge">License: {data.manifest.metadata.license}</span>
+      </li>
+      <li>
+        <span class="badge"
+          >Last Updated: {new Date(data.releaseTime).toLocaleDateString()}</span
         >
-      </dd>
-      <dt>Category</dt>
-      <dd>
-        <a
-          href={`/categories/${encodeURIComponent(data.manifest.app.category)}`}
-          >{data.manifest.app.category}</a
-        >
-      </dd>
-      <dt>Version</dt>
-      <dd>{data.manifest.metadata.version}</dd>
-      <dt>License</dt>
-      <dd>{data.manifest.metadata.license}</dd>
-      <dt>Last Updated</dt>
-      <dd>{new Date(data.releaseTime).toLocaleDateString()}</dd>
-      <dt>Source Code Repository</dt>
-      <dd>
-        <a href={data.manifest.metadata.url}>{data.manifest.metadata.url}</a>
-      </dd>
-    </dl>
+        <li>
+          <span class="badge"
+            >Source Code Repository: <a href={data.manifest.metadata.url}
+              >{data.manifest.metadata.url}</a
+            >
+          </span>
+        </li>
+      </li>
+    </ul>
     <h2>Installation</h2>
     <p>
       To install {data.manifest.app.name} on your badge, launch the App Store app
@@ -65,14 +78,14 @@ export async function getStaticPaths() {
     </p>
     <InstallationInstructions code={data.code} />
   </main>
+
+  <style>
+    a:hover {
+      color: #afc944;
+    }
+
+    dd {
+      margin-bottom: 8px;
+    }
+  </style>
 </Layout>
-
-<style>
-  a {
-    color: #528329;
-  }
-
-  dd {
-    margin-bottom: 8px;
-  }
-</style>
