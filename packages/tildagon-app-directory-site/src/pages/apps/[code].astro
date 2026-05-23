@@ -45,9 +45,9 @@ export async function getStaticPaths() {
       <li>
         <span
           class="badge badge-colored"
-          style=`--badge-bg: ${CategoryColors[data.manifest.app.category]}`
+          style=`--badge-bg: ${CategoryColors[data.manifest.app.category[0]!]}`
           >Category: <a
-            href={`/categories/${encodeURIComponent(data.manifest.app.category)}`}
+            href={`/categories/${encodeURIComponent(data.manifest.app.category[0]!)}`}
             >{data.manifest.app.category}</a
           >
         </span>
