@@ -2,3 +2,7 @@ a {
   color: initial;
   text-decoration: initial;
 }
+
+.badge-colored {
+  background-color: var(--badge-bg, #777);
+}

@@ -10,6 +10,8 @@ export const TildagonAppCategory = z.union([
   z.literal("Pattern"),
 ]);
 
+export type TildagonAppCategory = z.infer<typeof TildagonAppCategory>;
+
 export const TildagonAppManifestSchema = z.object({
   app: z.object({
     name: z.string(),
