@@ -1,17 +1,10 @@
 ---
-interface Props {
-  data: any;
-}
-const { data } = Astro.props;
-
-const categories = new Set(
-  data.map((app: any) => app.manifest.app.category),
-);
+import { TildagonAppCategory } from "tildagon-app";
 ---
 
 <nav class="category-nav">
   {
-    Array.from(categories)
+    Array.from(TildagonAppCategory.options)
       .sort()
       .map((category) => <a href={`/categories/${category}`}>{category}</a>)
   }

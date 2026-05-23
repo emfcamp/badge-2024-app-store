@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-export const TildagonAppCategory = z.union([
-  z.literal("Badge"),
-  z.literal("Music"),
-  z.literal("Media"),
-  z.literal("Apps"),
-  z.literal("Games"),
-  z.literal("Background"),
-  z.literal("Pattern"),
+export const TildagonAppCategory = z.enum([
+  "Badge",
+  "Music",
+  "Media",
+  "Apps",
+  "Games",
+  "Background",
+  "Pattern",
 ]);
 
 export type TildagonAppCategory = z.infer<typeof TildagonAppCategory>;
@@ -15,7 +15,10 @@ export type TildagonAppCategory = z.infer<typeof TildagonAppCategory>;
 export const TildagonAppManifestSchema = z.object({
   app: z.object({
     name: z.string(),
-    category: TildagonAppCategory,
+    category: z.preprocess((v: TildagonAppCategory | TildagonAppCategory[]) => {
+      if (Array.isArray(v)) return v;
+      return [v];
+    }, z.array(TildagonAppCategory)),
   }),
   metadata: z.object({
     author: z.string(),

@@ -1,20 +1,16 @@
 ---
+import type { TildagonAppRelease } from "tildagon-app";
 import AppCard from "./AppCard.astro";
+
+type Props = {
+  data: TildagonAppRelease[];
+};
+
 const { data } = Astro.props;
 ---
 
 <section role="list" class="apps">
-  {
-    data.map((app: any) => (
-      <AppCard
-        title={app.manifest.app.name}
-        description={app.manifest.metadata.description}
-        code={app.code}
-        owner={app.manifest.metadata.author}
-        category={app.manifest.app.category}
-      />
-    ))
-  }
+  {data.map((release) => <AppCard release={release} />)}
 </section>
 
 <style>

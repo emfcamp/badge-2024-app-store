@@ -29,11 +29,10 @@ export const getStaticPaths = (async () => {
 
 <Layout title={copy.title}>
   <main class="col-md-12">
-    <h1>{copy.title}</h1>
+    <a href="/">&#8592; All apps</a>
+    <h1>Apps by: {author}</h1>
     <AppsListing
-      data={data.filter(
-        (app: any) => app.manifest.metadata.author === author,
-      )}
+      data={data.filter((app: any) => app.manifest.metadata.author === author)}
     />
     <Alert kind="info">
       Can't find your app? <a href="/errors"
@@ -52,5 +51,9 @@ export const getStaticPaths = (async () => {
     margin: none;
     padding: none;
     flex-wrap: wrap;
+  }
+
+  a {
+    color: #afc944;
   }
 </style>

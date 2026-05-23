@@ -1,36 +1,28 @@
 ---
-import { TildagonAppCategory } from "tildagon-app";
 import { CategoryColors } from "../features/categories/index";
+import type { TildagonAppRelease } from "tildagon-app";
 
-interface Props {
-  title: string;
-  description: string;
-  owner: string;
-  code: string;
-  category?: string;
-}
+type Props = {
+  release: TildagonAppRelease;
+};
 
-const {
-  title,
-  description,
-  owner,
-  code,
-  category: param_category,
-} = Astro.props;
+const { release } = Astro.props;
 
-const category = TildagonAppCategory.parse(param_category);
+const { description, author } = release.manifest.metadata;
+const code = release.code;
+const { name, category } = release.manifest.app;
 ---
 
 <a href={`${import.meta.env.BASE_URL}apps/${code}`}>
-  <article style={{ "--badge-bg": CategoryColors[category] }}>
+  <article style={{ "--badge-bg": CategoryColors[category[0]!] }}>
     <div class="panel-heading">
-      <h4>{title}</h4>
+      <h4>{name}</h4>
     </div>
     <div class="panel-body">
       <p>
         {description}
       </p>
-      <span class="badge"><b>Owner:</b> {owner}</span>
+      <span class="badge"><b>Author:</b> {author}</span>
       {
         category && (
           <span class="badge badge-colored">

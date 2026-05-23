@@ -28,7 +28,7 @@ const SOURCES = process.env.APP_STORE_MOCK
 let bugfix_permacache_flag = false;
 
 export const CachedRegistryManager = {
-  async listApps() {
+  async listApps(): Promise<TildagonAppRelease[]> {
     if (!bugfix_permacache_flag) {
       await Promise.all(
         SOURCES.map(async (source) => {
