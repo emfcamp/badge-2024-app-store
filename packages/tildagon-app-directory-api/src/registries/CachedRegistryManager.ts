@@ -5,6 +5,7 @@ import { DummyRegistry } from "./sources/dummy";
 import {
   TildagonAppReleaseIdentifier,
   type TildagonAppRelease,
+  TildagonAppReleaseSchema,
 } from "tildagon-app";
 
 import { disallowedApps } from "./disallowlist";
@@ -88,7 +89,10 @@ export const CachedRegistryManager = {
                   if (Result.isNotOk(appResult)) {
                     ErrorCache.set(code, appResult.failure);
                   } else if (Result.isOk(appResult)) {
-                    AppCache.set(code, appResult.value);
+                    AppCache.set(
+                      code,
+                      TildagonAppReleaseSchema.parse(appResult.value),
+                    );
                   }
                 }
                 return "done";
