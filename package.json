@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "App Store for Tildagon",
   "scripts": {
-    "start:web": "npm -w='tildagon-app-directory-site' run start"
+    "start:web": "npm -w='tildagon-app-directory-site' run start",
+    "build": "astro.mjs build"
   },
   "keywords": [
     "emfcamp",
@@ -19,7 +20,9 @@
   "author": "Hugh Rawlinson",
   "license": "ISC",
   "dependencies": {
+    "@astrojs/node": "^10.1.2",
     "@iconify-json/openmoji": "^1.2.27",
+    "astro": "6",
     "astro-icon": "^1.1.5",
     "forgejo-js": "^11.0.0"
   },

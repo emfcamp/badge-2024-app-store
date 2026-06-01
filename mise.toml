@@ -8,6 +8,8 @@ node = "latest"
 GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
 APP_STORE_MOCK = true
 PORT = "3000"
+PROJECT = "app-store"
+CONTAINER_ID = "emf/${PROJECT}"
 
 [tasks.build-library]
 description = "Build the library"
@@ -22,3 +24,11 @@ run = "npm --workspace='tildagon-app-directory-site' run build"
 description = "Serve the website"
 depends = ["build-library"]
 run = "npm --workspace='tildagon-app-directory-site' run dev"
+
+[tasks.build-container]
+description = "Build the container"
+run = "docker build --build-arg PROJECT=${PROJECT} --tag ${CONTAINER_ID} ."
+
+[tasks.run-container]
+description = "Run the container"
+run = "docker run --name ${PROJECT} --hostname ${PROJECT} --rm --env GITHUB_TOKEN=${GITHUB_TOKEN} --publish 4321:4321 ${CONTAINER_ID}"
