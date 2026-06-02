@@ -73,6 +73,12 @@ export async function getStaticPaths() {
         </li>
       </li>
     </ul>
+    <h2>Try it out</h2>
+    <a class="btn btn-primary emulator-btn"
+      href={`https://emulator.badge.emfcamp.org/#${data.manifest.app.category[0]}/${data.id.title}`}
+      target="_blank">
+      Run app in web emulator
+    </a>
     <h2>Installation</h2>
     <p>
       To install {data.manifest.app.name} on your badge, launch the App Store app
@@ -88,6 +94,15 @@ export async function getStaticPaths() {
 
     dd {
       margin-bottom: 8px;
+    }
+
+    .emulator-btn {
+      display: inline-block;
+      margin-bottom: 1em;
+    }
+
+    .emulator-btn:hover {
+      color: #fff;
     }
   </style>
 </Layout>
