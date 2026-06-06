@@ -11,7 +11,6 @@ const { release } = Astro.props;
 const { description, author } = release.manifest.metadata;
 const code = release.code;
 const { name, category } = release.manifest.app;
-console.log(category);
 ---
 
 <a href={`${import.meta.env.BASE_URL}apps/${code}`}>
