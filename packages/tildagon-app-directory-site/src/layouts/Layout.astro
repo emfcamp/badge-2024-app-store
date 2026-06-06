@@ -27,18 +27,16 @@ const { title } = Astro.props;
   <body>
     <div id="emf-container">
       <header role="banner">
-        <a
-          aria-label="Electromagnetic Field"
-          href={`${import.meta.env.BASE_URL}/`}
-          id="main-logo"
-        >
+        <a aria-label="Electromagnetic Field" href="/" id="main-logo">
           <img
             id="logomark"
-            style="height: 120px; width: 40px;"
-            src={`${import.meta.env.BASE_URL}static/images/brand/2024/logomark-2024-4f87dc608c19738bdb138e9bc592a7ff.svg`}
+            src="/static/images/brand/2026/emf2026-logo-light-clipped.svg"
             alt=""
           />
-          Electromagnetic Field
+          <span class="logo-line logo-line1">Electromagnetic</span>
+          <span class="logo-line logo-line2"
+            >Field <span class="brand-2026-rainbow">2026</span></span
+          >
         </a>
         <div id="header-text">
           July 16<sup>th</sup>– 19<sup>th</sup> 2026
@@ -116,6 +114,54 @@ const { title } = Astro.props;
         <AppCategoryNav />
         <slot />
       </div>
+      <footer role="contentinfo">
+        <div id="bottom-menu-container">
+          <ul class="menu" role="menu">
+            <li role="presentation">
+              <a
+                role="menuitem"
+                rel="noopener"
+                target="_blank"
+                href="https://blog.emfcamp.org">Blog</a
+              >
+            </li>
+            <li role="presentation">
+              <a role="menuitem" target="_blank" href="/code-of-conduct/">
+                Code of Conduct</a
+              >
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="/account">My account</a>
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="/about/volunteering">Volunteering</a>
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="http://developer.emfcamp.org/">API</a>
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="/about/contact">Contact</a>
+            </li>
+          </ul>
+        </div>
+        <div class="share">
+          <a
+            rel="noreferrer"
+            target="_blank"
+            href="https://social.emfcamp.org/@emf">@emf@emfcamp.org</a
+          >
+        </div>
+        <div id="credits">
+          <p>
+            © <a href="/organisation/company">Electromagnetic Field</a> |
+            <a href="/about/privacy">Privacy</a>
+          </p>
+        </div>
+      </footer>
     </div>
   </body>
 </html>
