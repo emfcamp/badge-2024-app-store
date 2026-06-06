@@ -1,9 +1,13 @@
 {
   "name": "tildagon-app",
-  "main": "build/index.js",
-  "module": "build/index.js",
-  "types": "./build/index.d.ts",
+  "main": "build/src/index.js",
+  "module": "build/src/index.js",
+  "types": "./build/src/index.d.ts",
   "dependencies": {
+    "@jest/globals": "^30.4.1",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11",
     "zod": "4.4.3"
   },
   "peerDependencies": {
@@ -11,8 +15,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "type": "module",
-  "private": "true"
+  "private": "true",
+  "devDependencies": {
+    "toml": "^4.1.1"
+  }
 }

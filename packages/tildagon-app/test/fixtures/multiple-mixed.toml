@@ -1,0 +1,26 @@
+[app]
+name = "Multiple Mixed Capabilities"
+category = ["Apps", "Games"]
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with multiple capabilities, some required"
+version = "2.0.0"
+
+[[metadata.capabilities]]
+required = true
+feature = "gpio"
+
+[[metadata.capabilities]]
+required = true
+feature = "i2c"
+
+[[metadata.capabilities]]
+required = false
+feature = "spi"
+
+[[metadata.capabilities]]
+required = false
+feature = "uart"

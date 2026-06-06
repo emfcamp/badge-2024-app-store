@@ -1,0 +1,10 @@
+[app]
+name = "Invalid URL App"
+category = "Badge"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "not-a-valid-url"
+description = "App with invalid URL"
+version = "1.0.0"

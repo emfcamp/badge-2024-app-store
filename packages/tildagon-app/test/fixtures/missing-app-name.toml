@@ -1,0 +1,9 @@
+[app]
+category = "Badge"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with missing name"
+version = "1.0.0"

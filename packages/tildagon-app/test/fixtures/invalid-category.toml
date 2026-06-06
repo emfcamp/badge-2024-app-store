@@ -1,0 +1,10 @@
+[app]
+name = "Invalid Category App"
+category = "InvalidCat"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with invalid category"
+version = "1.0.0"

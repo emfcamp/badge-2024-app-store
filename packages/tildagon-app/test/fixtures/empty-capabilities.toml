@@ -1,0 +1,10 @@
+[app]
+name = "Empty Capabilities App"
+category = "Badge"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with no capabilities"
+version = "1.0.0"

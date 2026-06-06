@@ -1,0 +1,18 @@
+[app]
+name = "Simple Capability App"
+category = ["Apps", "Games"]
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with a simple string capability"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = true
+feature = "gpio"
+
+[[metadata.capabilities]]
+required = false
+feature = "i2c"
