@@ -1,0 +1,22 @@
+[app]
+name = "All Required Capabilities"
+category = "Games"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App where all capabilities are required"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = true
+feature = "input"
+
+[[metadata.capabilities]]
+required = true
+feature = "graphics"
+
+[[metadata.capabilities]]
+required = true
+feature = "storage"

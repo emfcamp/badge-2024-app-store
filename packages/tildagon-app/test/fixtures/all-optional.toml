@@ -1,0 +1,18 @@
+[app]
+name = "All Optional Capabilities"
+category = "Background"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App where all capabilities are optional"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = false
+feature = "display"
+
+[[metadata.capabilities]]
+required = false
+feature = "audio"

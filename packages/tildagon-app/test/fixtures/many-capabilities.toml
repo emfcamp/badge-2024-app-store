@@ -1,0 +1,34 @@
+[app]
+name = "Many Capabilities"
+category = "Music"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with many capabilities"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = true
+feature = "audio"
+
+[[metadata.capabilities]]
+required = true
+feature = "midi"
+
+[[metadata.capabilities]]
+required = true
+feature = "sequencer"
+
+[[metadata.capabilities]]
+required = false
+feature = "sampler"
+
+[[metadata.capabilities]]
+required = false
+feature = "effects"
+
+[[metadata.capabilities]]
+required = false
+feature = "mixer"

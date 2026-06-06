@@ -1,0 +1,14 @@
+[app]
+name = "Single Optional Capability"
+category = "Pattern"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with one optional capability"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = false
+feature = "animation"

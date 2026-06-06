@@ -1,0 +1,14 @@
+[app]
+name = "Invalid Capability Feature App"
+category = "Badge"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with invalid capability feature type"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = true
+feature = 123

@@ -1,0 +1,12 @@
+[app]
+name = "Missing Capability Fields App"
+category = "Badge"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with capability missing required and feature fields"
+version = "1.0.0"
+
+[[metadata.capabilities]]

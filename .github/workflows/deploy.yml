@@ -23,6 +23,8 @@ jobs:
         uses: jdx/mise-action@v4
       - name: Install dependencies
         run: npm install
+      - name: Run tests
+        run: npm run test
       - name: Run directory
         run: mise run build-website
         env:

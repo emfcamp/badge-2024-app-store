@@ -1,0 +1,14 @@
+[app]
+name = "Single Category App"
+category = "Media"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App with single category and capabilities"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = true
+feature = "video"

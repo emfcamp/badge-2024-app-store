@@ -1,0 +1,10 @@
+[app]
+name = "Minimal App"
+category = "Badge"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "Minimal app with no capabilities field"
+version = "1.0.0"
