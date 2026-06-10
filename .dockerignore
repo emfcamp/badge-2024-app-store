@@ -1,0 +1,13 @@
+# Dependencies
+node_modules
+npm-debug.log
+
+# Build artifacts
+dist
+build
+.next
+
+# Environment and sensitive data
+.env
+.git
+.DS_Store
