@@ -6,7 +6,7 @@ node = "latest"
 
 [env]
 GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
-APP_STORE_MOCK = true
+APP_STORE_MOCK = false
 PORT = "3000"
 
 [tasks.build-library]
