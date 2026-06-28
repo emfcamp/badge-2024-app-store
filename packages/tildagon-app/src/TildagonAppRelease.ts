@@ -31,7 +31,6 @@ export const TildagonAppReleaseIdentifier = {
     hash.update(identifier.service);
     hash.update(identifier.owner);
     hash.update(identifier.title);
-    hash.update(identifier.releaseHash || "");
     const digest = hash.digest();
     const code = new Array(8)
       .fill("")
