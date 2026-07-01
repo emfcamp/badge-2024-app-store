@@ -16,15 +16,28 @@ import TOML from "@ltd/j-toml";
 const API_BASE_URL = "https://codeberg.org";
 const api = forgejoApi(API_BASE_URL);
 
+type Repo = NonNullable<
+  Awaited<ReturnType<typeof api.repos.repoSearch>>["data"]["data"]
+>[number];
+
 async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> {
-  const results = await api.repos.repoSearch({
-    q: "tildagon-app",
-    topic: true,
-    archived: false,
-  });
+  const repos: Repo[] = [];
+  let page = 1;
+  while (true) {
+    const results = await api.repos.repoSearch({
+      q: "tildagon-app",
+      topic: true,
+      archived: false,
+      page,
+    });
+    const pageData = results.data?.data ?? [];
+    if (pageData.length === 0) break;
+    repos.push(...pageData);
+    page++;
+  }
 
   return await Promise.all(
-    results.data?.data?.map(async (repo) => {
+    repos.map(async (repo) => {
       try {
         const latestRelease = await api.repos.repoGetLatestRelease(
           repo.owner?.login!,
@@ -55,7 +68,7 @@ async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> 
           },
         };
       }
-    }) ?? [],
+    }),
   );
 }
 
