@@ -2,9 +2,8 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
     // Shared baseline for every package in the monorepo.
-    // Role-specific options (target/module/moduleResolution/verbatimModuleSyntax,
-    // emit settings) live in each package's own tsconfig for now; see PLAN.md T6–T9.
     "strict": true,
+    "verbatimModuleSyntax": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   }
