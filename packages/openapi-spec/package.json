@@ -10,10 +10,10 @@
     }
   },
   "scripts": {
-    "generate:spec": "mkdir -p build & npx @redocly/cli bundle spec/openapi.yaml > build/spec.yaml",
+    "generate:spec": "mkdir -p build && npx @redocly/cli bundle spec/openapi.yaml > build/spec.yaml",
     "generate:types": "npx openapi-typescript build/spec.yaml -o build/schema.d.ts",
     "check-types": "tsc --noEmit",
-    "build": "tsc",
+    "build": "npm run generate:spec && npm run generate:types && tsc",
     "lint": "npx -p @seriousme/openapi-schema-validator spec/openapi.yaml"
   },
   "peerDependencies": {
