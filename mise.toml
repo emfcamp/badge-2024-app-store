@@ -2,7 +2,7 @@
 env_shell_expand = true
 
 [tools]
-node = "latest"
+node = "24"
 
 [env]
 GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
