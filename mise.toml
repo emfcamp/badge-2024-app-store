@@ -19,6 +19,7 @@ run = "npm test"
 
 [tasks.check-types]
 description = "Typecheck all packages"
+depends = ["build-library", "build-spec"]
 run = "npm run --workspaces --if-present check-types"
 
 [tasks.build-library]
