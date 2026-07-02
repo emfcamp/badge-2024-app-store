@@ -8,7 +8,6 @@
     "@types/jest": "^30.0.0",
     "jest": "^30.4.2",
     "ts-jest": "^29.4.11",
-    "ts-jest": "^29.4.11",
     "zod": "4.4.3"
   },
   "peerDependencies": {
@@ -22,7 +21,7 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/node": "^24",
+    "@types/node": "^26",
     "toml": "^4.1.1"
   }
 }
