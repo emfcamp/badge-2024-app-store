@@ -42,3 +42,11 @@ run = "./node_modules/.bin/prettier --check '**/*.{ts,tsx,js,jsx,json,md,css,htm
 [tasks.prettier]
 description = "Format all files with prettier"
 run = "./node_modules/.bin/prettier --write '**/*.{ts,tsx,js,jsx,json,md,css,html,yaml,yml}'"
+
+[tasks.check-eslint]
+description = "Check for lint errors with eslint"
+run = "./node_modules/.bin/eslint ."
+
+[tasks.eslint]
+description = "Lint and auto-fix with eslint"
+run = "./node_modules/.bin/eslint --fix ."

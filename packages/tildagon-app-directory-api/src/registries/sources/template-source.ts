@@ -10,7 +10,7 @@ async function getTildagonApps(): RegistrySourceListResult {
 }
 
 async function getTildagonApp(
-  ...[key, requisites]: RegistrySourceGetParams
+  ...[_key, _requisites]: RegistrySourceGetParams
 ): RegistrySourceGetResult {
   throw new Error("not implemented");
 }
