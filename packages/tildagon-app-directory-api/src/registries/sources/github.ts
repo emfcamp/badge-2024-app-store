@@ -172,11 +172,11 @@ async function getTildagonApps(): Promise<
                     service: "github",
                     owner: value.value.owner.login,
                     title: value.value.name,
-                    releaseHash: value.value.releases.nodes[0].tagCommit.oid,
+                    releaseHash: value.value.releases.nodes[0]!.tagCommit.oid,
                   },
-                  releaseTime: value.value.releases.nodes[0].createdAt,
+                  releaseTime: value.value.releases.nodes[0]!.createdAt,
                   tarballUrl:
-                    value.value.releases.nodes[0].tagCommit.tarballUrl,
+                    value.value.releases.nodes[0]!.tagCommit.tarballUrl,
                 },
               };
             } catch (e) {
@@ -208,7 +208,7 @@ async function getTildagonApp(
   try {
     console.log(`Making GitHub Single App Query ${code}`);
     const response = await octokit.rest.repos.getContent({
-      ref: found.id.releaseHash,
+      ...(found.id.releaseHash ? { ref: found.id.releaseHash } : {}),
       owner: found.id.owner,
       repo: found.id.title,
       path: "tildagon.toml",
