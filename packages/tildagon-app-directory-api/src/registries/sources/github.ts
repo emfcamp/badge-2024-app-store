@@ -1,8 +1,7 @@
 import { Octokit } from "octokit";
 import type { GraphQlQueryResponseData } from "@octokit/graphql";
 import type { Result } from "../../models";
-import type {
-  TildagonAppReleaseIdentifier} from "tildagon-app";
+import type { TildagonAppReleaseIdentifier } from "tildagon-app";
 import {
   TildagonAppManifestSchema,
   type TildagonAppRelease,
