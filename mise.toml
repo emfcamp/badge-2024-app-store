@@ -9,6 +9,10 @@ GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
 APP_STORE_MOCK = true
 PORT = "3000"
 
+[tasks.check]
+description = "Run all checks (types, prettier, lint)"
+depends = ["check-types", "check-prettier", "check-eslint"]
+
 [tasks.test]
 description = "Run all tests"
 run = "npm test"

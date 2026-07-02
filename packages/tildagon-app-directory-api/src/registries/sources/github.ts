@@ -110,8 +110,10 @@ async function getTildagonApps(): Promise<
           "GitHub API returned unexpected response structure - missing 'search' property",
         );
       }
-      if (result.search.pageInfo.hasNextPage) {
-        return result.search.pageInfo.endCursor;
+      const search = result.search as Record<string, unknown>;
+      const pageInfo = search.pageInfo as Record<string, unknown>;
+      if (pageInfo.hasNextPage) {
+        return pageInfo.endCursor as string;
       }
       return null;
     },
