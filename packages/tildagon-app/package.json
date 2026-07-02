@@ -19,7 +19,7 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "type": "module",
-  "private": "true",
+  "private": true,
   "devDependencies": {
     "@types/node": "^24",
     "toml": "^4.1.1"
