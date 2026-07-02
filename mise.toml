@@ -9,9 +9,21 @@ GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
 APP_STORE_MOCK = true
 PORT = "3000"
 
+[tasks.test]
+description = "Run all tests"
+run = "npm test"
+
+[tasks.check-types]
+description = "Typecheck all packages"
+run = "npm run --workspaces --if-present check-types"
+
 [tasks.build-library]
-description = "Build the library"
+description = "Build the tildagon-app library"
 run = "npm --workspace='tildagon-app' run build"
+
+[tasks.build-spec]
+description = "Build the OpenAPI spec"
+run = "npm --workspace='openapi-spec' run build"
 
 [tasks.build-website]
 description = "Build the website"
