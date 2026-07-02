@@ -1,6 +1,6 @@
 import { readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { TildagonAppManifestSchema } from "../src/TildagonAppManifest";
+import { TildagonAppManifestSchema } from "../src/TildagonAppManifest.js";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse } from "toml";
