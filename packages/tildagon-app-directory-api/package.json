@@ -1,5 +1,6 @@
 {
   "name": "tildagon-app-directory-api",
+  "//": "Source-only package — run via tsx; main/module point at .ts source deliberately.",
   "module": "index.ts",
   "type": "module",
   "scripts": {
