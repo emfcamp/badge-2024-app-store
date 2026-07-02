@@ -19,11 +19,7 @@
   ],
   "author": "Hugh Rawlinson",
   "license": "ISC",
-  "dependencies": {
-    "@iconify-json/openmoji": "^1.2.27",
-    "astro-icon": "^1.1.5",
-    "forgejo-js": "^11.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "turbo": "^2.9.14"
   },
