@@ -25,5 +25,5 @@
     "tildagon-app": "*",
     "zod": "^4.4.3"
   },
-  "private": "true"
+  "private": true
 }
