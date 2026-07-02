@@ -23,6 +23,12 @@ jobs:
         uses: jdx/mise-action@v4
       - name: Install dependencies
         run: npm install
+      - name: Check types
+        run: mise run check-types
+      - name: Check formatting
+        run: mise run check-prettier
+      - name: Check linting
+        run: mise run check-eslint
       - name: Run tests
         run: npm run test
       - name: Run directory
