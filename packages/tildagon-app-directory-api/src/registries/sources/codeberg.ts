@@ -40,12 +40,12 @@ async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> 
     repos.map(async (repo) => {
       try {
         const latestRelease = await api.repos.repoGetLatestRelease(
-          repo.owner?.login!,
+          repo.owner!.login,
           repo.name!,
         );
         const id: TildagonAppReleaseIdentifier = {
           service: "codeberg",
-          owner: repo.owner?.login!,
+          owner: repo.owner!.login,
           title: repo.name!,
           releaseHash: latestRelease.data.target_commitish!,
         };
@@ -55,7 +55,7 @@ async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> 
           tarballUrl: latestRelease.data.tarball_url!,
           releaseTag: latestRelease.data.tag_name!,
         });
-      } catch (e) {
+      } catch {
         return {
           type: "failure",
           failure: {

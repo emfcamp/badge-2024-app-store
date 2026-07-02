@@ -1,9 +1,10 @@
 import { Octokit } from "octokit";
 import type { GraphQlQueryResponseData } from "@octokit/graphql";
 import type { Result } from "../../models";
+import type {
+  TildagonAppReleaseIdentifier} from "tildagon-app";
 import {
   TildagonAppManifestSchema,
-  TildagonAppReleaseIdentifier,
   type TildagonAppRelease,
 } from "tildagon-app";
 import { z } from "zod";
@@ -92,14 +93,14 @@ type ListResult = { id: TildagonAppReleaseIdentifier } & Pick<
 async function getTildagonApps(): Promise<
   Result<ListResult, RegistrySourceFailure>[]
 > {
-  let apps: Result<ListResult, RegistrySourceFailure>[] = [];
+  const apps: Result<ListResult, RegistrySourceFailure>[] = [];
 
   for await (const page of pageThroughResource<GraphQlQueryResponseData>(
     async (after?: string) => {
       console.log(`Making GitHub List Page Query`);
       return await octokit.graphql(LIST_QUERY, { after });
     },
-    (result: any): string | null => {
+    (result: Record<string, unknown>): string | null => {
       if (!result || !result.search) {
         console.error(
           "Unexpected GitHub API response:",
@@ -179,7 +180,7 @@ async function getTildagonApps(): Promise<
                     value.value.releases.nodes[0]!.tagCommit.tarballUrl,
                 },
               };
-            } catch (e) {
+            } catch (_e) {
               return {
                 type: "failure",
                 failure: {
@@ -241,7 +242,7 @@ async function getTildagonApp(
             manifest: app.data,
           },
         };
-      } catch (e) {
+      } catch (_e) {
         return {
           type: "failure",
           failure: {
@@ -256,7 +257,7 @@ async function getTildagonApp(
       type: "failure",
       failure: { id: found.id, reason: "No tildagon.toml file found" },
     };
-  } catch (e) {
+  } catch (_e) {
     return {
       type: "failure",
       failure: {
