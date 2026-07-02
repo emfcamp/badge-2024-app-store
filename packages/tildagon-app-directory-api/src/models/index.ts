@@ -1,6 +1,5 @@
 export type Result<Success, Error> =
-  | { type: "success"; value: Success }
-  | { type: "failure"; failure: Error };
+  { type: "success"; value: Success } | { type: "failure"; failure: Error };
 
 export const Result = {
   isOk<T>(result: Result<T, any>): result is { type: "success"; value: T } {

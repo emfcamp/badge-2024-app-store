@@ -34,3 +34,11 @@ run = "npm --workspace='tildagon-app-directory-site' run build"
 description = "Serve the website"
 depends = ["build-library"]
 run = "npm --workspace='tildagon-app-directory-site' run dev"
+
+[tasks.check-prettier]
+description = "Check formatting with prettier"
+run = "./node_modules/.bin/prettier --check '**/*.{ts,tsx,js,jsx,json,md,css,html,yaml,yml}'"
+
+[tasks.prettier]
+description = "Format all files with prettier"
+run = "./node_modules/.bin/prettier --write '**/*.{ts,tsx,js,jsx,json,md,css,html,yaml,yml}'"

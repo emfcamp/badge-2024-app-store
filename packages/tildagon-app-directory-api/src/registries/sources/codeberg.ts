@@ -79,8 +79,7 @@ async function getTildagonApp(
   const { id, releaseTime, tarballUrl, releaseTag } = requisites;
 
   let manifestResponse:
-    | Awaited<ReturnType<typeof api.repos.repoGetContents>>
-    | undefined;
+    Awaited<ReturnType<typeof api.repos.repoGetContents>> | undefined;
   try {
     manifestResponse = await api.repos.repoGetContents(
       id.owner,
