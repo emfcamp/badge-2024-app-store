@@ -8,6 +8,7 @@
     "@types/jest": "^30.0.0",
     "jest": "^30.4.2",
     "ts-jest": "^29.4.11",
+    "ts-jest": "^29.4.11",
     "zod": "4.4.3"
   },
   "peerDependencies": {
