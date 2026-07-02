@@ -2,6 +2,7 @@
   "name": "tildagon-app-directory-site",
   "type": "module",
   "version": "0.0.1",
+  "private": true,
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -17,11 +18,11 @@
     "@iconify-json/openmoji": "^1.2.27",
     "astro": "^6.3.7",
     "astro-icon": "^1.1.5",
-    "tildagon-app-directory-api": "*",
-    "typescript": "^5.9.3"
+    "tildagon-app-directory-api": "*"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
-    "prettier-plugin-astro": "0.14.1"
+    "prettier-plugin-astro": "0.14.1",
+    "typescript": "^5.9.3"
   }
 }

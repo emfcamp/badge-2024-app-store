@@ -1,8 +1,8 @@
 {
   "name": "tildagon-app",
-  "main": "build/src/index.js",
-  "module": "build/src/index.js",
-  "types": "./build/src/index.d.ts",
+  "main": "build/index.js",
+  "module": "build/index.js",
+  "types": "./build/index.d.ts",
   "dependencies": {
     "@jest/globals": "^30.4.1",
     "@types/jest": "^30.0.0",
@@ -19,8 +19,9 @@
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "type": "module",
-  "private": "true",
+  "private": true,
   "devDependencies": {
+    "@types/node": "^26",
     "toml": "^4.1.1"
   }
 }

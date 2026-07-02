@@ -1,5 +1,5 @@
+import type { TildagonAppReleaseIdentifier } from "tildagon-app";
 import {
-  TildagonAppReleaseIdentifier,
   TildagonAppReleaseIdentifierSchema,
   TildagonAppReleaseSchema,
 } from "tildagon-app";

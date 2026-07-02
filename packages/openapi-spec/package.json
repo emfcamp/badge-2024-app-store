@@ -1,23 +1,29 @@
 {
   "name": "openapi-spec",
-  "module": "index.ts",
-  "types": "schema.d.ts",
   "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    }
+  },
   "scripts": {
-    "generate:spec": "mkdir -p build & npx @redocly/cli bundle spec/openapi.yaml > build/spec.yaml",
+    "generate:spec": "mkdir -p build && npx @redocly/cli bundle spec/openapi.yaml > build/spec.yaml",
     "generate:types": "npx openapi-typescript build/spec.yaml -o build/schema.d.ts",
     "check-types": "tsc --noEmit",
-    "build": "tsc",
+    "build": "npm run generate:spec && npm run generate:types && tsc",
     "lint": "npx -p @seriousme/openapi-schema-validator spec/openapi.yaml"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@redocly/cli": "2.30.6",
+    "@redocly/cli": "^2.36.0",
     "openapi-typescript": "^7.13.0"
   },
-  "private": "true",
+  "private": true,
   "scarfSettings": {
     "enabled": false
   }

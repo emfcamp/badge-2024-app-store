@@ -2,16 +2,33 @@
 env_shell_expand = true
 
 [tools]
-node = "latest"
+node = "24"
 
 [env]
 GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
 APP_STORE_MOCK = true
 PORT = "3000"
 
+[tasks.check]
+description = "Run all checks (types, prettier, lint)"
+depends = ["check-types", "check-prettier", "check-eslint"]
+
+[tasks.test]
+description = "Run all tests"
+run = "npm test"
+
+[tasks.check-types]
+description = "Typecheck all packages"
+depends = ["build-library", "build-spec"]
+run = "npm run --workspaces --if-present check-types"
+
 [tasks.build-library]
-description = "Build the library"
+description = "Build the tildagon-app library"
 run = "npm --workspace='tildagon-app' run build"
+
+[tasks.build-spec]
+description = "Build the OpenAPI spec"
+run = "npm --workspace='openapi-spec' run build"
 
 [tasks.build-website]
 description = "Build the website"
@@ -22,3 +39,19 @@ run = "npm --workspace='tildagon-app-directory-site' run build"
 description = "Serve the website"
 depends = ["build-library"]
 run = "npm --workspace='tildagon-app-directory-site' run dev"
+
+[tasks.check-prettier]
+description = "Check formatting with prettier"
+run = "./node_modules/.bin/prettier --check '**/*.{ts,tsx,js,jsx,json,md,css,html,yaml,yml}'"
+
+[tasks.prettier]
+description = "Format all files with prettier"
+run = "./node_modules/.bin/prettier --write '**/*.{ts,tsx,js,jsx,json,md,css,html,yaml,yml}'"
+
+[tasks.check-eslint]
+description = "Check for lint errors with eslint"
+run = "./node_modules/.bin/eslint ."
+
+[tasks.eslint]
+description = "Lint and auto-fix with eslint"
+run = "./node_modules/.bin/eslint --fix ."

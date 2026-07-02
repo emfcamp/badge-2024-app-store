@@ -19,13 +19,12 @@
   ],
   "author": "Hugh Rawlinson",
   "license": "ISC",
-  "dependencies": {
-    "@iconify-json/openmoji": "^1.2.27",
-    "astro-icon": "^1.1.5",
-    "forgejo-js": "^11.0.0"
-  },
+  "type": "module",
+  "private": true,
   "devDependencies": {
-    "turbo": "^2.9.14"
-  },
-  "private": "true"
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.6.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "typescript-eslint": "^8.62.1"
+  }
 }

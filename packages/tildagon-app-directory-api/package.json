@@ -1,5 +1,6 @@
 {
   "name": "tildagon-app-directory-api",
+  "//": "Source-only package — run via tsx; main/module point at .ts source deliberately.",
   "module": "index.ts",
   "type": "module",
   "scripts": {
@@ -10,6 +11,7 @@
   },
   "main": "./src/registries/index.ts",
   "devDependencies": {
+    "@types/node": "^26",
     "tsx": "^4.21.0"
   },
   "peerDependencies": {
@@ -18,10 +20,11 @@
   "dependencies": {
     "@ltd/j-toml": "^1.38.0",
     "fast-deep-equal": "^3.1.3",
+    "forgejo-js": "^11.0.0",
     "octokit": "5.0.5",
     "openapi-spec": "*",
     "tildagon-app": "*",
     "zod": "^4.4.3"
   },
-  "private": "true"
+  "private": true
 }

@@ -8,7 +8,7 @@ function parseUrlSegments(url: string) {
   return urlSegments.slice(1);
 }
 
-async function handleApps(urlSegments: string[], request: Request) {
+async function handleApps(urlSegments: string[], _request: Request) {
   if (urlSegments[0]) {
     const code = urlSegments[0];
     const app = await CachedRegistryManager.getApp(code);
@@ -33,12 +33,13 @@ async function routeAPI(urlSegments: string[], request: Request) {
   switch (urlSegments[0]) {
     case "apps":
       return await handleApps(urlSegments.slice(1), request);
-    case "failures":
+    case "failures": {
       const failures = await CachedRegistryManager.listErrors();
       return new Response(
         JSON.stringify({ items: failures, count: failures.length }),
         { status: 200, headers: { "Content-Type": "application/json" } },
       );
+    }
     default:
       return new Response("Not found", { status: 404 });
   }
@@ -55,7 +56,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         case "v1":
           return await routeAPI(
             urlSegments.slice(1),
-            new Request(`http://${req.headers.host}${req.url!}`, { method: req.method, headers: req.headers }),
+            new Request(`http://${req.headers.host}${req.url!}`, {
+              method: req.method,
+              headers: Object.fromEntries(
+                Object.entries(req.headers).filter(
+                  (entry): entry is [string, string] =>
+                    typeof entry[1] === "string",
+                ),
+              ),
+            }),
           );
         default:
           return new Response("Not found", { status: 404 });

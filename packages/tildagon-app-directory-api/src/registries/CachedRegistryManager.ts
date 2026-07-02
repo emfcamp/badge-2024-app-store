@@ -54,7 +54,10 @@ export const CachedRegistryManager = {
                   const disallowReason = disallowedApps.find((disallowSpec) => {
                     return Object.entries(disallowSpec).every(
                       ([key, value]) => {
-                        return result.value.id.hasOwnProperty(key)
+                        return Object.prototype.hasOwnProperty.call(
+                          result.value.id,
+                          key,
+                        )
                           ? result.value.id[
                               key as keyof typeof result.value.id
                             ] === value
