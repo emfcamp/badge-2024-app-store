@@ -97,8 +97,254 @@ beforeEach(() => {
 });
 
 function createManager(sources: RegistrySource<any>[]) {
-  return createCachedRegistryManager(sources, { clock: () => clock.now });
+  return createCachedRegistryManager(sources, {
+    clock: () => clock.now,
+    refreshIntervalMs: 600_000,
+  });
 }
+
+// ── SWR tests ───────────────────────────────────────────────
+
+describe("listApps SWR", () => {
+  test("returns cached data immediately even when stale", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // Advance clock past the refresh interval → cache is stale
+    clock.now = 600_001;
+
+    const apps = await mgr.listApps();
+    // Data returned immediately (the SW in SWR)
+    expect(apps).toHaveLength(1);
+    expect(apps[0].manifest.app.name).toBe("Test App");
+  });
+
+  test("triggers background refresh when cache is stale", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+    source.list.mockResolvedValue([
+      Result.Ok({
+        id: app.id,
+        releaseTime: app.releaseTime,
+        tarballUrl: app.tarballUrl,
+      }),
+    ]);
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // Advance clock → stale
+    clock.now = 600_001;
+
+    // listApps should return immediately and fire background refresh
+    const apps = await mgr.listApps();
+    expect(apps).toHaveLength(1);
+
+    // Background refresh fires source.list
+    expect(source.list).toHaveBeenCalledTimes(2); // initial + SWR
+  });
+
+  test("does not trigger background refresh when cache is fresh", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+    source.list.mockResolvedValue([
+      Result.Ok({
+        id: app.id,
+        releaseTime: app.releaseTime,
+        tarballUrl: app.tarballUrl,
+      }),
+    ]);
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // Still within TTL
+    clock.now = 300_000;
+
+    await mgr.listApps();
+    expect(source.list).toHaveBeenCalledTimes(1); // only the initial refresh
+  });
+
+  test("does not trigger duplicate refresh when already in progress", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+    // First refresh — normal resolution
+    source.list.mockResolvedValueOnce([
+      Result.Ok({
+        id: app.id,
+        releaseTime: app.releaseTime,
+        tarballUrl: app.tarballUrl,
+      }),
+    ]);
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // Now set up a stuck listing for the SWR-triggered refresh
+    source.list.mockImplementationOnce(() => new Promise<never>(() => {}));
+
+    // Advance clock → stale
+    clock.now = 600_001;
+
+    // First listApps triggers SWR background refresh (which gets stuck)
+    const promise1 = mgr.listApps();
+
+    // Second listApps while refresh is in progress — should NOT trigger another
+    const promise2 = mgr.listApps();
+
+    // Both should return immediately with cached data
+    const [apps1, apps2] = await Promise.all([promise1, promise2]);
+    expect(apps1).toHaveLength(1);
+    expect(apps2).toHaveLength(1);
+
+    // source.list called twice: initial refresh + one SWR (not two)
+    expect(source.list).toHaveBeenCalledTimes(2);
+  });
+});
+
+// ── Deletion detection ──────────────────────────────────────
+
+describe("deletion detection", () => {
+  test("removes app from cache when source no longer lists it", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+    expect(await mgr.listApps()).toHaveLength(1);
+
+    // Next listing returns empty — app was deleted from the registry.
+    // Advance clock past TTL so listing cache doesn't short-circuit.
+    clock.now = 600_001;
+    source.list.mockResolvedValue([]);
+
+    await mgr.refreshAllSources();
+    expect(await mgr.listApps()).toHaveLength(0);
+    expect(mgr.getStatus().cacheSize).toBe(0);
+  });
+
+  test("preserves app when source listing fails entirely", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+    expect(await mgr.listApps()).toHaveLength(1);
+
+    // Source listing throws — we preserve existing apps
+    source.list.mockRejectedValue(new Error("API down"));
+
+    await mgr.refreshAllSources();
+    expect(await mgr.listApps()).toHaveLength(1);
+    expect(mgr.getStatus().cacheSize).toBe(1);
+  });
+});
+
+// ── Listing cache ───────────────────────────────────────────
+
+describe("listing cache", () => {
+  test("reuses cached listing within TTL", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+    source.list.mockResolvedValue([
+      Result.Ok({
+        id: app.id,
+        releaseTime: app.releaseTime,
+        tarballUrl: app.tarballUrl,
+      }),
+    ]);
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+    expect(source.list).toHaveBeenCalledTimes(1);
+
+    // Within TTL — listing cache hit, no API call
+    clock.now = 300_000;
+    await mgr.refreshAllSources();
+    expect(source.list).toHaveBeenCalledTimes(1); // still 1
+  });
+
+  test("refetches listing when TTL expires", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+    source.list.mockResolvedValue([
+      Result.Ok({
+        id: app.id,
+        releaseTime: app.releaseTime,
+        tarballUrl: app.tarballUrl,
+      }),
+    ]);
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+    expect(source.list).toHaveBeenCalledTimes(1);
+
+    // Past TTL — should refetch
+    clock.now = 600_001;
+    await mgr.refreshAllSources();
+    expect(source.list).toHaveBeenCalledTimes(2);
+  });
+
+  test("does not cache listing when it fails", async () => {
+    const source = mockSource({});
+    source.list.mockRejectedValue(new Error("API down"));
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // list was called once and failed
+    expect(source.list).toHaveBeenCalledTimes(1);
+
+    // Reset mock and advance clock
+    source.list.mockReset();
+    source.list.mockResolvedValue([]);
+
+    // Even within TTL, a failed listing should not be cached
+    clock.now = 100;
+    await mgr.refreshAllSources();
+    expect(source.list).toHaveBeenCalledTimes(1); // called again despite TTL
+  });
+});
 
 // ── Tests ────────────────────────────────────────────────────
 
@@ -188,7 +434,8 @@ describe("refreshAllSources", () => {
     await mgr.refreshAllSources();
     expect(await mgr.listApps()).toHaveLength(1);
 
-    // second refresh with v2
+    // second refresh with v2 — advance clock past TTL to bypass listing cache
+    clock.now = 600_001;
     source.list.mockResolvedValue([
       Result.Ok({
         id: appV2.id,
@@ -226,7 +473,9 @@ describe("refreshAllSources", () => {
     await mgr.refreshAllSources();
     expect(await mgr.listApps()).toHaveLength(1);
 
-    // second refresh — releaseHash changed, but get() fails
+    // second refresh — releaseHash changed, but get() fails.
+    // Advance clock past TTL to bypass listing cache.
+    clock.now = 600_001;
     const newId = makeId({ owner: "a", title: "alpha", releaseHash: "v2" });
     source.list.mockResolvedValue([
       Result.Ok({
