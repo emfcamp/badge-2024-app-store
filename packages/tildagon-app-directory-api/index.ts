@@ -3,7 +3,8 @@ import { CachedRegistryManager } from "./src/registries/index.ts";
 import { config, cacheMaxAge } from "./src/config.ts";
 import { createResponseCache } from "./src/responseCache.ts";
 import { createServer } from "node:http";
-import { writeFileSync } from "node:fs";
+import { writeFileSync, existsSync, readFileSync, statSync } from "node:fs";
+import { extname, join, normalize, resolve } from "node:path";
 
 // ── Response cache ──────────────────────────────────────────
 
@@ -144,8 +145,60 @@ async function main() {
       return;
     }
 
-    // Everything else → Astro SSR
+    // Everything else → serve static files from Astro dist/client, then SSR
     if (astroHandler) {
+      // Try serving as a static file first
+      const clientDistDir = resolve(
+        import.meta.dirname!,
+        "../tildagon-app-directory-site/dist/client",
+      );
+      const filePath = join(clientDistDir, url.pathname);
+      const normalizedPath = normalize(filePath);
+
+      // Security: prevent directory traversal
+      if (normalizedPath.startsWith(clientDistDir)) {
+        try {
+          if (existsSync(normalizedPath) && statSync(normalizedPath).isFile()) {
+            const content = readFileSync(normalizedPath);
+            const ext = extname(normalizedPath).toLowerCase();
+            const mimeTypes: Record<string, string> = {
+              ".css": "text/css",
+              ".js": "application/javascript",
+              ".mjs": "application/javascript",
+              ".json": "application/json",
+              ".svg": "image/svg+xml",
+              ".png": "image/png",
+              ".jpg": "image/jpeg",
+              ".jpeg": "image/jpeg",
+              ".avif": "image/avif",
+              ".jxl": "image/jxl",
+              ".webp": "image/webp",
+              ".woff": "font/woff",
+              ".woff2": "font/woff2",
+              ".ico": "image/x-icon",
+              ".html": "text/html; charset=utf-8",
+            };
+            const contentType = mimeTypes[ext] || "application/octet-stream";
+
+            // Long cache for hashed assets, short for others
+            const isHashed = /\/static\//.test(url.pathname);
+            const maxAge = isHashed ? 31536000 : 3600;
+
+            res.statusCode = 200;
+            res.setHeader("Content-Type", contentType);
+            res.setHeader(
+              "Cache-Control",
+              `public, max-age=${maxAge}${isHashed ? ", immutable" : ""}`,
+            );
+            res.end(content);
+            return;
+          }
+        } catch {
+          // File doesn't exist or can't be read — fall through to SSR
+        }
+      }
+
+      // Not a static file — delegate to Astro SSR
       astroHandler(req, res);
       return;
     }
