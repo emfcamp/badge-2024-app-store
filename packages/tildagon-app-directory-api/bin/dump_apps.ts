@@ -2,6 +2,7 @@ import { CachedRegistryManager } from "../src/registries";
 import { join } from "path";
 import { writeFileSync } from "node:fs";
 
+await CachedRegistryManager.refreshAllSources();
 const apps = await CachedRegistryManager.listApps();
 
 console.log(JSON.stringify(apps, null, 2));
