@@ -1,1 +1,4 @@
-export { CachedRegistryManager, createCachedRegistryManager } from "./CachedRegistryManager";
+export {
+  CachedRegistryManager,
+  createCachedRegistryManager,
+} from "./CachedRegistryManager";
