@@ -200,7 +200,60 @@ describe("refreshAllSources", () => {
 
     await mgr.refreshAllSources();
     const apps = await mgr.listApps();
+    expect(apps).toHaveLength(1); // replaced, not duplicated
     expect(apps[0].manifest.metadata.version).toBe("2.0.0");
+    expect(mgr.getStatus().cacheSize).toBe(1);
+  });
+
+  test("new release that fails fetch removes old app from cache", async () => {
+    const appV1 = makeApp({
+      id: { owner: "a", title: "alpha", releaseHash: "v1" },
+    });
+
+    const source = mockSource({});
+
+    // first refresh with v1 — works
+    source.list.mockResolvedValue([
+      Result.Ok({
+        id: appV1.id,
+        releaseTime: appV1.releaseTime,
+        tarballUrl: appV1.tarballUrl,
+      }),
+    ]);
+    source.get.mockResolvedValueOnce(Result.Ok(appV1));
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+    expect(await mgr.listApps()).toHaveLength(1);
+
+    // second refresh — releaseHash changed, but get() fails
+    const newId = makeId({ owner: "a", title: "alpha", releaseHash: "v2" });
+    source.list.mockResolvedValue([
+      Result.Ok({
+        id: newId,
+        releaseTime: "2024-06-01T00:00:00Z",
+        tarballUrl: "https://example.com/v2.tar.gz",
+      }),
+    ]);
+    source.get.mockResolvedValueOnce({
+      type: "failure",
+      failure: { id: newId, reason: "tildagon.toml parse error" },
+    });
+
+    await mgr.refreshAllSources();
+
+    // old app removed from cache
+    expect(await mgr.listApps()).toHaveLength(0);
+    expect(mgr.getStatus().cacheSize).toBe(0);
+
+    // error recorded
+    const errors = await mgr.listErrors();
+    expect(errors).toHaveLength(1);
+    expect(errors[0].reason).toBe("tildagon.toml parse error");
+
+    // getApp for the old code returns the error, not the stale v1
+    const result = await mgr.getApp(appV1.code);
+    expect(result.type).toBe("failure");
   });
 
   test("does nothing if refresh already in progress", async () => {
