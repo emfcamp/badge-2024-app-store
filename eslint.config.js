@@ -11,6 +11,7 @@ export default tseslint.config(
       "**/dist/**",
       "**/.astro/**",
       "packages/tildagon-app-directory-site/public/global.css",
+      "packages/tildagon-app-directory-site/public/static/js/*.js",
       "**/*.toml",
     ],
   },
