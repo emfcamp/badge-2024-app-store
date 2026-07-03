@@ -12,13 +12,13 @@ import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
 
-if (process.env.APP_STORE_MOCK) {
+if (process.env.APP_STORE_MOCK === "true") {
   console.log("Mocking the app store data");
 } else {
   console.log("Using real data");
 }
 
-const DEFAULT_SOURCES: RegistrySource<any>[] = process.env.APP_STORE_MOCK
+const DEFAULT_SOURCES: RegistrySource<any>[] = process.env.APP_STORE_MOCK === "true"
   ? [DummyRegistry]
   : [GitHubRegistry, CodebergRegistry];
 
