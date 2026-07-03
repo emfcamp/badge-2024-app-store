@@ -11,6 +11,13 @@ import { z } from "zod";
 import TOML from "@ltd/j-toml";
 import type { RegistrySource, RegistrySourceFailure } from "../RegistrySource";
 
+const maybeGitHubTokenSchema = z.string().startsWith("ghp_");
+const githubTokenParseResult = maybeGitHubTokenSchema.safeParse(
+  process.env.GITHUB_TOKEN,
+);
+if (githubTokenParseResult.error) {
+  console.warn(githubTokenParseResult.error);
+}
 const MyOctokit = Octokit.plugin(throttling);
 
 const octokit = new MyOctokit({
