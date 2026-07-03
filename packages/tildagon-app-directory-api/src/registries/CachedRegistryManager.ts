@@ -18,9 +18,10 @@ if (process.env.APP_STORE_MOCK === "true") {
   console.log("Using real data");
 }
 
-const DEFAULT_SOURCES: RegistrySource<any>[] = process.env.APP_STORE_MOCK === "true"
-  ? [DummyRegistry]
-  : [GitHubRegistry, CodebergRegistry];
+const DEFAULT_SOURCES: RegistrySource<any>[] =
+  process.env.APP_STORE_MOCK === "true"
+    ? [DummyRegistry]
+    : [GitHubRegistry, CodebergRegistry];
 
 /**
  * Creates a CachedRegistryManager that orchestrates listing and fetching
