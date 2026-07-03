@@ -1,3 +1,4 @@
 {
-  "extends": ["../../tsconfig.base.json", "astro/tsconfigs/strictest"]
+  "extends": ["../../tsconfig.base.json", "astro/tsconfigs/strictest"],
+  "exclude": ["public/static/js/**", "dist/**"]
 }
