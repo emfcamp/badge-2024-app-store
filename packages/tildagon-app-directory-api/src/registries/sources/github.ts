@@ -11,7 +11,10 @@ import { z } from "zod";
 import TOML from "@ltd/j-toml";
 import type { RegistrySource, RegistrySourceFailure } from "../RegistrySource";
 
-const maybeGitHubTokenSchema = z.string().startsWith("ghp_");
+const maybeGitHubTokenSchema = z.union([
+  z.string().startsWith("ghp_"),
+  z.string().startsWith("github_pat_"),
+]);
 const githubTokenParseResult = maybeGitHubTokenSchema.safeParse(
   process.env.GITHUB_TOKEN,
 );
