@@ -40,6 +40,19 @@ async function routeAPI(urlSegments: string[], request: Request) {
         { status: 200, headers: { "Content-Type": "application/json" } },
       );
     }
+    case "health":
+      return new Response(
+        JSON.stringify({
+          status: "ok",
+          uptime: process.uptime(),
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } },
+      );
+    case "status":
+      return new Response(JSON.stringify(CachedRegistryManager.getStatus()), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     default:
       return new Response("Not found", { status: 404 });
   }
