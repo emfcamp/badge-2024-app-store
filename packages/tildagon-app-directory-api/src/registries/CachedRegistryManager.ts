@@ -1,5 +1,5 @@
 import { Result } from "../models";
-import type { RegistrySourceFailure } from "./RegistrySource";
+import type { RegistrySourceFailure, RegistrySource } from "./RegistrySource";
 import { GitHubRegistry } from "./sources/github";
 import { DummyRegistry } from "./sources/dummy";
 import {
@@ -12,124 +12,135 @@ import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
 
-// TODO: Move cache to KV
-const AppCache = new Map<string, TildagonAppRelease>();
-const ErrorCache = new Map<string, RegistrySourceFailure>();
-
 if (process.env.APP_STORE_MOCK) {
   console.log("Mocking the app store data");
 } else {
   console.log("Using real data");
 }
 
-const SOURCES = process.env.APP_STORE_MOCK
+const DEFAULT_SOURCES: RegistrySource<any>[] = process.env.APP_STORE_MOCK
   ? [DummyRegistry]
   : [GitHubRegistry, CodebergRegistry];
 
-let bugfix_permacache_flag = false;
+/**
+ * Creates a CachedRegistryManager that orchestrates listing and fetching
+ * apps from the given registry sources. Sources are injected so the
+ * manager can be tested with mock registries.
+ */
+export function createCachedRegistryManager(
+  sources: RegistrySource<any>[],
+) {
+  // TODO: Move cache to KV
+  const AppCache = new Map<string, TildagonAppRelease>();
+  const ErrorCache = new Map<string, RegistrySourceFailure>();
+  let bugfix_permacache_flag = false;
 
-export const CachedRegistryManager = {
-  async listApps(): Promise<TildagonAppRelease[]> {
-    if (!bugfix_permacache_flag) {
-      await Promise.all(
-        SOURCES.map(async (source) => {
-          return await Promise.all(
-            (await source.list())
-              .filter((result) => {
-                if (result.type === "failure") {
-                  ErrorCache.set(
-                    TildagonAppReleaseIdentifier.toAppCode(result.failure.id),
-                    result.failure,
-                  );
-                  return false;
-                }
-                return true;
-              })
-              .map(async (result) => {
-                if (result.type === "success") {
-                  const code = TildagonAppReleaseIdentifier.toAppCode(
-                    result.value.id,
-                  );
-
-                  const disallowReason = disallowedApps.find((disallowSpec) => {
-                    return Object.entries(disallowSpec).every(
-                      ([key, value]) => {
-                        return Object.prototype.hasOwnProperty.call(
-                          result.value.id,
-                          key,
-                        )
-                          ? result.value.id[
-                              key as keyof typeof result.value.id
-                            ] === value
-                          : true;
-                      },
+  return {
+    async listApps(): Promise<TildagonAppRelease[]> {
+      if (!bugfix_permacache_flag) {
+        await Promise.all(
+          sources.map(async (source) => {
+            return await Promise.all(
+              (await source.list())
+                .filter((result) => {
+                  if (result.type === "failure") {
+                    ErrorCache.set(
+                      TildagonAppReleaseIdentifier.toAppCode(result.failure.id),
+                      result.failure,
                     );
-                  });
-
-                  if (disallowReason) {
-                    ErrorCache.set(code, {
-                      id: result.value.id,
-                      reason: `Ban: ${JSON.stringify(disallowReason, null, 2)}`,
-                    });
-                    return "done";
+                    return false;
                   }
+                  return true;
+                })
+                .map(async (result) => {
+                  if (result.type === "success") {
+                    const code = TildagonAppReleaseIdentifier.toAppCode(
+                      result.value.id,
+                    );
 
-                  // Early exit if we already have this release
-                  if (AppCache.has(code)) {
-                    const cachedApp = AppCache.get(code);
-                    if (equal(cachedApp?.id, result.value.id)) {
+                    const disallowReason = disallowedApps.find((disallowSpec) => {
+                      return Object.entries(disallowSpec).every(
+                        ([key, value]) => {
+                          return Object.prototype.hasOwnProperty.call(
+                            result.value.id,
+                            key,
+                          )
+                            ? result.value.id[
+                                key as keyof typeof result.value.id
+                              ] === value
+                            : true;
+                        },
+                      );
+                    });
+
+                    if (disallowReason) {
                       ErrorCache.set(code, {
                         id: result.value.id,
-                        reason: `Hash collision with ${code} - ${cachedApp?.manifest.app.name}`,
+                        reason: `Ban: ${JSON.stringify(disallowReason, null, 2)}`,
                       });
+                      return "done";
                     }
-                    return "done";
-                  }
 
-                  // Here's where we would emit a "we found a new app" event
+                    // Early exit if we already have this release
+                    if (AppCache.has(code)) {
+                      const cachedApp = AppCache.get(code);
+                      if (equal(cachedApp?.id, result.value.id)) {
+                        ErrorCache.set(code, {
+                          id: result.value.id,
+                          reason: `Hash collision with ${code} - ${cachedApp?.manifest.app.name}`,
+                        });
+                      }
+                      return "done";
+                    }
 
-                  const appResult = await source.get(code, result.value);
-                  if (Result.isNotOk(appResult)) {
-                    ErrorCache.set(code, appResult.failure);
-                  } else if (Result.isOk(appResult)) {
-                    AppCache.set(
-                      code,
-                      TildagonAppReleaseSchema.parse(appResult.value),
-                    );
+                    // Here's where we would emit a "we found a new app" event
+
+                    const appResult = await source.get(code, result.value);
+                    if (Result.isNotOk(appResult)) {
+                      ErrorCache.set(code, appResult.failure);
+                    } else if (Result.isOk(appResult)) {
+                      AppCache.set(
+                        code,
+                        TildagonAppReleaseSchema.parse(appResult.value),
+                      );
+                    }
                   }
-                }
-                return "done";
-              }),
-          );
-        }),
+                  return "done";
+                }),
+            );
+          }),
+        );
+      }
+      bugfix_permacache_flag = true;
+
+      return Array.from(AppCache.values()).toSorted((a, b) =>
+        a.manifest.app.name
+          .toLowerCase()
+          .localeCompare(b.manifest.app.name.toLowerCase()),
       );
-    }
-    bugfix_permacache_flag = true;
+    },
 
-    return Array.from(AppCache.values()).toSorted((a, b) =>
-      a.manifest.app.name
-        .toLowerCase()
-        .localeCompare(b.manifest.app.name.toLowerCase()),
-    );
-  },
+    async getApp(
+      key: string,
+    ): Promise<Result<TildagonAppRelease, RegistrySourceFailure>> {
+      const cachedValue = AppCache.get(key);
+      if (cachedValue) {
+        return { type: "success", value: cachedValue };
+      }
+      return {
+        type: "failure",
+        failure: ErrorCache.get(key) || {
+          id: { owner: "", title: "", service: "github" },
+          reason: "Not found",
+        },
+      };
+    },
 
-  async getApp(
-    key: string,
-  ): Promise<Result<TildagonAppRelease, RegistrySourceFailure>> {
-    const cachedValue = AppCache.get(key);
-    if (cachedValue) {
-      return { type: "success", value: cachedValue };
-    }
-    return {
-      type: "failure",
-      failure: ErrorCache.get(key) || {
-        id: { owner: "", title: "", service: "github" },
-        reason: "Not found",
-      },
-    };
-  },
+    async listErrors() {
+      return Array.from(ErrorCache.values());
+    },
+  };
+}
 
-  async listErrors() {
-    return Array.from(ErrorCache.values());
-  },
-};
+/** Default singleton instance wired to the real/dummy registry sources. */
+export const CachedRegistryManager = createCachedRegistryManager(DEFAULT_SOURCES);
