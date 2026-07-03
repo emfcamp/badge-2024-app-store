@@ -27,9 +27,7 @@ const DEFAULT_SOURCES: RegistrySource<any>[] = process.env.APP_STORE_MOCK
  * apps from the given registry sources. Sources are injected so the
  * manager can be tested with mock registries.
  */
-export function createCachedRegistryManager(
-  sources: RegistrySource<any>[],
-) {
+export function createCachedRegistryManager(sources: RegistrySource<any>[]) {
   // TODO: Move cache to KV
   const AppCache = new Map<string, TildagonAppRelease>();
   const ErrorCache = new Map<string, RegistrySourceFailure>();
@@ -58,20 +56,22 @@ export function createCachedRegistryManager(
                       result.value.id,
                     );
 
-                    const disallowReason = disallowedApps.find((disallowSpec) => {
-                      return Object.entries(disallowSpec).every(
-                        ([key, value]) => {
-                          return Object.prototype.hasOwnProperty.call(
-                            result.value.id,
-                            key,
-                          )
-                            ? result.value.id[
-                                key as keyof typeof result.value.id
-                              ] === value
-                            : true;
-                        },
-                      );
-                    });
+                    const disallowReason = disallowedApps.find(
+                      (disallowSpec) => {
+                        return Object.entries(disallowSpec).every(
+                          ([key, value]) => {
+                            return Object.prototype.hasOwnProperty.call(
+                              result.value.id,
+                              key,
+                            )
+                              ? result.value.id[
+                                  key as keyof typeof result.value.id
+                                ] === value
+                              : true;
+                          },
+                        );
+                      },
+                    );
 
                     if (disallowReason) {
                       ErrorCache.set(code, {
@@ -143,4 +143,5 @@ export function createCachedRegistryManager(
 }
 
 /** Default singleton instance wired to the real/dummy registry sources. */
-export const CachedRegistryManager = createCachedRegistryManager(DEFAULT_SOURCES);
+export const CachedRegistryManager =
+  createCachedRegistryManager(DEFAULT_SOURCES);
