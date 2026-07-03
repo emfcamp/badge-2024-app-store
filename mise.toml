@@ -6,7 +6,7 @@ node = "24"
 
 [env]
 GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
-APP_STORE_MOCK = false
+APP_STORE_MOCK = true
 PORT = "3000"
 
 [tasks.check]

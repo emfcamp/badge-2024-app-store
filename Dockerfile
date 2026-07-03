@@ -1,39 +1,27 @@
-FROM debian:bookworm-slim as base
+# ── Build stage ──────────────────────────────────────────────
+FROM node:24-alpine AS build
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-RUN apt-get update  \
-  && apt-get -y --no-install-recommends install  \
-  # install any other dependencies you might need
-  sudo curl git ca-certificates build-essential \
-  && rm -rf /var/lib/apt/lists/*
+COPY package.json package-lock.json ./
+COPY packages/ ./packages/
 
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ENV MISE_DATA_DIR="/mise"
-ENV MISE_CONFIG_DIR="/mise"
-ENV MISE_CACHE_DIR="/mise/cache"
-ENV MISE_INSTALL_PATH="/usr/local/bin/mise"
-ENV PATH="/mise/shims:$PATH"
-# ENV MISE_VERSION="..."
+RUN npm ci
 
-RUN curl https://mise.run | sh
+RUN npm --workspace=tildagon-app run build
+RUN npm --workspace=tildagon-app-directory-site run build
 
-COPY ./ /usr/src/app
+# ── Run stage ────────────────────────────────────────────────
+FROM node:24-alpine
 
-RUN mise trust
+WORKDIR /app
 
-RUN mise install
-RUN npm install
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/packages ./packages
+COPY package.json ./
 
-RUN mise build-website
-
-ENV HOST=0.0.0.0
+ENV APP_STORE_MOCK=false
 ENV PORT=3000
 EXPOSE 3000
-CMD ["node", "/usr/src/app/packages/tildagon-app-directory-site/dist/server/entry.mjs"]
 
-# ---
-#
-# FROM debian:13-slim as deployable
-#
-# COPY --from=base
+CMD ["./node_modules/.bin/tsx", "packages/tildagon-app-directory-api/index.ts"]
