@@ -1,4 +1,5 @@
 import { Octokit } from "octokit";
+import { throttling } from "@octokit/plugin-throttling";
 import type { GraphQlQueryResponseData } from "@octokit/graphql";
 import type { Result } from "../../models";
 import type { TildagonAppReleaseIdentifier } from "tildagon-app";
@@ -10,7 +11,23 @@ import { z } from "zod";
 import TOML from "@ltd/j-toml";
 import type { RegistrySource, RegistrySourceFailure } from "../RegistrySource";
 
-const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+const MyOctokit = Octokit.plugin(throttling);
+
+const octokit = new MyOctokit({
+  auth: process.env.GITHUB_TOKEN,
+  throttle: {
+    onRateLimit: (retryAfter: number, _options: unknown) => {
+      console.warn(`GitHub rate limit hit, retrying after ${retryAfter}s`);
+      return true;
+    },
+    onSecondaryRateLimit: (retryAfter: number, _options: unknown) => {
+      console.warn(
+        `GitHub secondary rate limit hit, retrying after ${retryAfter}s`,
+      );
+      return true;
+    },
+  },
+});
 
 const GitHubRegistryListQueryResultSchema = z.object({
   nameWithOwner: z.string(),
