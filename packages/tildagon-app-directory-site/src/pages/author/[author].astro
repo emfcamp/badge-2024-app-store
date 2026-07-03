@@ -6,7 +6,7 @@ import Alert from "../../components/Alert.astro";
 import { CachedRegistryManager } from "tildagon-app-directory-api";
 
 let { author } = Astro.params;
-author = decodeURIComponent(author);
+author = decodeURIComponent(author!);
 
 const data = await CachedRegistryManager.listApps();
 
@@ -22,7 +22,7 @@ export const getStaticPaths = (async () => {
   );
 
   return Array.from(authors).map((author) => ({
-    params: { author: author },
+    params: { author },
   }));
 }) satisfies GetStaticPaths;
 ---

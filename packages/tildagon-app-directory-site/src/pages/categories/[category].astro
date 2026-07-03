@@ -9,10 +9,6 @@ import { CategoryColors } from "../../features/categories";
 
 const data = await CachedRegistryManager.listApps();
 
-type Props = {
-  category: TildagonAppCategory;
-};
-
 const { category } = Astro.params;
 
 export const getStaticPaths = (async () => {
@@ -30,17 +26,24 @@ const categoryDescriptionCopy: Record<TildagonAppCategory, string> = {
   Background: "Visualisations that run behind the badge menu",
   Pattern: "Colors and animations for the Tildagon's RGB LEDs",
 };
+
+const parsed = TildagonAppCategory.safeParse(category);
+if (!parsed.success) {
+  return new Response("Category not found", { status: 404 });
+}
+
+const cat = parsed.data;
 ---
 
-<Layout title={category}>
-  <main class="col-md-12" style=`--badge-bg: ${CategoryColors[category]}`>
+<Layout title={cat}>
+  <main class="col-md-12" style=`--badge-bg: ${CategoryColors[cat]}`>
     <a href="/">&#8592; All apps</a>
-    <h1>{category}</h1>
-    <p>{categoryDescriptionCopy[category]}</p>
+    <h1>{cat}</h1>
+    <p>{categoryDescriptionCopy[cat]}</p>
     <hr />
     <AppsListing
       data={data.filter((app: any) =>
-        app.manifest.app.category.includes(category),
+        app.manifest.app.category.includes(cat),
       )}
     />
     <Alert kind="info">
