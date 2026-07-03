@@ -6,24 +6,26 @@ import { CategoryColors } from "../../features/categories";
 
 const { code } = Astro.params;
 
+if (!code) {
+  return new Response("Bad request", { status: 400 });
+}
+
 const result = await CachedRegistryManager.getApp(code);
 
-if (result.type == "failure") {
-  // do 404
-  // since we're always doing ssg and not ssr, we won't hit this code. we will
-  // need something real for ssr
-  return;
+if (result.type === "failure") {
+  return new Response(
+    `<html><body><h1>App not found</h1><p>The app "${code}" was not found.</p><a href="/">Back to directory</a></body></html>`,
+    { status: 404, headers: { "Content-Type": "text/html" } },
+  );
 }
 
 const data = result.value;
 
 export async function getStaticPaths() {
   const apps = await CachedRegistryManager.listApps();
-  const paths = apps.map((app: any) => ({
+  return apps.map((app: any) => ({
     params: { code: app.code },
   }));
-
-  return paths;
 }
 ---
 

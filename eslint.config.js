@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import astro from "eslint-plugin-astro";
+import globals from "globals";
 
 export default tseslint.config(
   // Global ignores
@@ -19,6 +20,14 @@ export default tseslint.config(
   // Base JS/TS recommended rules
   js.configs.recommended,
   ...tseslint.configs.recommended,
+
+  // Node.js globals for config files
+  {
+    files: ["**/astro.config.mjs", "**/*.config.{mjs,js}"],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 
   // Astro files
   ...astro.configs.recommended,
