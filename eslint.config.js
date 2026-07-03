@@ -43,4 +43,14 @@ export default tseslint.config(
       "@typescript-eslint/triple-slash-reference": "off",
     },
   },
+
+  // Allow Node.js globals in config files
+  {
+    files: ["**/astro.config.mjs", "**/*.config.{js,mjs,ts}"],
+    languageOptions: {
+      globals: {
+        process: "readonly",
+      },
+    },
+  },
 );
