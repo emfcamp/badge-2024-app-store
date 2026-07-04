@@ -2,6 +2,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ["**"]
+  pull_request:
+    branches: ["**"]
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
@@ -24,8 +26,10 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Run checks
+        if: github.event_name == 'pull_request'
         run: mise run check
       - name: Run tests
+        if: github.event_name == 'pull_request'
         run: npm run test
       - name: Build website (static)
         run: mise run build-website
