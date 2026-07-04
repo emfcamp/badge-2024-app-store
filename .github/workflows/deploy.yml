@@ -1,9 +1,8 @@
 name: Deploy to GitHub Pages
 on:
   push:
-    branches: ["**"]
+    branches: ["main"]
   pull_request:
-    branches: ["**"]
   schedule:
     - cron: "*/15 * * * *"
   workflow_dispatch:
