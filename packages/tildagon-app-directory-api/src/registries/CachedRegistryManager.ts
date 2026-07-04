@@ -12,6 +12,18 @@ import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
 
+export interface AppFilters {
+  category?: string;
+  author?: string;
+  license?: string;
+  capabilities?: string[];
+  vid?: string;
+  pid?: string;
+  frontboard?: string;
+  service?: string;
+  q?: string;
+}
+
 if (process.env.APP_STORE_MOCK === "true") {
   console.log("Mocking the app store data");
 } else {
@@ -203,7 +215,7 @@ export function createCachedRegistryManager(
       }
     },
 
-    async listApps(): Promise<TildagonAppRelease[]> {
+    async listApps(filters?: AppFilters): Promise<TildagonAppRelease[]> {
       // Lazy-init: if cache has never been populated, refresh now.
       if (lastRefresh === null && !refreshInProgress) {
         await this.refreshAllSources();
@@ -216,13 +228,94 @@ export function createCachedRegistryManager(
         );
       }
 
-      return Array.from(AppCache.values())
-        .map((e) => e.app)
-        .toSorted((a, b) =>
-          a.manifest.app.name
-            .toLowerCase()
-            .localeCompare(b.manifest.app.name.toLowerCase()),
-        );
+      let apps = Array.from(AppCache.values()).map((e) => e.app);
+
+      if (filters) {
+        apps = apps.filter((app) => {
+          if (filters.category) {
+            const cats = filters.category.split(",");
+            if (
+              !cats.some((c) => app.manifest.app.category.includes(c as any))
+            ) {
+              return false;
+            }
+          }
+          if (filters.author) {
+            const authors = filters.author
+              .split(",")
+              .map((a) => a.toLowerCase());
+            if (!authors.includes(app.manifest.metadata.author.toLowerCase())) {
+              return false;
+            }
+          }
+          if (filters.license) {
+            const licenses = filters.license
+              .split(",")
+              .map((l) => l.toLowerCase());
+            if (
+              !licenses.includes(app.manifest.metadata.license.toLowerCase())
+            ) {
+              return false;
+            }
+          }
+          if (filters.service) {
+            const services = filters.service.split(",");
+            if (!services.includes(app.id.service)) {
+              return false;
+            }
+          }
+          if (filters.capabilities) {
+            const appCaps = app.manifest.metadata.capabilities ?? [];
+            const hasAll = filters.capabilities.every((capGroup) => {
+              const orCaps = capGroup.split(",");
+              return orCaps.some((c) =>
+                appCaps.some(
+                  (assoc) =>
+                    typeof assoc.feature === "string" && assoc.feature === c,
+                ),
+              );
+            });
+            if (!hasAll) return false;
+          }
+          if (filters.vid || filters.pid) {
+            const appCaps = app.manifest.metadata.capabilities ?? [];
+            const hasMatch = appCaps.some(
+              (assoc) =>
+                typeof assoc.feature === "object" &&
+                "vid" in assoc.feature &&
+                "pid" in assoc.feature &&
+                (!filters.vid || assoc.feature.vid === filters.vid) &&
+                (!filters.pid || assoc.feature.pid === filters.pid),
+            );
+            if (!hasMatch) return false;
+          }
+          if (filters.frontboard) {
+            const appCaps = app.manifest.metadata.capabilities ?? [];
+            const hasMatch = appCaps.some(
+              (assoc) =>
+                typeof assoc.feature === "object" &&
+                "name" in assoc.feature &&
+                assoc.feature.name === filters.frontboard,
+            );
+            if (!hasMatch) return false;
+          }
+          if (filters.q) {
+            const q = filters.q.toLowerCase();
+            const inName = app.manifest.app.name.toLowerCase().includes(q);
+            const inDesc = app.manifest.metadata.description
+              .toLowerCase()
+              .includes(q);
+            if (!inName && !inDesc) return false;
+          }
+          return true;
+        });
+      }
+
+      return apps.toSorted((a, b) =>
+        a.manifest.app.name
+          .toLowerCase()
+          .localeCompare(b.manifest.app.name.toLowerCase()),
+      );
     },
 
     async getApp(

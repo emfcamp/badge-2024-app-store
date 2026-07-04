@@ -3,6 +3,7 @@ import { CachedRegistryManager } from "./src/registries/index.ts";
 import { config, cacheMaxAge } from "./src/config.ts";
 import { createResponseCache } from "./src/responseCache.ts";
 import { Hono } from "hono";
+import type { AppFilters } from "./src/registries/CachedRegistryManager";
 import {
   createServer,
   type IncomingMessage,
@@ -61,7 +62,30 @@ api.get("/v1/apps/:code", async (c) => {
 
 // GET /v1/apps
 api.get("/v1/apps", async (c) => {
-  const apps = await CachedRegistryManager.listApps();
+  const filters: AppFilters = {};
+  const category = c.req.query("category");
+  const author = c.req.query("author");
+  const license = c.req.query("license");
+  const service = c.req.query("service");
+  const vid = c.req.query("vid");
+  const pid = c.req.query("pid");
+  const frontboard = c.req.query("frontboard");
+  const q = c.req.query("q");
+  if (category) filters.category = category;
+  if (author) filters.author = author;
+  if (license) filters.license = license;
+  if (service) filters.service = service;
+  if (vid) filters.vid = vid;
+  if (pid) filters.pid = pid;
+  if (frontboard) filters.frontboard = frontboard;
+  if (q) filters.q = q;
+
+  const caps = c.req.queries("capability");
+  if (caps && caps.length > 0) filters.capabilities = caps;
+
+  const apps = await CachedRegistryManager.listApps(
+    Object.keys(filters).length > 0 ? filters : undefined,
+  );
   return c.json({ items: apps, count: apps.length });
 });
 
