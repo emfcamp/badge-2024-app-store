@@ -165,5 +165,14 @@ const { title } = Astro.props;
     </div>
     <script is:inline src="/static/js/main-b8229ebdeb2adc1e59be5f04daef1e24.js"
     ></script>
+    <script is:inline>
+      document
+        .getElementById("menu-button")
+        .addEventListener("click", function () {
+          const menu = document.getElementById("menu-container");
+          menu.style.display =
+            menu.style.display === "block" ? "none" : "block";
+        });
+    </script>
   </body>
 </html>
