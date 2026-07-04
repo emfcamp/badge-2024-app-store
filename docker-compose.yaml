@@ -1,0 +1,21 @@
+services:
+  app-store:
+    image: ghcr.io/emfcamp/app-store:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      APP_STORE_MOCK: "false"
+      PORT: "3000"
+    volumes:
+      - app-store-cache:/app/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  app-store-cache:
