@@ -13,6 +13,15 @@ import { writeFileSync, existsSync, readFileSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 import { Readable } from "node:stream";
 
+function escapeXml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 // ── Response cache ──────────────────────────────────────────
 
 const responseCache = createResponseCache({
@@ -87,6 +96,46 @@ api.get("/v1/apps", async (c) => {
     Object.keys(filters).length > 0 ? filters : undefined,
   );
   return c.json({ items: apps, count: apps.length });
+});
+
+// GET /v1/apps/rss
+api.get("/v1/apps/rss", async (c) => {
+  const apps = await CachedRegistryManager.listApps();
+
+  const sorted = apps.toSorted(
+    (a, b) =>
+      new Date(b.releaseTime).getTime() - new Date(a.releaseTime).getTime(),
+  );
+
+  const items = sorted
+    .slice(0, 50)
+    .map(
+      (app) => `
+    <item>
+      <title>${escapeXml(app.manifest.app.name)}</title>
+      <link>https://apps.badge.emfcamp.org/apps/${app.code}</link>
+      <description>${escapeXml(app.manifest.metadata.description)}</description>
+      <author>${escapeXml(app.manifest.metadata.author)}</author>
+      ${app.manifest.app.category.map((cat) => `      <category>${escapeXml(cat)}</category>`).join("\n")}
+      <pubDate>${new Date(app.releaseTime).toUTCString()}</pubDate>
+      <guid isPermaLink="false">${app.code}</guid>
+    </item>`,
+    )
+    .join("");
+
+  const rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tildagon App Store</title>
+    <link>https://apps.badge.emfcamp.org</link>
+    <description>Latest apps for the Tildagon badge</description>
+    <atom:link href="https://apps.badge.emfcamp.org/v1/apps/rss" rel="self" type="application/rss+xml"/>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>${items}
+  </channel>
+</rss>`;
+
+  c.header("Content-Type", "application/rss+xml; charset=utf-8");
+  return c.body(rss);
 });
 
 // GET /v1/failures
