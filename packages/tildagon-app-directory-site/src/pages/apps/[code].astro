@@ -1,6 +1,7 @@
 ---
 import { CachedRegistryManager } from "tildagon-app-directory-api";
 import InstallationInstructions from "../../components/InstallationInstructions.astro";
+import Alert from "../../components/Alert.astro";
 import Layout from "../../layouts/Layout.astro";
 import { CategoryColors } from "../../features/categories";
 
@@ -20,6 +21,12 @@ if (result.type === "failure") {
 }
 
 const data = result.value;
+
+function urlLooksSuspicious(url: string): boolean {
+  return /\[.*?\]/.test(url) || url.includes('username');
+}
+
+const showSourceUrlWarning = urlLooksSuspicious(data.manifest.metadata.url);
 
 export async function getStaticPaths() {
   const apps = await CachedRegistryManager.listApps();
@@ -72,6 +79,14 @@ export async function getStaticPaths() {
               >{data.manifest.metadata.url}</a
             >
           </span>
+          {showSourceUrlWarning && (
+            <Alert kind="warning">
+              This app's source code URL looks like a placeholder (e.g.
+              "github.com/username/[app]"). The author should update the{" "}
+              <code>url</code> field in their{" "}
+              <code>tildagon.toml</code> to point to the actual repository.
+            </Alert>
+          )}
         </li>
       </li>
     </ul>
