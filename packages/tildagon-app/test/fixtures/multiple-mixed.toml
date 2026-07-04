@@ -6,21 +6,21 @@ category = ["Apps", "Games"]
 author = "Test Author"
 license = "MIT"
 url = "https://example.com"
-description = "App with multiple capabilities, some required"
+description = "App with multiple capabilities, some required, mixing feature types"
 version = "2.0.0"
 
 [[metadata.capabilities]]
 required = true
-feature = "gpio"
+feature = { type = "Capability", identifier = "gpio" }
 
 [[metadata.capabilities]]
 required = true
-feature = "i2c"
+feature = { type = "Capability", identifier = "i2c" }
 
 [[metadata.capabilities]]
 required = false
-feature = "spi"
+feature = { vid = "abcd", pid = "ef01" }
 
 [[metadata.capabilities]]
 required = false
-feature = "uart"
+feature = { type = "Capability", identifier = "uart" }

@@ -6,13 +6,13 @@ category = ["Apps", "Games"]
 author = "Test Author"
 license = "MIT"
 url = "https://example.com"
-description = "App with a simple string capability"
+description = "App with simple capability features"
 version = "1.0.0"
 
 [[metadata.capabilities]]
 required = true
-feature = "gpio"
+feature = { type = "Capability", identifier = "gpio" }
 
 [[metadata.capabilities]]
 required = false
-feature = "i2c"
+feature = { type = "Capability", identifier = "i2c" }

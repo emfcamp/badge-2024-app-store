@@ -11,8 +11,8 @@ version = "1.0.0"
 
 [[metadata.capabilities]]
 required = false
-feature = "display"
+feature = { type = "Capability", identifier = "display" }
 
 [[metadata.capabilities]]
 required = false
-feature = "audio"
+feature = { type = "Capability", identifier = "audio" }

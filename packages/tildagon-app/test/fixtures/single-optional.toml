@@ -11,4 +11,4 @@ version = "1.0.0"
 
 [[metadata.capabilities]]
 required = false
-feature = "animation"
+feature = { type = "Capability", identifier = "animation" }

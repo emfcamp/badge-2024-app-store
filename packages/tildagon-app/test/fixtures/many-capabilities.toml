@@ -6,29 +6,29 @@ category = "Music"
 author = "Test Author"
 license = "MIT"
 url = "https://example.com"
-description = "App with many capabilities"
+description = "App with many capabilities across all feature types"
 version = "1.0.0"
 
 [[metadata.capabilities]]
 required = true
-feature = "audio"
+feature = { type = "Capability", identifier = "audio" }
 
 [[metadata.capabilities]]
 required = true
-feature = "midi"
+feature = { type = "Capability", identifier = "midi" }
 
 [[metadata.capabilities]]
 required = true
-feature = "sequencer"
+feature = { type = "2026 Frontboard" }
 
 [[metadata.capabilities]]
 required = false
-feature = "sampler"
+feature = { vid = "1234", pid = "5678", name = "Sampler HAT" }
 
 [[metadata.capabilities]]
 required = false
-feature = "effects"
+feature = { type = "Capability", identifier = "effects" }
 
 [[metadata.capabilities]]
 required = false
-feature = "mixer"
+feature = { type = "Capability", identifier = "mixer" }

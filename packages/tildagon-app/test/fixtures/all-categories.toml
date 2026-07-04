@@ -11,4 +11,4 @@ version = "1.0.0"
 
 [[metadata.capabilities]]
 required = true
-feature = "all-the-things"
+feature = { type = "Capability", identifier = "all-the-things" }

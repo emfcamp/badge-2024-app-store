@@ -20,21 +20,22 @@ export const HexpansionIdentifier = z.object({
   pid: z.string(),
 });
 
-export const Capability = z.string();
+export const Capability = z.object({
+  type: z.literal("Capability"),
+  identifier: z.string(),
+});
 
 export const HexpansionDefinition = z.object({
+  type: z.literal("Hexpansion"),
   identifier: HexpansionIdentifier,
-  capabilities: z.array(Capability),
 });
 
 export const Frontboard2024 = z.object({
-  name: z.literal("2024 Frontboard"),
-  capabilities: z.tuple([]),
+  type: z.literal("2024 Frontboard"),
 });
 
 export const Frontboard2026 = z.object({
-  name: z.literal("2026 Frontboard"),
-  capabilities: z.tuple([]),
+  type: z.literal("2026 Frontboard"),
 });
 
 export const TildagonOSMinimumVersion = z.object({
@@ -47,13 +48,13 @@ export const ProvidedCapability = z.object({
   capability: Capability,
 });
 
-export const Frontboard = z.discriminatedUnion("name", [
+export const Frontboard = z.discriminatedUnion("type", [
   Frontboard2024,
   Frontboard2026,
 ]);
 
 export const FrontboardIdentifier = z.object({
-  name: z.union(Frontboard.options.map((option) => option.shape.name)),
+  type: z.union(Frontboard.options.map((option) => option.shape.type)),
 });
 
 export const TildagonAppCapabilityAssociations = z.array(

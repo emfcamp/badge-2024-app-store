@@ -11,4 +11,4 @@ version = "1.0.0"
 
 [[metadata.capabilities]]
 required = true
-feature = "gpio"
+feature = { type = "Capability", identifier = "gpio" }

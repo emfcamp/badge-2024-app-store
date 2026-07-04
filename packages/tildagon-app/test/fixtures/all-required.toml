@@ -11,12 +11,12 @@ version = "1.0.0"
 
 [[metadata.capabilities]]
 required = true
-feature = "input"
+feature = { type = "Capability", identifier = "input" }
 
 [[metadata.capabilities]]
 required = true
-feature = "graphics"
+feature = { type = "Capability", identifier = "graphics" }
 
 [[metadata.capabilities]]
 required = true
-feature = "storage"
+feature = { type = "Capability", identifier = "storage" }
