@@ -160,8 +160,10 @@ export function createCachedRegistryManager(
 
         // 2. Track seen codes per source for deletion detection
         const seenBySource = new Map<number, Set<string>>();
-        for (const { sourceIndex } of listings) {
-          seenBySource.set(sourceIndex, new Set());
+        for (const { sourceIndex, succeeded } of listings) {
+          if (succeeded) {
+            seenBySource.set(sourceIndex, new Set());
+          }
         }
 
         // 3. Process each listing result

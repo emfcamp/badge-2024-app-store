@@ -274,6 +274,32 @@ describe("deletion detection", () => {
     expect(await mgr.listApps()).toHaveLength(1);
     expect(mgr.getStatus().cacheSize).toBe(1);
   });
+
+  test("preserves app when source listing fails and listing cache is stale", async () => {
+    const app = makeApp({ id: { owner: "a", title: "alpha" } });
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "a/alpha": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+    expect(await mgr.listApps()).toHaveLength(1);
+
+    // Advance clock past TTL so listing cache is stale, then simulate GitHub being down
+    clock.now = 600_001;
+    source.list.mockRejectedValue(new Error("API down"));
+
+    await mgr.refreshAllSources();
+    expect(await mgr.listApps()).toHaveLength(1);
+    expect(mgr.getStatus().cacheSize).toBe(1);
+  });
 });
 
 // ── Listing cache ───────────────────────────────────────────
