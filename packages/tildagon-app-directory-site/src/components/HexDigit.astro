@@ -28,7 +28,7 @@ const descriptions = [
     <Icon size={26} name="openmoji:backhand-index-pointing-down" />
   </span>
   <div class="badge-container">
-    <div class="hex"></div>
+    <div class="hex" style={`--width: 67px`}></div>
     <h2>{digit}</h2>
   </div>
 </article>
@@ -42,6 +42,8 @@ const descriptions = [
     display: flex;
     flex-direction: column;
     align-items: center;
+    max-width: 80px;
+    flex: 0 1 80px;
   }
 
   .badge-container {
@@ -57,8 +59,11 @@ const descriptions = [
   }
 
   .button-indicator {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 12px;
     transform: rotate(calc(360deg / 6 * var(--digit)));
-    transform-origin: 50% 68px;
+    transform-origin: 50% calc(67px + 12px);
   }
 
   .visually-hidden:not(:focus):not(:active) {
