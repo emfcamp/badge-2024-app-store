@@ -1,6 +1,6 @@
 a {
-  color: initial;
-  text-decoration: initial;
+  color: inherit;
+  text-decoration: none;
 }
 
 .badge-colored {
