@@ -3,6 +3,26 @@ a {
   text-decoration: none;
 }
 
+@font-face {
+  font-family: Raleway;
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src:
+    url(/static/fonts/tildagon-extended.woff2) format("woff2"),
+    url(/static/fonts/tildagon-extended.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: Raleway;
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    url(/static/fonts/tildagon-extended.woff2) format("woff2"),
+    url(/static/fonts/tildagon-extended.ttf) format("truetype");
+}
+
 .badge-colored {
   background-color: var(--badge-bg, #777);
 }
