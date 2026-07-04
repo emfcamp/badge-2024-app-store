@@ -11,7 +11,7 @@ PORT = "3000"
 
 [tasks.check]
 description = "Run all checks (types, prettier, lint)"
-depends = ["check-types", "check-prettier", "check-eslint"]
+depends = ["check-types", "check-astro", "check-prettier", "check-eslint"]
 
 [tasks.test]
 description = "Run all tests"
@@ -21,6 +21,10 @@ run = "npm test"
 description = "Typecheck all packages"
 depends = ["build-library", "build-spec"]
 run = "npm run --workspaces --if-present check-types"
+
+[tasks.check-astro]
+description = "Run astro check on the site"
+run = "npm --workspace='tildagon-app-directory-site' run astro check"
 
 [tasks.build-library]
 description = "Build the tildagon-app library"
