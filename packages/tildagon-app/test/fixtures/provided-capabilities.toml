@@ -1,0 +1,18 @@
+[app]
+name = "Provided Capabilities App"
+category = "Apps"
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App that provides capabilities"
+version = "1.0.0"
+
+[[metadata.providedCapabilities]]
+type = "ProvidedCapability"
+capability = { type = "Capability", identifier = "gpio" }
+
+[[metadata.providedCapabilities]]
+type = "ProvidedCapability"
+capability = { type = "Capability", identifier = "i2c" }

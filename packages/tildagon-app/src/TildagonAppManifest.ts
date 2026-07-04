@@ -44,7 +44,7 @@ export const TildagonOSMinimumVersion = z.object({
 });
 
 export const ProvidedCapability = z.object({
-  type: "ProvidedCapability",
+  type: z.literal("ProvidedCapability"),
   capability: Capability,
 });
 
@@ -79,6 +79,7 @@ export const TildagonAppManifestSchema = z.object({
     description: z.string(),
     version: z.string(),
     capabilities: TildagonAppCapabilityAssociations.optional(),
+    providedCapabilities: z.array(ProvidedCapability).optional(),
   }),
 });
 
