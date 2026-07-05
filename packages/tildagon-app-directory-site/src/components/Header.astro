@@ -1,0 +1,84 @@
+<header role="banner">
+    <a aria-label="Electromagnetic Field" href="/" id="main-logo">
+        <img
+            id="logomark"
+            src="/static/images/brand/2026/emf2026-logo-light-clipped.svg"
+            alt=""
+        />
+        <span class="logo-line logo-line1">Electromagnetic</span>
+        <span class="logo-line logo-line2"
+            >Field <span class="brand-2026-rainbow">2026</span></span
+        >
+    </a>
+    <div id="header-text">
+        July 16<sup>th</sup>– 19<sup>th</sup> 2026
+        <br />
+        Eastnor, UK
+    </div>
+
+    <button id="menu-button" data-toggle="menu-container" aria-label="Menu">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 16 16"
+            width="28"
+            height="28"
+        >
+            <path
+                fill="white"
+                fill-rule="evenodd"
+                d="M1 2.75A.75.75 0 011.75 2h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 2.75zm0 5A.75.75 0 011.75 7h12.5a.75.75 0 110 1.5H1.75A.75.75 0 011 7.75zM1.75 12a.75.75 0 100 1.5h12.5a.75.75 0 100-1.5H1.75z"
+                style="--darkreader-inline-fill: #e8e6e3;"
+                data-darkreader-inline-fill=""
+            >
+            </path>
+        </svg>
+    </button>
+    <div id="menu-container" role="navigation" aria-label="Main">
+        <ul class="menu" role="menu">
+            <li role="presentation">
+                <a role="menuitem" href={`${import.meta.env.BASE_URL}latest`}
+                    >Latest apps</a
+                >
+            </li>
+            <li role="presentation">
+                <a role="menuitem" href={`https://tildagon.badge.emfcamp.org/`}
+                    >Documentation</a
+                >
+            </li>
+            <li role="presentation">
+                <a role="menuitem" href={`${import.meta.env.BASE_URL}`}>Apps</a>
+            </li>
+            <li role="presentation">
+                <a role="menuitem" href={`${import.meta.env.BASE_URL}github`}
+                    >GitHub</a
+                >
+            </li>
+            <li role="presentation">
+                <a
+                    role="menuitem"
+                    href={`https://tildagon.badge.emfcamp.org/tildagon-apps/publish/`}
+                    >Publish</a
+                >
+            </li>
+            <li role="presentation">
+                <a role="menuitem" href={`${import.meta.env.BASE_URL}errors`}
+                    >Errors</a
+                >
+            </li>
+            <!--
+
+            <li role="presentation">
+              <a role="menuitem" href="/cfp">Call for Participation</a>
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="/schedule/">Talks</a>
+            </li>
+
+            <li role="presentation">
+              <a role="menuitem" href="/sponsor">Sponsor</a>
+            </li> -->
+        </ul>
+    </div>
+    <div style="clear: both"></div>
+</header>
