@@ -26,3 +26,7 @@ a {
 .badge-colored {
   background-color: var(--badge-bg, #777);
 }
+
+p {
+  font-family: Raleway, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
