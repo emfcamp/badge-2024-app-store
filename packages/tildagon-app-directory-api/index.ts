@@ -32,6 +32,15 @@ function escapeXml(s: string): string {
     .replace(/'/g, "&apos;");
 }
 
+// ── Git commit hash ────────────────────────────────────────
+
+let commitSha = "unknown";
+try {
+  commitSha = readFileSync("/app/commit.txt", "utf-8").trim();
+} catch {
+  // Not running in Docker or file not found — use "unknown"
+}
+
 // ── Response cache ──────────────────────────────────────────
 
 const responseCache = createResponseCache({
@@ -184,7 +193,7 @@ api.get("/v1/health", (c) => {
 
 // GET /v1/status
 api.get("/v1/status", (c) => {
-  return c.json(CachedRegistryManager.getStatus());
+  return c.json({ ...CachedRegistryManager.getStatus(), commit: commitSha });
 });
 
 // GET /metrics

@@ -16,6 +16,9 @@ FROM node:24-alpine
 
 WORKDIR /app
 
+ARG GIT_COMMIT_SHA=unknown
+RUN echo -n "$GIT_COMMIT_SHA" > /app/commit.txt
+
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/packages ./packages
 COPY package.json ./
