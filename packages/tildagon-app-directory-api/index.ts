@@ -156,6 +156,16 @@ api.get("/v1/apps/rss", async (c) => {
   return c.body(rss);
 });
 
+// GET /v1/apps/:code/download — redirect to the tarball URL
+api.get("/v1/apps/:code/download", async (c) => {
+  const code = c.req.param("code");
+  const app = await CachedRegistryManager.getApp(code);
+  if (app.type === "success") {
+    return c.redirect(app.value.tarballUrl, 302);
+  }
+  return c.json(app.failure, 404);
+});
+
 // GET /v1/apps/:code
 api.get("/v1/apps/:code", async (c) => {
   const code = c.req.param("code");
