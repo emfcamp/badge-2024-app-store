@@ -544,6 +544,9 @@ export function createCachedRegistryManager(
         byService,
         errorCount: ErrorCache.size,
         lastRefresh: lastRefresh?.toISOString() ?? null,
+        nextRefresh: lastRefresh
+          ? new Date(lastRefresh.getTime() + refreshIntervalMs).toISOString()
+          : null,
         refreshInProgress,
       };
     },
