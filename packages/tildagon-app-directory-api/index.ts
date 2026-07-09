@@ -340,12 +340,19 @@ function streamBody(body: ReadableStream<Uint8Array>, res: ServerResponse) {
 async function main() {
   const PORT = parseInt(process.env.PORT || "3000", 10);
 
-  // Step 1: Blocking initial refresh — ensures cache is never empty
-  console.log("Running initial refresh...");
-  await CachedRegistryManager.refreshAllSources();
-  console.log(
-    `Initial refresh done. ${CachedRegistryManager.getStatus().cacheSize} apps loaded.`,
-  );
+  // Step 1: Load cache from disk (if available), then run initial refresh
+  const loadedFromDisk = CachedRegistryManager.loadFromDisk();
+  if (!loadedFromDisk) {
+    console.log("No disk cache found, running initial refresh...");
+    await CachedRegistryManager.refreshAllSources();
+    console.log(
+      `Initial refresh done. ${CachedRegistryManager.getStatus().cacheSize} apps loaded.`,
+    );
+  } else {
+    console.log(
+      `Disk cache loaded with ${CachedRegistryManager.getStatus().cacheSize} apps — skipping initial refresh.`,
+    );
+  }
 
   // Step 2: Heartbeat — clear response cache after each successful refresh
   setInterval(async () => {

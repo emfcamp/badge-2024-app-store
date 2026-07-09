@@ -11,6 +11,8 @@ import {
 import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 import {
   refreshTotal,
   refreshDuration,
@@ -56,6 +58,73 @@ export function createCachedRegistryManager(
 ) {
   const now = options?.clock ?? (() => Date.now());
   const refreshIntervalMs = options?.refreshIntervalMs ?? 600_000;
+
+  // ── Disk cache ──────────────────────────────────────────
+
+  const CACHE_DIR = process.env.CACHE_DIR || "/app/cache";
+  const CACHE_FILE = join(CACHE_DIR, "store.json");
+
+  interface DiskCacheData {
+    apps: { sourceIndex: number; app: TildagonAppRelease }[];
+    errors: { code: string; failure: RegistrySourceFailure }[];
+    lastRefresh: string | null;
+  }
+
+  function saveToDisk(): void {
+    try {
+      if (!existsSync(CACHE_DIR)) {
+        mkdirSync(CACHE_DIR, { recursive: true });
+      }
+      const data: DiskCacheData = {
+        apps: Array.from(AppCache.entries()).map(([, entry]) => ({
+          sourceIndex: entry.sourceIndex,
+          app: entry.app,
+        })),
+        errors: Array.from(ErrorCache.entries()).map(([code, failure]) => ({
+          code,
+          failure,
+        })),
+        lastRefresh: lastRefresh?.toISOString() ?? null,
+      };
+      writeFileSync(CACHE_FILE, JSON.stringify(data));
+    } catch (err) {
+      console.warn("Failed to save cache to disk:", err);
+    }
+  }
+
+  function loadFromDisk(): boolean {
+    try {
+      if (!existsSync(CACHE_FILE)) return false;
+      const raw: DiskCacheData = JSON.parse(
+        readFileSync(CACHE_FILE, "utf-8"),
+      );
+
+      for (const { sourceIndex, app } of raw.apps) {
+        try {
+          const validated = TildagonAppReleaseSchema.parse(app);
+          AppCache.set(app.code, { app: validated, sourceIndex });
+        } catch {
+          console.warn(`Skipping invalid app in disk cache: ${app.code}`);
+        }
+      }
+
+      for (const { code, failure } of raw.errors) {
+        ErrorCache.set(code, failure);
+      }
+
+      if (raw.lastRefresh) {
+        lastRefresh = new Date(raw.lastRefresh);
+      }
+
+      console.log(
+        `Loaded ${AppCache.size} apps and ${ErrorCache.size} errors from disk cache`,
+      );
+      return true;
+    } catch (err) {
+      console.warn("Failed to load cache from disk:", err);
+      return false;
+    }
+  }
 
   // TODO: Move cache to KV
   const AppCache = new Map<
@@ -266,6 +335,7 @@ export function createCachedRegistryManager(
         refreshTotal.inc({ status: "success" });
         refreshLastSuccess.set(ts / 1000);
         updateCacheMetrics();
+        saveToDisk();
       } catch (err) {
         refreshTotal.inc({ status: "failure" });
         throw err;
@@ -424,6 +494,11 @@ export function createCachedRegistryManager(
         appCacheSize.set({ service: svc }, count);
       }
       errorCacheSize.set(ErrorCache.size);
+    },
+
+    /** Load cache from disk. Returns true if a cache file was found and loaded. */
+    loadFromDisk(): boolean {
+      return loadFromDisk();
     },
   };
 }
