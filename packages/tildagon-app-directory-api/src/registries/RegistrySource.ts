@@ -68,6 +68,8 @@ export type RegistrySourceGetResult = Promise<
  * @typeParam T - Data additional to the identifier fetched during the list call
  */
 export interface RegistrySource<T = {}> {
+  /** Human-readable service name for metrics/logging (e.g. "github", "codeberg"). */
+  serviceName: string;
   /**
    * List all apps from the source
    */

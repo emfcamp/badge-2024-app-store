@@ -11,6 +11,16 @@ import {
 import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
+import {
+  refreshTotal,
+  refreshDuration,
+  refreshLastSuccess,
+  refreshInProgress as refreshInProgressGauge,
+  sourceApiRequests,
+  sourceApiDuration,
+  appCacheSize,
+  errorCacheSize,
+} from "../metrics.js";
 
 export interface AppFilters {
   category?: string;
@@ -109,7 +119,17 @@ export function createCachedRegistryManager(
     }
 
     try {
+      const getStart = Date.now();
       const appResult = await source.get(code, listingResult);
+      sourceApiDuration.observe(
+        { service: source.serviceName, operation: "get" },
+        (Date.now() - getStart) / 1000,
+      );
+      sourceApiRequests.inc({
+        service: source.serviceName,
+        operation: "get",
+        status: Result.isOk(appResult) ? "success" : "failure",
+      });
       if (Result.isOk(appResult)) {
         AppCache.set(code, {
           app: TildagonAppReleaseSchema.parse(appResult.value),
@@ -130,6 +150,19 @@ export function createCachedRegistryManager(
 
   // ── Public API ───────────────────────────────────────────
 
+  /** Update Prometheus gauges from current cache state. */
+  function updateCacheMetrics(): void {
+    const byService: Record<string, number> = {};
+    for (const [, entry] of AppCache) {
+      const svc = entry.app.id.service;
+      byService[svc] = (byService[svc] || 0) + 1;
+    }
+    for (const [svc, count] of Object.entries(byService)) {
+      appCacheSize.set({ service: svc }, count);
+    }
+    errorCacheSize.set(ErrorCache.size);
+  }
+
   return {
     /**
      * Fetch all apps from all sources and rebuild the cache.
@@ -138,7 +171,9 @@ export function createCachedRegistryManager(
     async refreshAllSources(): Promise<void> {
       if (refreshInProgress) return;
       refreshInProgress = true;
+      refreshInProgressGauge.set(1);
 
+      const refreshStart = Date.now();
       try {
         const ts = now();
 
@@ -160,10 +195,25 @@ export function createCachedRegistryManager(
             }
 
             try {
+              const listStart = Date.now();
               const results = await source.list();
+              sourceApiDuration.observe(
+                { service: source.serviceName, operation: "list" },
+                (Date.now() - listStart) / 1000,
+              );
+              sourceApiRequests.inc({
+                service: source.serviceName,
+                operation: "list",
+                status: "success",
+              });
               listingCache.set(sourceIndex, { results, fetchedAt: ts });
               return { source, sourceIndex, results, succeeded: true };
             } catch (err) {
+              sourceApiRequests.inc({
+                service: source.serviceName,
+                operation: "list",
+                status: "error",
+              });
               console.error("Source listing failed:", err);
               return { source, sourceIndex, results: [], succeeded: false };
             }
@@ -210,8 +260,18 @@ export function createCachedRegistryManager(
         }
 
         lastRefresh = new Date(ts);
+
+        // Record refresh success metrics
+        refreshDuration.observe((Date.now() - refreshStart) / 1000);
+        refreshTotal.inc({ status: "success" });
+        refreshLastSuccess.set(ts / 1000);
+        updateCacheMetrics();
+      } catch (err) {
+        refreshTotal.inc({ status: "failure" });
+        throw err;
       } finally {
         refreshInProgress = false;
+        refreshInProgressGauge.set(0);
       }
     },
 
@@ -339,12 +399,31 @@ export function createCachedRegistryManager(
     },
 
     getStatus() {
+      const byService: Record<string, number> = {};
+      for (const [, entry] of AppCache) {
+        const svc = entry.app.id.service;
+        byService[svc] = (byService[svc] || 0) + 1;
+      }
       return {
         cacheSize: AppCache.size,
+        byService,
         errorCount: ErrorCache.size,
         lastRefresh: lastRefresh?.toISOString() ?? null,
         refreshInProgress,
       };
+    },
+
+    /** Update Prometheus gauges from the current cache state. */
+    refreshCacheMetrics(): void {
+      const byService: Record<string, number> = {};
+      for (const [, entry] of AppCache) {
+        const svc = entry.app.id.service;
+        byService[svc] = (byService[svc] || 0) + 1;
+      }
+      for (const [svc, count] of Object.entries(byService)) {
+        appCacheSize.set({ service: svc }, count);
+      }
+      errorCacheSize.set(ErrorCache.size);
     },
   };
 }

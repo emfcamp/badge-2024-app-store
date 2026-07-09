@@ -25,6 +25,7 @@ async function getTildagonApp(code: string) {
 }
 
 export const DummyRegistry: RegistrySource<{}> = {
+  serviceName: "dummy",
   list: getTildagonApps,
   get: getTildagonApp,
 };

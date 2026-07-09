@@ -5,6 +5,16 @@ import { createResponseCache } from "./src/responseCache.ts";
 import { Hono } from "hono";
 import type { AppFilters } from "./src/registries/CachedRegistryManager";
 import {
+  register,
+  httpRequestsTotal,
+  httpRequestDuration,
+  responseCacheHits,
+  responseCacheMisses,
+  responseCacheBypass,
+  refreshProcessMetrics,
+  normalizeRoute,
+} from "./src/metrics.js";
+import {
   createServer,
   type IncomingMessage,
   type ServerResponse,
@@ -32,9 +42,20 @@ const responseCache = createResponseCache({
 
 const api = new Hono();
 
-// Response cache middleware — skip for health/status and during refresh
+// HTTP metrics middleware — runs first so all responses are measured
 api.use("*", async (c, next) => {
-  if (c.req.path === "/v1/health" || c.req.path === "/v1/status") {
+  const start = Date.now();
+  await next();
+  const duration = (Date.now() - start) / 1000;
+  const route = normalizeRoute(c.req.routePath || c.req.path);
+  const status = String(c.res.status);
+  httpRequestsTotal.inc({ method: c.req.method, route, status });
+  httpRequestDuration.observe({ method: c.req.method, route }, duration);
+});
+
+// Response cache middleware — skip for health/status/metrics and during refresh
+api.use("*", async (c, next) => {
+  if (c.req.path === "/v1/health" || c.req.path === "/v1/status" || c.req.path === "/metrics") {
     return next();
   }
 
@@ -42,6 +63,7 @@ api.use("*", async (c, next) => {
   // partially populated. Use a short TTL so nginx doesn't hold on to a
   // mid-refresh snapshot.
   if (CachedRegistryManager.getStatus().refreshInProgress) {
+    responseCacheBypass.inc();
     await next();
     c.header("Cache-Control", "private, max-age=5");
     return;
@@ -49,6 +71,7 @@ api.use("*", async (c, next) => {
 
   const cached = responseCache.get(c.req.url);
   if (cached) {
+    responseCacheHits.inc();
     c.header("Content-Type", cached.contentType);
     c.header("Cache-Control", `public, max-age=${cacheMaxAge()}`);
     c.status(cached.status as 200);
@@ -57,6 +80,7 @@ api.use("*", async (c, next) => {
 
   await next();
 
+  responseCacheMisses.inc();
   if (c.res.ok) {
     const body = await c.res.clone().text();
     responseCache.set(c.req.url, {
@@ -161,6 +185,14 @@ api.get("/v1/health", (c) => {
 // GET /v1/status
 api.get("/v1/status", (c) => {
   return c.json(CachedRegistryManager.getStatus());
+});
+
+// GET /metrics
+api.get("/metrics", async (c) => {
+  refreshProcessMetrics();
+  CachedRegistryManager.refreshCacheMetrics();
+  c.header("Content-Type", register.contentType);
+  return c.body(await register.metrics());
 });
 
 // ── Astro SSR ───────────────────────────────────────────────

@@ -147,6 +147,7 @@ type MetadataFromListing = {
 };
 
 export const CodebergRegistry: RegistrySource<MetadataFromListing> = {
+  serviceName: "codeberg",
   list: getTildagonApps,
   get: getTildagonApp,
 };

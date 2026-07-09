@@ -85,6 +85,7 @@ function mockSource(opts: {
   });
 
   return {
+    serviceName: "mock",
     list: listMock,
     get: getMock,
   } satisfies RegistrySource<ListingExtra>;

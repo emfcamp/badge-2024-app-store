@@ -300,6 +300,7 @@ export const GitHubRegistry: RegistrySource<{
   releaseTime: string;
   tarballUrl: string;
 }> = {
+  serviceName: "github",
   list: getTildagonApps,
   get: getTildagonApp,
 };
