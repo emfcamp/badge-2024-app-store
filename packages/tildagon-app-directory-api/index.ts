@@ -58,6 +58,7 @@ const api = new Hono();
 
 // HTTP metrics middleware — runs first so all responses are measured
 api.use("*", async (c, next) => {
+  c.header("Access-Control-Allow-Origin", "https://emulator.badge.emfcamp.org");
   c.header("X-Container-Id", containerId);
   const start = Date.now();
   await next();
@@ -66,6 +67,14 @@ api.use("*", async (c, next) => {
   const status = String(c.res.status);
   httpRequestsTotal.inc({ method: c.req.method, route, status });
   httpRequestDuration.observe({ method: c.req.method, route }, duration);
+});
+
+// CORS preflight — all API routes
+api.options("*", (c) => {
+  c.header("Access-Control-Allow-Origin", "https://emulator.badge.emfcamp.org");
+  c.header("Access-Control-Allow-Methods", "GET, OPTIONS");
+  c.header("Access-Control-Allow-Headers", "Content-Type");
+  return c.body(null, 204);
 });
 
 // Response cache middleware — skip for health/status/metrics and during refresh
