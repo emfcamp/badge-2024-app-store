@@ -59,45 +59,6 @@ api.use("*", async (c, next) => {
   }
 });
 
-// GET /v1/apps/:code
-api.get("/v1/apps/:code", async (c) => {
-  const code = c.req.param("code");
-  const app = await CachedRegistryManager.getApp(code);
-  if (app.type === "success") {
-    return c.json(app.value);
-  }
-  return c.json(app.failure, 404);
-});
-
-// GET /v1/apps
-api.get("/v1/apps", async (c) => {
-  const filters: AppFilters = {};
-  const category = c.req.query("category");
-  const author = c.req.query("author");
-  const license = c.req.query("license");
-  const service = c.req.query("service");
-  const vid = c.req.query("vid");
-  const pid = c.req.query("pid");
-  const frontboard = c.req.query("frontboard");
-  const q = c.req.query("q");
-  if (category) filters.category = category;
-  if (author) filters.author = author;
-  if (license) filters.license = license;
-  if (service) filters.service = service;
-  if (vid) filters.vid = vid;
-  if (pid) filters.pid = pid;
-  if (frontboard) filters.frontboard = frontboard;
-  if (q) filters.q = q;
-
-  const caps = c.req.queries("capability");
-  if (caps && caps.length > 0) filters.capabilities = caps;
-
-  const apps = await CachedRegistryManager.listApps(
-    Object.keys(filters).length > 0 ? filters : undefined,
-  );
-  return c.json({ items: apps, count: apps.length });
-});
-
 // GET /v1/apps/rss
 api.get("/v1/apps/rss", async (c) => {
   const apps = await CachedRegistryManager.listApps();
@@ -136,6 +97,45 @@ api.get("/v1/apps/rss", async (c) => {
 
   c.header("Content-Type", "application/rss+xml; charset=utf-8");
   return c.body(rss);
+});
+
+// GET /v1/apps/:code
+api.get("/v1/apps/:code", async (c) => {
+  const code = c.req.param("code");
+  const app = await CachedRegistryManager.getApp(code);
+  if (app.type === "success") {
+    return c.json(app.value);
+  }
+  return c.json(app.failure, 404);
+});
+
+// GET /v1/apps
+api.get("/v1/apps", async (c) => {
+  const filters: AppFilters = {};
+  const category = c.req.query("category");
+  const author = c.req.query("author");
+  const license = c.req.query("license");
+  const service = c.req.query("service");
+  const vid = c.req.query("vid");
+  const pid = c.req.query("pid");
+  const frontboard = c.req.query("frontboard");
+  const q = c.req.query("q");
+  if (category) filters.category = category;
+  if (author) filters.author = author;
+  if (license) filters.license = license;
+  if (service) filters.service = service;
+  if (vid) filters.vid = vid;
+  if (pid) filters.pid = pid;
+  if (frontboard) filters.frontboard = frontboard;
+  if (q) filters.q = q;
+
+  const caps = c.req.queries("capability");
+  if (caps && caps.length > 0) filters.capabilities = caps;
+
+  const apps = await CachedRegistryManager.listApps(
+    Object.keys(filters).length > 0 ? filters : undefined,
+  );
+  return c.json({ items: apps, count: apps.length });
 });
 
 // GET /v1/failures
