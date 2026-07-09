@@ -8,6 +8,7 @@ export interface CachedResponse {
 export interface ResponseCache {
   get(key: string): CachedResponse | null;
   set(key: string, entry: CachedResponse): void;
+  clear(): void;
 }
 
 export function createResponseCache(options: {
@@ -30,6 +31,10 @@ export function createResponseCache(options: {
 
     set(key: string, entry: CachedResponse): void {
       cache.set(key, entry);
+    },
+
+    clear(): void {
+      cache.clear();
     },
   };
 }

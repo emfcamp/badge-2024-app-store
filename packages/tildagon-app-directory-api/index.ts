@@ -32,10 +32,19 @@ const responseCache = createResponseCache({
 
 const api = new Hono();
 
-// Response cache middleware — skip for health/status
+// Response cache middleware — skip for health/status and during refresh
 api.use("*", async (c, next) => {
   if (c.req.path === "/v1/health" || c.req.path === "/v1/status") {
     return next();
+  }
+
+  // During a refresh, skip the response cache entirely — AppCache may be
+  // partially populated. Use a short TTL so nginx doesn't hold on to a
+  // mid-refresh snapshot.
+  if (CachedRegistryManager.getStatus().refreshInProgress) {
+    await next();
+    c.header("Cache-Control", "private, max-age=5");
+    return;
   }
 
   const cached = responseCache.get(c.req.url);
@@ -282,11 +291,14 @@ async function main() {
     `Initial refresh done. ${CachedRegistryManager.getStatus().cacheSize} apps loaded.`,
   );
 
-  // Step 2: Heartbeat
-  setInterval(() => {
-    CachedRegistryManager.refreshAllSources().catch((err) =>
-      console.error("Heartbeat refresh failed:", err),
-    );
+  // Step 2: Heartbeat — clear response cache after each successful refresh
+  setInterval(async () => {
+    try {
+      await CachedRegistryManager.refreshAllSources();
+      responseCache.clear();
+    } catch (err) {
+      console.error("Heartbeat refresh failed:", err);
+    }
   }, config.refreshIntervalMs);
 
   // Step 3: Load Astro SSR handler (production)
