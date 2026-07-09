@@ -22,6 +22,11 @@ import {
 import { writeFileSync, existsSync, readFileSync, statSync } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 import { Readable } from "node:stream";
+import { randomUUID } from "node:crypto";
+
+// ── Container identity ─────────────────────────────────────
+
+const containerId = randomUUID().slice(0, 8);
 
 function escapeXml(s: string): string {
   return s
@@ -53,6 +58,7 @@ const api = new Hono();
 
 // HTTP metrics middleware — runs first so all responses are measured
 api.use("*", async (c, next) => {
+  c.header("X-Container-Id", containerId);
   const start = Date.now();
   await next();
   const duration = (Date.now() - start) / 1000;
