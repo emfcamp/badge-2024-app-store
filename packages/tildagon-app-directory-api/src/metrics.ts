@@ -54,6 +54,14 @@ export const errorCacheSize = new Gauge({
   registers: [register],
 });
 
+/** Info metric — set to 1 for each app so operators can join app metadata */
+export const appInfo = new Gauge({
+  name: "app_store_app_info",
+  help: "App metadata for joining with other metrics",
+  labelNames: ["service", "app_code", "name", "author", "category"],
+  registers: [register],
+});
+
 // ── Refresh ─────────────────────────────────────────────────
 
 export const refreshTotal = new Counter({

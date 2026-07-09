@@ -24,6 +24,7 @@ import {
   sourceApiDuration,
   appCacheSize,
   errorCacheSize,
+  appInfo,
 } from "../metrics.js";
 
 export interface AppFilters {
@@ -278,6 +279,22 @@ export function createCachedRegistryManager(
       appCacheSize.set({ service: svc }, count);
     }
     errorCacheSize.set(ErrorCache.size);
+
+    // App info metric — reset and repopulate so removed apps are cleaned up
+    appInfo.reset();
+    for (const [, entry] of AppCache) {
+      const app = entry.app;
+      appInfo.set(
+        {
+          service: app.id.service,
+          app_code: app.code,
+          name: app.manifest.app.name,
+          author: app.manifest.metadata.author,
+          category: app.manifest.app.category.join(","),
+        },
+        1,
+      );
+    }
   }
 
   return {
@@ -533,15 +550,7 @@ export function createCachedRegistryManager(
 
     /** Update Prometheus gauges from the current cache state. */
     refreshCacheMetrics(): void {
-      const byService: Record<string, number> = {};
-      for (const [, entry] of AppCache) {
-        const svc = entry.app.id.service;
-        byService[svc] = (byService[svc] || 0) + 1;
-      }
-      for (const [svc, count] of Object.entries(byService)) {
-        appCacheSize.set({ service: svc }, count);
-      }
-      errorCacheSize.set(ErrorCache.size);
+      updateCacheMetrics();
     },
 
     /** Load cache from disk. Returns true if a cache file was found and loaded. */
