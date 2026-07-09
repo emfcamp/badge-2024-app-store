@@ -52,16 +52,45 @@ const DEFAULT_SOURCES: RegistrySource<any>[] =
     : [GitHubRegistry, CodebergRegistry];
 
 /**
+ * Runs `fn` over `items` with at most `concurrency` calls in flight at once,
+ * preserving the input order in the returned array.
+ */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let cursor = 0;
+
+  async function worker(): Promise<void> {
+    while (cursor < items.length) {
+      const index = cursor++;
+      results[index] = await fn(items[index]!);
+    }
+  }
+
+  const workerCount = Math.max(1, Math.min(concurrency, items.length));
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
+}
+
+/**
  * Creates a CachedRegistryManager that orchestrates listing and fetching
  * apps from the given registry sources. Sources are injected so the
  * manager can be tested with mock registries.
  */
 export function createCachedRegistryManager(
   sources: RegistrySource<any>[],
-  options?: { clock?: () => number; refreshIntervalMs?: number },
+  options?: {
+    clock?: () => number;
+    refreshIntervalMs?: number;
+    getConcurrency?: number;
+  },
 ) {
   const now = options?.clock ?? (() => Date.now());
   const refreshIntervalMs = options?.refreshIntervalMs ?? 600_000;
+  const getConcurrency = options?.getConcurrency ?? 10;
 
   // ── Disk cache ──────────────────────────────────────────
 
@@ -363,7 +392,20 @@ export function createCachedRegistryManager(
           }
         }
 
-        // 3. Process each listing result
+        // 3. Gather the apps that need a `get()` call across all sources, then
+        // fetch them in parallel (bounded by getConcurrency) instead of one
+        // at a time. Failures from the listing stage are recorded immediately
+        // since they require no further network calls.
+        const fetchJobs: {
+          code: string;
+          sourceIndex: number;
+          source: RegistrySource<any>;
+          listingResult: { id: TildagonAppReleaseIdentifier } & Record<
+            string,
+            any
+          >;
+        }[] = [];
+
         for (const { source, sourceIndex, results, succeeded } of listings) {
           if (!succeeded) continue;
           const seen = seenBySource.get(sourceIndex)!;
@@ -381,7 +423,12 @@ export function createCachedRegistryManager(
               result.value.id,
             );
             seen.add(code);
-            await safelyGetApp(code, sourceIndex, source, result.value);
+            fetchJobs.push({
+              code,
+              sourceIndex,
+              source,
+              listingResult: result.value,
+            });
           }
 
           refreshLastSuccessByService.set(
@@ -389,6 +436,10 @@ export function createCachedRegistryManager(
             ts / 1000,
           );
         }
+
+        await mapWithConcurrency(fetchJobs, getConcurrency, (job) =>
+          safelyGetApp(job.code, job.sourceIndex, job.source, job.listingResult),
+        );
 
         // 4. Delete apps whose source succeeded but no longer lists them
         for (const [code, entry] of AppCache) {
