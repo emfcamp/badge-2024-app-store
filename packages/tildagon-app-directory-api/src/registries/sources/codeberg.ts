@@ -78,66 +78,91 @@ async function getTildagonApp(
   const [key, requisites] = args;
   const { id, releaseTime, tarballUrl, releaseTag } = requisites;
 
-  let manifestResponse:
-    Awaited<ReturnType<typeof api.repos.repoGetContents>> | undefined;
+  // Fetch both manifest files to detect the ambiguous case (both exist)
+  let jsonContent: string | null = null;
+  let tomlContent: string | null = null;
+
   try {
-    manifestResponse = await api.repos.repoGetContents(
+    const jsonResp = await api.repos.repoGetContents(
+      id.owner,
+      id.title,
+      "tildagon.json",
+      { ref: releaseTag },
+    );
+    if (jsonResp.data.encoding === "base64" && jsonResp.data.content) {
+      jsonContent = Buffer.from(jsonResp.data.content, "base64").toString();
+    }
+  } catch {
+    // tildagon.json not found — fine
+  }
+
+  try {
+    const tomlResp = await api.repos.repoGetContents(
       id.owner,
       id.title,
       "tildagon.toml",
-      {
-        ref: releaseTag,
-      },
+      { ref: releaseTag },
     );
-  } catch (e) {
+    if (tomlResp.data.encoding === "base64" && tomlResp.data.content) {
+      tomlContent = Buffer.from(tomlResp.data.content, "base64").toString();
+    }
+  } catch {
+    // tildagon.toml not found — fine
+  }
+
+  // Ambiguous: both files present
+  if (jsonContent !== null && tomlContent !== null) {
     return {
       type: "failure",
       failure: {
         id,
         reason:
-          e instanceof Error
-            ? e.message
-            : "Failed to retrieve manifest from release",
+          "Both tildagon.json and tildagon.toml found — only one manifest file is allowed",
       },
     };
   }
 
-  if (manifestResponse.data.encoding != "base64") {
+  // Neither file found
+  if (jsonContent === null && tomlContent === null) {
     return {
       type: "failure",
       failure: {
         id,
-        reason: `tildagon.toml returned in unexpected format ${manifestResponse.data.encoding}`,
+        reason: "No tildagon.json or tildagon.toml file found",
       },
     };
   }
 
-  if (!manifestResponse.data.content) {
+  // Prefer JSON, fall back to TOML
+  const content = jsonContent ?? tomlContent!;
+  const format = jsonContent !== null ? "json" : "toml";
+
+  try {
+    const parsed =
+      format === "json" ? JSON.parse(content) : TOML.parse(content);
+    const manifest = TildagonAppManifestSchema.safeParse(parsed);
+
+    if (manifest.error) {
+      return { type: "failure", failure: { id, reason: manifest.error.message } };
+    }
+
+    const appRelease: TildagonAppRelease = {
+      code: key,
+      id: id,
+      releaseTime,
+      tarballUrl,
+      manifest: manifest.data!,
+    };
+    return Result.Ok(appRelease);
+  } catch {
     return {
       type: "failure",
       failure: {
         id,
-        reason: "tildagon.toml was empty",
+        reason: `Failed to parse contents of tildagon.${format}`,
       },
     };
   }
-
-  const manifest = TildagonAppManifestSchema.safeParse(
-    TOML.parse(Buffer.from(manifestResponse.data.content, "base64").toString()),
-  );
-
-  if (manifest.error) {
-    return { type: "failure", failure: { id, reason: manifest.error.message } };
-  }
-
-  const appRelease: TildagonAppRelease = {
-    code: key,
-    id: id,
-    releaseTime,
-    tarballUrl,
-    manifest: manifest.data!,
-  };
-  return Result.Ok(appRelease);
 }
 
 type MetadataFromListing = {

@@ -234,63 +234,105 @@ async function getTildagonApp(
   code: string,
   found: Omit<TildagonAppRelease, "manifest">,
 ): Promise<Result<TildagonAppRelease, RegistrySourceFailure>> {
+  console.log(`Making GitHub Single App Query ${code}`);
+
+  // Fetch both manifest files to detect the ambiguous case (both exist)
+  const opts = {
+    ...(found.id.releaseHash ? { ref: found.id.releaseHash } : {}),
+    owner: found.id.owner,
+    repo: found.id.title,
+  };
+
+  let jsonContent: string | null = null;
+  let tomlContent: string | null = null;
+
   try {
-    console.log(`Making GitHub Single App Query ${code}`);
-    const response = await octokit.rest.repos.getContent({
-      ...(found.id.releaseHash ? { ref: found.id.releaseHash } : {}),
-      owner: found.id.owner,
-      repo: found.id.title,
+    const jsonResp = await octokit.rest.repos.getContent({
+      ...opts,
+      path: "tildagon.json",
+    });
+    if (
+      jsonResp.status === 200 &&
+      !Array.isArray(jsonResp.data) &&
+      jsonResp.data.type === "file"
+    ) {
+      jsonContent = Buffer.from(jsonResp.data.content, "base64").toString();
+    }
+  } catch {
+    // tildagon.json not found — fine
+  }
+
+  try {
+    const tomlResp = await octokit.rest.repos.getContent({
+      ...opts,
       path: "tildagon.toml",
     });
-
     if (
-      response.status === 200 &&
-      !Array.isArray(response.data) &&
-      response.data.type === "file"
+      tomlResp.status === 200 &&
+      !Array.isArray(tomlResp.data) &&
+      tomlResp.data.type === "file"
     ) {
-      try {
-        const content = Buffer.from(response.data.content, "base64").toString();
+      tomlContent = Buffer.from(tomlResp.data.content, "base64").toString();
+    }
+  } catch {
+    // tildagon.toml not found — fine
+  }
 
-        const app = TildagonAppManifestSchema.safeParse(TOML.parse(content));
+  // Ambiguous: both files present
+  if (jsonContent !== null && tomlContent !== null) {
+    return {
+      type: "failure",
+      failure: {
+        id: found.id,
+        reason:
+          "Both tildagon.json and tildagon.toml found — only one manifest file is allowed",
+      },
+    };
+  }
 
-        if (!app.success) {
-          return {
-            type: "failure",
-            failure: { id: found.id, reason: app.error.message },
-          };
-        }
+  // Neither file found
+  if (jsonContent === null && tomlContent === null) {
+    return {
+      type: "failure",
+      failure: {
+        id: found.id,
+        reason: "No tildagon.json or tildagon.toml file found",
+      },
+    };
+  }
 
-        return {
-          type: "success",
-          value: {
-            code,
-            id: found.id,
-            releaseTime: found.releaseTime,
-            tarballUrl: found.tarballUrl,
-            manifest: app.data,
-          },
-        };
-      } catch (_e) {
-        return {
-          type: "failure",
-          failure: {
-            id: found.id,
-            reason: "Failed to parse contents of tildagon.toml",
-          },
-        };
-      }
+  // Prefer JSON, fall back to TOML
+  const content = jsonContent ?? tomlContent!;
+  const format = jsonContent !== null ? "json" : "toml";
+
+  try {
+    const parsed =
+      format === "json" ? JSON.parse(content) : TOML.parse(content);
+    const app = TildagonAppManifestSchema.safeParse(parsed);
+
+    if (!app.success) {
+      return {
+        type: "failure",
+        failure: { id: found.id, reason: app.error.message },
+      };
     }
 
     return {
-      type: "failure",
-      failure: { id: found.id, reason: "No tildagon.toml file found" },
+      type: "success",
+      value: {
+        code,
+        id: found.id,
+        releaseTime: found.releaseTime,
+        tarballUrl: found.tarballUrl,
+        manifest: app.data,
+      },
     };
   } catch (_e) {
     return {
       type: "failure",
       failure: {
         id: found.id,
-        reason: "GitHub says there's no repository content",
+        reason: `Failed to parse contents of tildagon.${format}`,
       },
     };
   }
