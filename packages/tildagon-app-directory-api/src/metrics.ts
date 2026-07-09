@@ -113,6 +113,20 @@ export const heapBytesUsed = new Gauge({
   registers: [register],
 });
 
+// ── Downloads ───────────────────────────────────────────────
+
+/**
+ * Incremented each time the /v1/apps/:code/download endpoint is hit,
+ * regardless of whether the tarball is cached or redirected to origin.
+ * Labels: service (github/codeberg), app_code.
+ */
+export const downloadsTotal = new Counter({
+  name: "app_store_downloads_total",
+  help: "Total app download requests",
+  labelNames: ["service", "app_code"],
+  registers: [register],
+});
+
 // ── Helpers ─────────────────────────────────────────────────
 
 /** Update process-level gauges (call before serving /metrics). */

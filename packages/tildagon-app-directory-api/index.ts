@@ -13,15 +13,17 @@ import {
   responseCacheBypass,
   refreshProcessMetrics,
   normalizeRoute,
+  downloadsTotal,
 } from "./src/metrics.js";
 import {
   createServer,
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { writeFileSync, existsSync, readFileSync, statSync } from "node:fs";
+import { writeFileSync, existsSync, readFileSync, statSync, createReadStream } from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { randomUUID } from "node:crypto";
 
 // ── Container identity ─────────────────────────────────────
@@ -79,7 +81,7 @@ api.options("*", (c) => {
 
 // Response cache middleware — skip for health/status/metrics and during refresh
 api.use("*", async (c, next) => {
-  if (c.req.path === "/v1/health" || c.req.path === "/v1/status" || c.req.path === "/metrics") {
+  if (c.req.path === "/v1/health" || c.req.path === "/v1/status" || c.req.path === "/metrics" || c.req.path.startsWith("/v1/tarballs")) {
     return next();
   }
 
@@ -156,14 +158,27 @@ api.get("/v1/apps/rss", async (c) => {
   return c.body(rss);
 });
 
-// GET /v1/apps/:code/download — redirect to the tarball URL
+// GET /v1/apps/:code/download — count + redirect to tarball (cached or origin)
 api.get("/v1/apps/:code/download", async (c) => {
   const code = c.req.param("code");
   const app = await CachedRegistryManager.getApp(code);
-  if (app.type === "success") {
-    return c.redirect(app.value.tarballUrl, 302);
+  if (app.type !== "success") {
+    return c.json(app.failure, 404);
   }
-  return c.json(app.failure, 404);
+
+  downloadsTotal.inc({
+    service: app.value.id.service,
+    app_code: code,
+  });
+
+  // Serve from disk cache if available
+  if (CachedRegistryManager.hasCachedTarball(code)) {
+    return c.redirect(`/v1/tarballs/${code}.tar.gz`, 302);
+  }
+
+  // Redirect to origin and start background download
+  CachedRegistryManager.downloadTarball(code, app.value.tarballUrl);
+  return c.redirect(app.value.tarballUrl, 302);
 });
 
 // GET /v1/apps/:code
@@ -219,6 +234,19 @@ api.get("/v1/health", (c) => {
 // GET /v1/status
 api.get("/v1/status", (c) => {
   return c.json({ ...CachedRegistryManager.getStatus(), commit: commitSha });
+});
+
+// GET /v1/tarballs/:filename — serve cached tarballs from disk
+api.get("/v1/tarballs/:filename", (c) => {
+  const filename = c.req.param("filename");
+  const code = filename.replace(/\.tar\.gz$/, "");
+  const path = CachedRegistryManager.getCachedTarballPath(code);
+  if (!existsSync(path)) {
+    return c.notFound();
+  }
+  c.header("Content-Type", "application/gzip");
+  c.header("Cache-Control", "public, max-age=31536000, immutable");
+  return c.body(Readable.toWeb(createReadStream(path)) as ReadableStream);
 });
 
 // GET /metrics

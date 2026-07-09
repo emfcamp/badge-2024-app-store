@@ -11,8 +11,10 @@ import {
 import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
+import { writeFileSync, readFileSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
+import { createWriteStream } from "node:fs";
+import { pipeline } from "node:stream/promises";
 import {
   refreshTotal,
   refreshDuration,
@@ -63,6 +65,7 @@ export function createCachedRegistryManager(
 
   const CACHE_DIR = process.env.CACHE_DIR || "/app/cache";
   const CACHE_FILE = join(CACHE_DIR, "store.json");
+  const TARBALL_DIR = join(CACHE_DIR, "tarballs");
 
   interface DiskCacheData {
     apps: { sourceIndex: number; app: TildagonAppRelease }[];
@@ -126,6 +129,46 @@ export function createCachedRegistryManager(
     }
   }
 
+  // ── Tarball cache ───────────────────────────────────────
+
+  function tarballPath(code: string): string {
+    return join(TARBALL_DIR, `${code}.tar.gz`);
+  }
+
+  function isTarballCached(code: string): boolean {
+    return existsSync(tarballPath(code));
+  }
+
+  function invalidateTarball(code: string): void {
+    const path = tarballPath(code);
+    if (existsSync(path)) {
+      try {
+        unlinkSync(path);
+      } catch (err) {
+        console.warn(`Failed to delete cached tarball ${code}:`, err);
+      }
+    }
+  }
+
+  async function fetchAndCacheTarball(
+    code: string,
+    url: string,
+  ): Promise<void> {
+    try {
+      if (!existsSync(TARBALL_DIR)) {
+        mkdirSync(TARBALL_DIR, { recursive: true });
+      }
+      const response = await fetch(url);
+      if (!response.ok || !response.body) {
+        throw new Error(`Fetch failed: ${response.status}`);
+      }
+      const dest = tarballPath(code);
+      await pipeline(response.body, createWriteStream(dest));
+    } catch (err) {
+      console.warn(`Failed to cache tarball for ${code}:`, err);
+    }
+  }
+
   // TODO: Move cache to KV
   const AppCache = new Map<
     string,
@@ -185,6 +228,11 @@ export function createCachedRegistryManager(
     const cached = AppCache.get(code);
     if (cached && equal(cached.app.id, listingResult.id)) {
       return;
+    }
+
+    // New release — invalidate old cached tarball
+    if (cached) {
+      invalidateTarball(code);
     }
 
     try {
@@ -499,6 +547,21 @@ export function createCachedRegistryManager(
     /** Load cache from disk. Returns true if a cache file was found and loaded. */
     loadFromDisk(): boolean {
       return loadFromDisk();
+    },
+
+    /** Check if a tarball is cached on disk for the given app code. */
+    hasCachedTarball(code: string): boolean {
+      return isTarballCached(code);
+    },
+
+    /** Get the filesystem path to a cached tarball. */
+    getCachedTarballPath(code: string): string {
+      return tarballPath(code);
+    },
+
+    /** Download a tarball from a URL and cache it on disk (fire-and-forget). */
+    downloadTarball(code: string, url: string): void {
+      fetchAndCacheTarball(code, url);
     },
   };
 }
