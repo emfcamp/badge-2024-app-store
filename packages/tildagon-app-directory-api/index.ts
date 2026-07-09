@@ -38,7 +38,7 @@ api.use("*", async (c, next) => {
     return next();
   }
 
-  const cached = responseCache.get(c.req.path);
+  const cached = responseCache.get(c.req.url);
   if (cached) {
     c.header("Content-Type", cached.contentType);
     c.header("Cache-Control", `public, max-age=${cacheMaxAge()}`);
@@ -50,7 +50,7 @@ api.use("*", async (c, next) => {
 
   if (c.res.ok) {
     const body = await c.res.clone().text();
-    responseCache.set(c.req.path, {
+    responseCache.set(c.req.url, {
       body,
       contentType: c.res.headers.get("Content-Type") || "application/json",
       status: c.res.status,
