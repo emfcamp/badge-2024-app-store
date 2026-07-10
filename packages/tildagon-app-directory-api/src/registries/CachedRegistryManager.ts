@@ -19,6 +19,7 @@ import {
   refreshTotal,
   refreshDuration,
   refreshLastSuccess,
+  refreshLastSuccessByService,
   refreshInProgress as refreshInProgressGauge,
   sourceApiRequests,
   sourceApiDuration,
@@ -382,6 +383,11 @@ export function createCachedRegistryManager(
             seen.add(code);
             await safelyGetApp(code, sourceIndex, source, result.value);
           }
+
+          refreshLastSuccessByService.set(
+            { service: source.serviceName },
+            ts / 1000,
+          );
         }
 
         // 4. Delete apps whose source succeeded but no longer lists them

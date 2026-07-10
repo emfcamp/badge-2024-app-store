@@ -84,6 +84,13 @@ export const refreshLastSuccess = new Gauge({
   registers: [register],
 });
 
+export const refreshLastSuccessByService = new Gauge({
+  name: "app_store_refresh_last_success_by_service_timestamp_seconds",
+  help: "Unix timestamp of the last successful refresh per registry source",
+  labelNames: ["service"],
+  registers: [register],
+});
+
 export const refreshInProgress = new Gauge({
   name: "app_store_refresh_in_progress",
   help: "1 if a refresh is currently running, 0 otherwise",
