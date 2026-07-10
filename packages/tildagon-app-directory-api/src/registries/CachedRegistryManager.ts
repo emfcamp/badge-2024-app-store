@@ -11,7 +11,13 @@ import {
 import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
-import { writeFileSync, readFileSync, existsSync, mkdirSync, unlinkSync } from "node:fs";
+import {
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  mkdirSync,
+  unlinkSync,
+} from "node:fs";
 import { join } from "node:path";
 import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
@@ -129,9 +135,7 @@ export function createCachedRegistryManager(
   function loadFromDisk(): boolean {
     try {
       if (!existsSync(CACHE_FILE)) return false;
-      const raw: DiskCacheData = JSON.parse(
-        readFileSync(CACHE_FILE, "utf-8"),
-      );
+      const raw: DiskCacheData = JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
 
       for (const { sourceIndex, app } of raw.apps) {
         try {
@@ -438,7 +442,12 @@ export function createCachedRegistryManager(
         }
 
         await mapWithConcurrency(fetchJobs, getConcurrency, (job) =>
-          safelyGetApp(job.code, job.sourceIndex, job.source, job.listingResult),
+          safelyGetApp(
+            job.code,
+            job.sourceIndex,
+            job.source,
+            job.listingResult,
+          ),
         );
 
         // 4. Delete apps whose source succeeded but no longer lists them

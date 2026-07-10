@@ -143,7 +143,10 @@ async function getTildagonApp(
     const manifest = TildagonAppManifestSchema.safeParse(parsed);
 
     if (manifest.error) {
-      return { type: "failure", failure: { id, reason: manifest.error.message } };
+      return {
+        type: "failure",
+        failure: { id, reason: manifest.error.message },
+      };
     }
 
     const appRelease: TildagonAppRelease = {
