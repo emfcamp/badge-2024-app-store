@@ -330,7 +330,7 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse) {
   const url = new URL(req.url!, `http://${req.headers.host}`);
 
   // API routes → Hono
-  if (url.pathname.startsWith("/v1")) {
+  if (url.pathname.startsWith("/v1") || url.pathname === "/metrics") {
     const webRes = await api.fetch(
       new Request(url, {
         method: req.method,
