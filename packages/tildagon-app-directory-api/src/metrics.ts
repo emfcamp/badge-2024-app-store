@@ -97,6 +97,13 @@ export const refreshInProgress = new Gauge({
   registers: [register],
 });
 
+export const refreshAppsUpdated = new Gauge({
+  name: "app_store_refresh_apps_updated",
+  help: "Number of apps whose release was newly fetched or updated in the most recent refresh",
+  labelNames: ["service"],
+  registers: [register],
+});
+
 // ── Source API calls ────────────────────────────────────────
 
 export const sourceApiRequests = new Counter({

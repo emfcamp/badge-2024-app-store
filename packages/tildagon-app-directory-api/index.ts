@@ -396,7 +396,10 @@ function streamBody(body: ReadableStream<Uint8Array>, res: ServerResponse) {
 async function main() {
   const PORT = parseInt(process.env.PORT || "3000", 10);
 
-  // Step 1: Load cache from disk (if available), then run initial refresh
+  // Step 1: Load cache from disk (if available), then run initial refresh.
+  // If a disk cache exists, serve from it immediately while doing the initial
+  // fetch in the background (cold start with stale data, then warm up).
+  // If no disk cache exists, block until the initial fetch completes.
   const loadedFromDisk = CachedRegistryManager.loadFromDisk();
   if (!loadedFromDisk) {
     console.log("No disk cache found, running initial refresh...");
@@ -406,7 +409,11 @@ async function main() {
     );
   } else {
     console.log(
-      `Disk cache loaded with ${CachedRegistryManager.getStatus().cacheSize} apps — skipping initial refresh.`,
+      `Disk cache loaded with ${CachedRegistryManager.getStatus().cacheSize} apps — starting background refresh.`,
+    );
+    // Fire-and-forget: serve stale data now, warm up in the background
+    CachedRegistryManager.refreshAllSources().catch((err) =>
+      console.error("Background refresh after disk cache load failed:", err),
     );
   }
 

@@ -27,6 +27,7 @@ import {
   refreshLastSuccess,
   refreshLastSuccessByService,
   refreshInProgress as refreshInProgressGauge,
+  refreshAppsUpdated,
   sourceApiRequests,
   sourceApiDuration,
   appCacheSize,
@@ -223,6 +224,9 @@ export function createCachedRegistryManager(
   let refreshInProgress = false;
   let lastRefresh: Date | null = null;
 
+  /** Per-service count of apps newly added/updated during the current refresh. */
+  const refreshUpdateCounts = new Map<string, number>();
+
   // ── Helpers ──────────────────────────────────────────────
 
   function isStale(): boolean {
@@ -264,6 +268,10 @@ export function createCachedRegistryManager(
     if (cached && equal(cached.app.id, listingResult.id)) {
       return;
     }
+
+    // This app needs fetching — track it for metrics
+    const svc = source.serviceName;
+    refreshUpdateCounts.set(svc, (refreshUpdateCounts.get(svc) || 0) + 1);
 
     // New release — invalidate old cached tarball
     if (cached) {
@@ -465,6 +473,14 @@ export function createCachedRegistryManager(
         refreshDuration.observe((Date.now() - refreshStart) / 1000);
         refreshTotal.inc({ status: "success" });
         refreshLastSuccess.set(ts / 1000);
+
+        // Emit per-service app-update counts and reset for next refresh
+        refreshAppsUpdated.reset();
+        for (const [svc, count] of refreshUpdateCounts) {
+          refreshAppsUpdated.set({ service: svc }, count);
+        }
+        refreshUpdateCounts.clear();
+
         updateCacheMetrics();
         saveToDisk();
       } catch (err) {
