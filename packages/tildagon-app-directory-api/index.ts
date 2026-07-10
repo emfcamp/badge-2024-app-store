@@ -21,7 +21,13 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { writeFileSync, existsSync, readFileSync, statSync, createReadStream } from "node:fs";
+import {
+  writeFileSync,
+  existsSync,
+  readFileSync,
+  statSync,
+  createReadStream,
+} from "node:fs";
 import { extname, join, normalize, resolve } from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
@@ -109,7 +115,12 @@ api.options("*", (c) => {
 
 // Response cache middleware — skip for health/status/metrics and during refresh
 api.use("*", async (c, next) => {
-  if (c.req.path === "/v1/health" || c.req.path === "/v1/status" || c.req.path === "/metrics" || c.req.path.startsWith("/v1/tarballs")) {
+  if (
+    c.req.path === "/v1/health" ||
+    c.req.path === "/v1/status" ||
+    c.req.path === "/metrics" ||
+    c.req.path.startsWith("/v1/tarballs")
+  ) {
     return next();
   }
 
