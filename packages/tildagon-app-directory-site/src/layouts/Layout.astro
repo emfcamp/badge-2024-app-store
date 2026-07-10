@@ -5,16 +5,28 @@ import "../styles/global.css";
 
 interface Props {
   title: string;
+  description?: string;
+  ogUrl?: string;
+  ogType?: string;
 }
 
-const { title } = Astro.props;
+const { title, description, ogUrl, ogType } = Astro.props;
+const ogDescription = description ?? "Tildagon App Directory — browse apps for your EMF Camp badge";
+const url = ogUrl ?? Astro.url.href;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Tildagon App Directory" />
+    <meta name="description" content={ogDescription} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={ogDescription} />
+    <meta property="og:url" content={url} />
+    <meta property="og:type" content={ogType ?? "website"} />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={ogDescription} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link

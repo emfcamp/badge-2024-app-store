@@ -11,7 +11,10 @@ const copy = {
 };
 ---
 
-<Layout title={copy.title}>
+<Layout
+  title="Tildagon App Directory"
+  description={`Browse ${data.length} apps for your Tildagon badge at EMF Camp`}
+>
   <main class="col-md-12">
     <h1>{copy.title}</h1>
     <AppsListing data={data} />

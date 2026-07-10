@@ -10,10 +10,6 @@ author = decodeURIComponent(author!);
 
 const data = await CachedRegistryManager.listApps();
 
-const copy = {
-  title: "Tildagon App Directory",
-};
-
 export const getStaticPaths = (async () => {
   const data = await CachedRegistryManager.listApps();
 
@@ -27,7 +23,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 ---
 
-<Layout title={copy.title}>
+<Layout title={`Apps by ${author} — Tildagon App Store`} description={`Browse apps by ${author} on the Tildagon App Store`}>
   <main class="col-md-12">
     <a href="/">&#8592; All apps</a>
     <h1>Apps by: {author}</h1>

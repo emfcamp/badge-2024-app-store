@@ -36,7 +36,11 @@ export async function getStaticPaths() {
 }
 ---
 
-<Layout title="Tildagon App Directory">
+<Layout
+  title={`${data.manifest.app.name} — Tildagon App Store`}
+  description={`${data.manifest.app.name} by ${data.manifest.metadata.author}. ${data.manifest.metadata.description}`}
+  ogType="article"
+>
   <main class="col-md-12">
     <h1 class="manifest-name">{data.manifest.app.name}</h1>
     <h2>Description</h2>
