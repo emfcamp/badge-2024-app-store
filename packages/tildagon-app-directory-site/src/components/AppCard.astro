@@ -16,10 +16,10 @@ const { name, category } = release.manifest.app;
 <a href={`${import.meta.env.BASE_URL}apps/${code}`}>
   <article style={{ "--badge-bg": CategoryColors[category[0]!] }}>
     <div class="panel-heading">
-      <h4>{name}</h4>
+      <h4 class="manifest-name">{name}</h4>
     </div>
     <div class="panel-body">
-      <p>
+      <p class="manifest-description">
         {description}
       </p>
       <span class="badge"><b>Author:</b> {author}</span>

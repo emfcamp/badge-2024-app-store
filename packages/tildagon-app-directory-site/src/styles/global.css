@@ -4,7 +4,7 @@ a {
 }
 
 @font-face {
-  font-family: Raleway;
+  font-family: "Tildagon Extended";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -14,13 +14,20 @@ a {
 }
 
 @font-face {
-  font-family: Raleway;
+  font-family: "Tildagon Extended";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
   src:
     url(/static/fonts/tildagon-extended.woff2) format("woff2"),
     url(/static/fonts/tildagon-extended.ttf) format("truetype");
+}
+
+/* Apply extended font only to manifest-sourced text */
+.manifest-name,
+.manifest-description,
+.manifest-author {
+  font-family: "Tildagon Extended", "Raleway", sans-serif;
 }
 
 .badge-colored {
