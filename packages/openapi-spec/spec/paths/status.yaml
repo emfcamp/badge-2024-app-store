@@ -1,0 +1,40 @@
+get:
+  summary: Cache and server status
+  operationId: status
+  tags:
+    - Monitoring
+  responses:
+    "200":
+      description: Current cache state and build info
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              cacheSize:
+                type: integer
+                description: Number of apps in the cache
+              errorCount:
+                type: integer
+                description: Number of apps in the error cache
+              byService:
+                type: object
+                description: App count broken down by registry service
+                additionalProperties:
+                  type: integer
+              lastRefresh:
+                type: string
+                format: date-time
+                nullable: true
+                description: When the last refresh completed
+              nextRefresh:
+                type: string
+                format: date-time
+                nullable: true
+                description: When the next heartbeat refresh will fire
+              refreshInProgress:
+                type: boolean
+                description: Whether a refresh is currently running
+              commit:
+                type: string
+                description: Git commit SHA of the running build

@@ -6,7 +6,19 @@ info:
 paths:
   /v1/apps:
     $ref: "./paths/listApps.yaml"
+  /v1/apps/rss:
+    $ref: "./paths/listAppsRss.yaml"
   /v1/apps/{appId}:
     $ref: "./paths/appById.yaml"
+  /v1/apps/{appId}/download:
+    $ref: "./paths/downloadApp.yaml"
+  /v1/tarballs/{filename}:
+    $ref: "./paths/serveTarball.yaml"
   /v1/failures:
     $ref: "./paths/listFailures.yaml"
+  /v1/health:
+    $ref: "./paths/health.yaml"
+  /v1/status:
+    $ref: "./paths/status.yaml"
+  /metrics:
+    $ref: "./paths/metrics.yaml"

@@ -1,0 +1,21 @@
+get:
+  summary: Download an app tarball
+  operationId: downloadApp
+  tags:
+    - Apps
+  parameters:
+    - name: appId
+      in: path
+      required: true
+      description: The app code
+      schema:
+        type: string
+  responses:
+    "302":
+      description: Redirect to the tarball URL (cached locally or from the origin)
+    "404":
+      description: App not found
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/monitoring/ReleaseFailure.yaml"

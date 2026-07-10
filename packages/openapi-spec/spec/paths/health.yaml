@@ -1,0 +1,19 @@
+get:
+  summary: Health check
+  operationId: health
+  tags:
+    - Monitoring
+  responses:
+    "200":
+      description: Server is healthy
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "ok"
+              uptime:
+                type: number
+                description: Process uptime in seconds

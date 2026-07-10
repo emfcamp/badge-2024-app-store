@@ -1,0 +1,12 @@
+get:
+  summary: Prometheus metrics
+  operationId: metrics
+  tags:
+    - Monitoring
+  responses:
+    "200":
+      description: Prometheus text-format metrics
+      content:
+        text/plain:
+          schema:
+            type: string

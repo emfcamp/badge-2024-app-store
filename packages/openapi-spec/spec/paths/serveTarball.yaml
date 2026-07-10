@@ -1,0 +1,22 @@
+get:
+  summary: Serve a cached tarball file
+  operationId: serveTarball
+  tags:
+    - Apps
+  parameters:
+    - name: filename
+      in: path
+      required: true
+      description: Tarball filename (e.g. 12345678.tar.gz)
+      schema:
+        type: string
+  responses:
+    "200":
+      description: The tarball file
+      content:
+        application/gzip:
+          schema:
+            type: string
+            format: binary
+    "404":
+      description: Tarball not found in cache

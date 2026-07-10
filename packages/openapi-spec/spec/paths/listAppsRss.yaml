@@ -1,0 +1,12 @@
+get:
+  summary: RSS feed of latest apps
+  operationId: appRss
+  tags:
+    - Apps
+  responses:
+    "200":
+      description: RSS 2.0 feed of the 50 most recent apps
+      content:
+        application/rss+xml:
+          schema:
+            type: string

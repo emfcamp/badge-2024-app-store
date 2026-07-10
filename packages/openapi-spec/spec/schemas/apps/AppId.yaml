@@ -12,10 +12,9 @@ properties:
     description: "The title of the app"
     type: string
   releaseHash:
-    description: "The unique hash of the app build bundle"
+    description: "The unique hash of the app build bundle. May be absent for release failures."
     type: string
 required:
   - "service"
   - "owner"
   - "title"
-  - "releaseHash"

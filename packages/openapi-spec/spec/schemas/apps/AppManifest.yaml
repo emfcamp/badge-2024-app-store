@@ -1,5 +1,5 @@
 title: AppManifest
-description: The author provided app manifest
+description: The author-provided app manifest (tildagon.toml or tildagon.json)
 properties:
   app:
     type: object
@@ -9,8 +9,18 @@ properties:
         type: string
         description: The name of the app
       category:
-        type: string
-        description: The category of the app
+        type: array
+        description: One or more categories for the app
+        items:
+          type: string
+          enum:
+            - Badge
+            - Music
+            - Media
+            - Apps
+            - Games
+            - Background
+            - Pattern
     required:
       - name
       - category
@@ -33,6 +43,14 @@ properties:
       version:
         type: string
         description: The version of the app
+      capabilities:
+        type: array
+        description: Hardware capabilities required or provided by this app
+        items:
+          type: object
+          properties:
+            feature:
+              description: A string capability name, or a hexpansion/frontboard identifier
     required:
       - author
       - license
