@@ -28,6 +28,25 @@ function urlLooksSuspicious(url: string): boolean {
 
 const showSourceUrlWarning = urlLooksSuspicious(data.manifest.metadata.url);
 
+function capabilityLabel(feature: any): { label: string; filter: string } | null {
+  if (feature.type === "Capability") {
+    return { label: feature.identifier, filter: `capability=${encodeURIComponent(feature.identifier)}` };
+  }
+  if (feature.type === "Hexpansion") {
+    const { vid, pid, name } = feature.identifier;
+    return { label: name || `VID:${vid} PID:${pid}`, filter: `vid=${encodeURIComponent(vid)}&pid=${encodeURIComponent(pid)}` };
+  }
+  if (typeof feature.type === "string" && feature.type.includes("Frontboard")) {
+    return { label: feature.type, filter: `frontboard=${encodeURIComponent(feature.type)}` };
+  }
+  return null;
+}
+
+const capabilities = data.manifest.metadata.capabilities ?? [];
+const required = capabilities.filter((c) => c.required);
+const optional = capabilities.filter((c) => !c.required);
+const provided = data.manifest.metadata.providedCapabilities ?? [];
+
 export async function getStaticPaths() {
   const apps = await CachedRegistryManager.listApps();
   return apps.map((app: any) => ({
@@ -77,24 +96,89 @@ export async function getStaticPaths() {
         <span class="badge"
           >Last Updated: {new Date(data.releaseTime).toLocaleDateString()}</span
         >
-        <li>
-          <span class="badge"
-            >Source Code Repository: <a href={data.manifest.metadata.url}
-              >{data.manifest.metadata.url}</a
-            >
-          </span>
-          {showSourceUrlWarning && (
-            <Alert kind="warning">
-              This app's source code URL looks like a placeholder (e.g.
-              "github.com/username/[app]"). The author should update the{" "}
-              <code>url</code> field in their{" "}
-              <code>tildagon.toml</code> to point to the actual repository.
-            </Alert>
-          )}
-        </li>
       </li>
-    </ul>
-    <h2>Try it out</h2>
+      <li>
+        <span class="badge"
+          >Source Code Repository: <a href={data.manifest.metadata.url}
+            >{data.manifest.metadata.url}</a
+          >
+        </span>
+        {showSourceUrlWarning && (
+          <Alert kind="warning">
+            This app's source code URL looks like a placeholder (e.g.
+            "github.com/username/[app]"). The author should update the{" "}
+            <code>url</code> field in their{" "}
+            <code>tildagon.toml</code> to point to the actual repository.
+          </Alert>
+        )}
+      </li>
+      </ul>
+    </li>
+  </ul>
+  {
+    capabilities.length > 0 && (
+      <div>
+        <h2>Hardware Capabilities</h2>
+        {required.length > 0 && (
+          <>
+            <h3>Required</h3>
+            <ul>
+              {required.map((c) => {
+                const info = capabilityLabel(c.feature);
+                return (
+                  <li>
+                    <span class="badge"
+                      >{info?.filter ? (
+                        <a href={`/?${info.filter}`}>{info.label}</a>
+                      ) : (
+                        info?.label ?? "Unknown"
+                      )}</span
+                    >
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+        {optional.length > 0 && (
+          <>
+            <h3>Optional</h3>
+            <ul>
+              {optional.map((c) => {
+                const info = capabilityLabel(c.feature);
+                return (
+                  <li>
+                    <span class="badge"
+                      >{info?.filter ? (
+                        <a href={`/?${info.filter}`}>{info.label}</a>
+                      ) : (
+                        info?.label ?? "Unknown"
+                      )}</span
+                    >
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+      </div>
+    )
+  }
+  {
+    provided.length > 0 && (
+      <div>
+        <h2>Provided Capabilities</h2>
+        <ul>
+          {provided.map((p) => (
+            <li>
+              <span class="badge">{p.capability.identifier}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+  <h2>Try it out</h2>
     <a class="btn btn-primary emulator-btn"
       href={`https://emulator.badge.emfcamp.org/#${data.manifest.app.category[0]}/${data.manifest.app.name}`}
       target="_blank">

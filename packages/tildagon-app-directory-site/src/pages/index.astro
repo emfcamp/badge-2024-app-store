@@ -3,8 +3,34 @@ import Layout from "../layouts/Layout.astro";
 import Alert from "../components/Alert.astro";
 import AppsListing from "../components/AppsListing.astro";
 import { CachedRegistryManager } from "tildagon-app-directory-api";
+import type { AppFilters } from "tildagon-app-directory-api/src/registries/CachedRegistryManager";
 
-const data = await CachedRegistryManager.listApps();
+const url = new URL(Astro.request.url);
+const filters: AppFilters = {};
+const capability = url.searchParams.get("capability");
+const vid = url.searchParams.get("vid");
+const pid = url.searchParams.get("pid");
+const frontboard = url.searchParams.get("frontboard");
+if (capability) filters.capabilities = [capability];
+if (vid) filters.vid = vid;
+if (pid) filters.pid = pid;
+if (frontboard) filters.frontboard = frontboard;
+const hasFilters = Object.keys(filters).length > 0;
+
+const data = await CachedRegistryManager.listApps(hasFilters ? filters : undefined);
+
+// Full unfiltered list for populating filter options
+const allApps = hasFilters ? await CachedRegistryManager.listApps() : data;
+const uniqueCapabilities = [...new Set(
+  allApps.flatMap((a: any) => (a.manifest.metadata.capabilities ?? []).flatMap((c: any) =>
+    c.feature.type === "Capability" ? [c.feature.identifier] : []
+  ))
+)].sort();
+const uniqueFrontboards = [...new Set(
+  allApps.flatMap((a: any) => (a.manifest.metadata.capabilities ?? []).flatMap((c: any) =>
+    typeof c.feature.type === "string" && c.feature.type.includes("Frontboard") ? [c.feature.type] : []
+  ))
+)].sort();
 
 const copy = {
   title: "Tildagon App Directory",
@@ -17,6 +43,47 @@ const copy = {
 >
   <main class="col-md-12">
     <h1>{copy.title}</h1>
+    <details id="filters" open={hasFilters}>
+      <summary>Filters {hasFilters ? "(active)" : ""}</summary>
+      <form method="get" action="/" style="margin-bottom: 1rem;">
+        <label>
+          Capability:
+          <input
+            type="text"
+            name="capability"
+            value={capability ?? ""}
+            list="capability-list"
+            placeholder="https://tildagon.badge.emfcamp.org/capabilities/registry/example/"
+          />
+        </label>
+        <datalist id="capability-list">
+          {uniqueCapabilities.map((c: string) => (<option value={c} />))}
+        </datalist>
+        <label>
+          VID:
+          <input type="text" name="vid" value={vid ?? ""} placeholder="e.g. 1234" />
+        </label>
+        <label>
+          PID:
+          <input type="text" name="pid" value={pid ?? ""} placeholder="e.g. 5678" />
+        </label>
+        <label>
+          Frontboard:
+          <select name="frontboard">
+            <option value="">Any</option>
+            {uniqueFrontboards.map((f: string) => (
+              <option value={f} selected={frontboard === f}>{f}</option>
+            ))}
+          </select>
+        </label>
+        <button type="submit" class="btn btn-primary">Apply</button>
+      </form>
+      {
+        hasFilters && (
+          <p><a href="/">&larr; Clear all filters</a></p>
+        )
+      }
+    </details>
     <AppsListing data={data} />
     <Alert kind="info">
       Can't find your app? <a href="/errors"
