@@ -1,0 +1,6 @@
+name: license
+in: query
+required: false
+description: Filter by license (comma-separated). e.g. `MIT`
+schema:
+  type: string

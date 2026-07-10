@@ -1,0 +1,6 @@
+name: author
+in: query
+required: false
+description: Filter by author (comma-separated). e.g. `pikesley`
+schema:
+  type: string

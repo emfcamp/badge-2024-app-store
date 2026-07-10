@@ -1,0 +1,6 @@
+name: category
+in: query
+required: false
+description: Filter by category (comma-separated). e.g. `Games,Apps`
+schema:
+  type: string

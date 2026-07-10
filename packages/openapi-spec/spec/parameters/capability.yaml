@@ -1,0 +1,6 @@
+name: capability
+in: query
+required: false
+description: Filter by required capability. Repeat for AND logic. e.g. `?capability=MOTOR&capability=LED`
+schema:
+  type: string

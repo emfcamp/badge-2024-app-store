@@ -1,0 +1,6 @@
+name: frontboard
+in: query
+required: false
+description: Filter by frontboard name
+schema:
+  type: string

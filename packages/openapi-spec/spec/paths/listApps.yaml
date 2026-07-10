@@ -4,60 +4,15 @@ get:
   tags:
     - Apps
   parameters:
-    - name: category
-      in: query
-      required: false
-      description: Filter by category (comma-separated). e.g. `Games,Apps`
-      schema:
-        type: string
-    - name: author
-      in: query
-      required: false
-      description: Filter by author (comma-separated). e.g. `pikesley`
-      schema:
-        type: string
-    - name: license
-      in: query
-      required: false
-      description: Filter by license (comma-separated). e.g. `MIT`
-      schema:
-        type: string
-    - name: service
-      in: query
-      required: false
-      description: Filter by registry service (comma-separated). e.g. `github,codeberg`
-      schema:
-        type: string
-    - name: q
-      in: query
-      required: false
-      description: Free-text search across app name and description
-      schema:
-        type: string
-    - name: capability
-      in: query
-      required: false
-      description: Filter by required capability. Repeat for AND logic. e.g. `?capability=MOTOR&capability=LED`
-      schema:
-        type: string
-    - name: vid
-      in: query
-      required: false
-      description: Filter by hexpansion vendor ID
-      schema:
-        type: string
-    - name: pid
-      in: query
-      required: false
-      description: Filter by hexpansion product ID
-      schema:
-        type: string
-    - name: frontboard
-      in: query
-      required: false
-      description: Filter by frontboard name
-      schema:
-        type: string
+    - $ref: "../parameters/category.yaml"
+    - $ref: "../parameters/author.yaml"
+    - $ref: "../parameters/license.yaml"
+    - $ref: "../parameters/service.yaml"
+    - $ref: "../parameters/q.yaml"
+    - $ref: "../parameters/capability.yaml"
+    - $ref: "../parameters/vid.yaml"
+    - $ref: "../parameters/pid.yaml"
+    - $ref: "../parameters/frontboard.yaml"
   responses:
     "200":
       description: A list of apps

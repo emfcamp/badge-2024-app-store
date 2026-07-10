@@ -3,6 +3,7 @@ import { CachedRegistryManager } from "./src/registries/index.ts";
 import { config, cacheMaxAge } from "./src/config.ts";
 import { createResponseCache } from "./src/responseCache.ts";
 import { Hono } from "hono";
+import type { Context } from "hono";
 import type { AppFilters } from "./src/registries/CachedRegistryManager";
 import {
   register,
@@ -53,6 +54,33 @@ try {
 const responseCache = createResponseCache({
   ttlMs: config.refreshIntervalMs,
 });
+
+// ── Helpers ──────────────────────────────────────────────────
+
+function parseAppFilters(c: Context): AppFilters | undefined {
+  const filters: AppFilters = {};
+  const category = c.req.query("category");
+  const author = c.req.query("author");
+  const license = c.req.query("license");
+  const service = c.req.query("service");
+  const vid = c.req.query("vid");
+  const pid = c.req.query("pid");
+  const frontboard = c.req.query("frontboard");
+  const q = c.req.query("q");
+  if (category) filters.category = category;
+  if (author) filters.author = author;
+  if (license) filters.license = license;
+  if (service) filters.service = service;
+  if (vid) filters.vid = vid;
+  if (pid) filters.pid = pid;
+  if (frontboard) filters.frontboard = frontboard;
+  if (q) filters.q = q;
+
+  const caps = c.req.queries("capability");
+  if (caps && caps.length > 0) filters.capabilities = caps;
+
+  return Object.keys(filters).length > 0 ? filters : undefined;
+}
 
 // ── Hono app (API routes) ───────────────────────────────────
 
@@ -120,7 +148,8 @@ api.use("*", async (c, next) => {
 
 // GET /v1/apps/rss
 api.get("/v1/apps/rss", async (c) => {
-  const apps = await CachedRegistryManager.listApps();
+  const filters = parseAppFilters(c);
+  const apps = await CachedRegistryManager.listApps(filters);
 
   const sorted = apps.toSorted(
     (a, b) =>
@@ -146,10 +175,10 @@ api.get("/v1/apps/rss", async (c) => {
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Tildagon App Store</title>
+    <title>Tildagon App Store${filters ? ` — Filtered` : ""}</title>
     <link>https://apps.badge.emfcamp.org</link>
-    <description>Latest apps for the Tildagon badge</description>
-    <atom:link href="https://apps.badge.emfcamp.org/v1/apps/rss" rel="self" type="application/rss+xml"/>
+    <description>Latest apps for the Tildagon badge${filters ? ` (filtered)` : ""}</description>
+    <atom:link href="https://apps.badge.emfcamp.org${c.req.url}" rel="self" type="application/rss+xml"/>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>${items}
   </channel>
 </rss>`;
@@ -193,30 +222,8 @@ api.get("/v1/apps/:code", async (c) => {
 
 // GET /v1/apps
 api.get("/v1/apps", async (c) => {
-  const filters: AppFilters = {};
-  const category = c.req.query("category");
-  const author = c.req.query("author");
-  const license = c.req.query("license");
-  const service = c.req.query("service");
-  const vid = c.req.query("vid");
-  const pid = c.req.query("pid");
-  const frontboard = c.req.query("frontboard");
-  const q = c.req.query("q");
-  if (category) filters.category = category;
-  if (author) filters.author = author;
-  if (license) filters.license = license;
-  if (service) filters.service = service;
-  if (vid) filters.vid = vid;
-  if (pid) filters.pid = pid;
-  if (frontboard) filters.frontboard = frontboard;
-  if (q) filters.q = q;
-
-  const caps = c.req.queries("capability");
-  if (caps && caps.length > 0) filters.capabilities = caps;
-
-  const apps = await CachedRegistryManager.listApps(
-    Object.keys(filters).length > 0 ? filters : undefined,
-  );
+  const filters = parseAppFilters(c);
+  const apps = await CachedRegistryManager.listApps(filters);
   return c.json({ items: apps, count: apps.length });
 });
 

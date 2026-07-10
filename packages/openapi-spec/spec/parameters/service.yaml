@@ -1,0 +1,6 @@
+name: service
+in: query
+required: false
+description: Filter by registry service (comma-separated). e.g. `github,codeberg`
+schema:
+  type: string

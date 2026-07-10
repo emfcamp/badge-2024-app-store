@@ -1,0 +1,6 @@
+name: pid
+in: query
+required: false
+description: Filter by hexpansion product ID
+schema:
+  type: string

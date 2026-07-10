@@ -1,0 +1,6 @@
+name: vid
+in: query
+required: false
+description: Filter by hexpansion vendor ID
+schema:
+  type: string

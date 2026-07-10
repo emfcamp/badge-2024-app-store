@@ -3,6 +3,16 @@ get:
   operationId: appRss
   tags:
     - Apps
+  parameters:
+    - $ref: "../parameters/category.yaml"
+    - $ref: "../parameters/author.yaml"
+    - $ref: "../parameters/license.yaml"
+    - $ref: "../parameters/service.yaml"
+    - $ref: "../parameters/q.yaml"
+    - $ref: "../parameters/capability.yaml"
+    - $ref: "../parameters/vid.yaml"
+    - $ref: "../parameters/pid.yaml"
+    - $ref: "../parameters/frontboard.yaml"
   responses:
     "200":
       description: RSS 2.0 feed of the 50 most recent apps
