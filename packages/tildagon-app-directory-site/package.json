@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "npm --workspace=openapi-spec run build && cp ../openapi-spec/build/spec.yaml public/spec.yaml && astro check && astro build",
     "preview": "astro preview",
     "pull-css": "curl https://www.emfcamp.org/static/css/main-4ea2a04cb955c834fd84796b0110a908.css -o ./public/global.css",
     "astro": "astro",

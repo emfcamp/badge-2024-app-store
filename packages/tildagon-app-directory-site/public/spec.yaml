@@ -1,0 +1,399 @@
+openapi: 3.1.0
+info:
+  title: Tildagon App Directory API
+  description: Interact with the Tildagon App Store
+  version: 1.0.0
+paths:
+  /v1/apps:
+    get:
+      summary: List all apps
+      operationId: listApps
+      tags:
+        - Apps
+      parameters:
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/author'
+        - $ref: '#/components/parameters/license'
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/capability'
+        - $ref: '#/components/parameters/vid'
+        - $ref: '#/components/parameters/pid'
+        - $ref: '#/components/parameters/frontboard'
+      responses:
+        '200':
+          description: A list of apps
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/App'
+                  count:
+                    type: integer
+                    description: The total number of apps available
+  /v1/apps/rss:
+    get:
+      summary: RSS feed of latest apps
+      operationId: appRss
+      tags:
+        - Apps
+      parameters:
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/author'
+        - $ref: '#/components/parameters/license'
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/capability'
+        - $ref: '#/components/parameters/vid'
+        - $ref: '#/components/parameters/pid'
+        - $ref: '#/components/parameters/frontboard'
+      responses:
+        '200':
+          description: RSS 2.0 feed of the 50 most recent apps
+          content:
+            application/rss+xml:
+              schema:
+                type: string
+  /v1/apps/{appId}:
+    get:
+      summary: Get a specific app given its ID
+      operationId: appById
+      tags:
+        - Apps
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          description: The ID of the app to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: An app with the specified ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+  /v1/apps/{appId}/download:
+    get:
+      summary: Download an app tarball
+      operationId: downloadApp
+      tags:
+        - Apps
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          description: The app code
+          schema:
+            type: string
+      responses:
+        '302':
+          description: Redirect to the tarball URL (cached locally or from the origin)
+        '404':
+          description: App not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseFailure'
+  /v1/tarballs/{filename}:
+    get:
+      summary: Serve a cached tarball file
+      operationId: serveTarball
+      tags:
+        - Apps
+      parameters:
+        - name: filename
+          in: path
+          required: true
+          description: Tarball filename (e.g. 12345678.tar.gz)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The tarball file
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Tarball not found in cache
+  /v1/failures:
+    get:
+      summary: List all release failures
+      operationId: listReleaseFailures
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: A list of apps
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ReleaseFailure'
+                  count:
+                    type: integer
+                    description: The total number of apps available
+  /v1/health:
+    get:
+      summary: Health check
+      operationId: health
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  uptime:
+                    type: number
+                    description: Process uptime in seconds
+  /v1/status:
+    get:
+      summary: Cache and server status
+      operationId: status
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Current cache state and build info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cacheSize:
+                    type: integer
+                    description: Number of apps in the cache
+                  errorCount:
+                    type: integer
+                    description: Number of apps in the error cache
+                  byService:
+                    type: object
+                    description: App count broken down by registry service
+                    additionalProperties:
+                      type: integer
+                  lastRefresh:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: When the last refresh completed
+                  nextRefresh:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: When the next heartbeat refresh will fire
+                  refreshInProgress:
+                    type: boolean
+                    description: Whether a refresh is currently running
+                  commit:
+                    type: string
+                    description: Git commit SHA of the running build
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      operationId: metrics
+      tags:
+        - Monitoring
+      responses:
+        '200':
+          description: Prometheus text-format metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  parameters:
+    category:
+      name: category
+      in: query
+      required: false
+      description: Filter by category (comma-separated). e.g. `Games,Apps`
+      schema:
+        type: string
+    author:
+      name: author
+      in: query
+      required: false
+      description: Filter by author (comma-separated). e.g. `pikesley`
+      schema:
+        type: string
+    license:
+      name: license
+      in: query
+      required: false
+      description: Filter by license (comma-separated). e.g. `MIT`
+      schema:
+        type: string
+    service:
+      name: service
+      in: query
+      required: false
+      description: Filter by registry service (comma-separated). e.g. `github,codeberg`
+      schema:
+        type: string
+    q:
+      name: q
+      in: query
+      required: false
+      description: Free-text search across app name and description
+      schema:
+        type: string
+    capability:
+      name: capability
+      in: query
+      required: false
+      description: Filter by required capability. Repeat for AND logic. e.g. `?capability=MOTOR&capability=LED`
+      schema:
+        type: string
+    vid:
+      name: vid
+      in: query
+      required: false
+      description: Filter by hexpansion vendor ID
+      schema:
+        type: string
+    pid:
+      name: pid
+      in: query
+      required: false
+      description: Filter by hexpansion product ID
+      schema:
+        type: string
+    frontboard:
+      name: frontboard
+      in: query
+      required: false
+      description: Filter by frontboard name
+      schema:
+        type: string
+  schemas:
+    AppId:
+      title: AppId
+      description: A group of properties that uniquely identify an app release in the Tildagon App Store.
+      type: object
+      properties:
+        service:
+          description: The service that the app was published on
+          type: string
+        owner:
+          description: The username of the account that published the app on the service
+          type: string
+        title:
+          description: The title of the app
+          type: string
+        releaseHash:
+          description: The unique hash of the app build bundle. May be absent for release failures.
+          type: string
+      required:
+        - service
+        - owner
+        - title
+    AppManifest:
+      title: AppManifest
+      description: The author-provided app manifest (tildagon.toml or tildagon.json)
+      properties:
+        app:
+          type: object
+          description: The app's manifest
+          properties:
+            name:
+              type: string
+              description: The name of the app
+            category:
+              type: array
+              description: One or more categories for the app
+              items:
+                type: string
+                enum:
+                  - Badge
+                  - Music
+                  - Media
+                  - Apps
+                  - Games
+                  - Background
+                  - Pattern
+          required:
+            - name
+            - category
+        metadata:
+          type: object
+          properties:
+            author:
+              type: string
+              description: The author of the app
+            license:
+              type: string
+              description: The license of the app
+            url:
+              type: string
+              format: uri
+              description: The URL of the app's homepage
+            description:
+              type: string
+              description: A short description of the app
+            version:
+              type: string
+              description: The version of the app
+            capabilities:
+              type: array
+              description: Hardware capabilities required or provided by this app
+              items:
+                type: object
+                properties:
+                  feature:
+                    description: A string capability name, or a hexpansion/frontboard identifier
+          required:
+            - author
+            - license
+            - url
+            - description
+            - version
+    App:
+      title: App
+      description: Represents an application in the Tildagon App Store.
+      type: object
+      properties:
+        code:
+          type: string
+        id:
+          $ref: '#/components/schemas/AppId'
+        releaseTime:
+          type: string
+          format: date-time
+        tarballUrl:
+          type: string
+          format: uri
+        manifest:
+          $ref: '#/components/schemas/AppManifest'
+      required:
+        - code
+        - id
+        - releaseTime
+        - tarballUrl
+        - manifest
+    ReleaseFailure:
+      title: ReleaseFailure
+      description: Contains information about a release that was identified but not successfully published to the Tildagon App Store.
+      properties:
+        id:
+          $ref: '#/components/schemas/AppId'
+        reason:
+          type: string
+          description: The reason why the release failed to be published
