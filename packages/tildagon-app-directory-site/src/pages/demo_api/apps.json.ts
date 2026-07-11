@@ -18,5 +18,7 @@ const data = {
 };
 
 export async function GET() {
-  return new Response(JSON.stringify(data));
+  return new Response(JSON.stringify(data), {
+    headers: { "Access-Control-Allow-Origin": "*" },
+  });
 }

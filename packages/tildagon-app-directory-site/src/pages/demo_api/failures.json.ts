@@ -5,5 +5,7 @@ const items = await CachedRegistryManager.listErrors();
 const data = { items, count: items.length };
 
 export async function GET() {
-  return new Response(JSON.stringify(data));
+  return new Response(JSON.stringify(data), {
+    headers: { "Access-Control-Allow-Origin": "*" },
+  });
 }
