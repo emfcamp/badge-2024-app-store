@@ -27,8 +27,11 @@ import {
   readFileSync,
   statSync,
   createReadStream,
+  createWriteStream,
+  mkdirSync,
 } from "node:fs";
-import { extname, join, normalize, resolve } from "node:path";
+import { extname, join, normalize, resolve, dirname } from "node:path";
+import type { TildagonAppRelease } from "tildagon-app";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { randomUUID } from "node:crypto";
@@ -62,6 +65,14 @@ const responseCache = createResponseCache({
 });
 
 // ── Helpers ──────────────────────────────────────────────────
+
+// ── Helpers ──────────────────────────────────────────────────
+
+/** Rewrite an app's tarballUrl to point at our proxy/cache endpoint. */
+function proxyTarballUrl(app: TildagonAppRelease): TildagonAppRelease {
+  const rh = app.id.releaseHash || "unknown";
+  return { ...app, tarballUrl: `/v1/tarballs/${app.code}-${rh}.tar.gz` };
+}
 
 function parseAppFilters(c: Context): AppFilters | undefined {
   const filters: AppFilters = {};
@@ -198,7 +209,7 @@ api.get("/v1/apps/rss", async (c) => {
   return c.body(rss);
 });
 
-// GET /v1/apps/:code/download — count + redirect to tarball (cached or origin)
+// GET /v1/apps/:code/download — count + redirect to cached tarball
 api.get("/v1/apps/:code/download", async (c) => {
   const code = c.req.param("code");
   const app = await CachedRegistryManager.getApp(code);
@@ -206,19 +217,22 @@ api.get("/v1/apps/:code/download", async (c) => {
     return c.json(app.failure, 404);
   }
 
+  const rh = app.value.id.releaseHash || "unknown";
+
   downloadsTotal.inc({
     service: app.value.id.service,
     app_code: code,
   });
 
-  // Serve from disk cache if available
-  if (CachedRegistryManager.hasCachedTarball(code)) {
-    return c.redirect(`/v1/tarballs/${code}.tar.gz`, 302);
+  // If not cached yet, fetch from origin before redirecting
+  if (!CachedRegistryManager.hasCachedTarball(code, rh)) {
+    const originUrl = CachedRegistryManager.getOriginTarballUrl(code, rh);
+    if (originUrl) {
+      await CachedRegistryManager.downloadTarball(code, rh, originUrl);
+    }
   }
 
-  // Redirect to origin and start background download
-  CachedRegistryManager.downloadTarball(code, app.value.tarballUrl);
-  return c.redirect(app.value.tarballUrl, 302);
+  return c.redirect(`/v1/tarballs/${code}-${rh}.tar.gz`, 302);
 });
 
 // GET /v1/apps/:code
@@ -226,7 +240,7 @@ api.get("/v1/apps/:code", async (c) => {
   const code = c.req.param("code");
   const app = await CachedRegistryManager.getApp(code);
   if (app.type === "success") {
-    return c.json(app.value);
+    return c.json(proxyTarballUrl(app.value));
   }
   return c.json(app.failure, 404);
 });
@@ -235,7 +249,7 @@ api.get("/v1/apps/:code", async (c) => {
 api.get("/v1/apps", async (c) => {
   const filters = parseAppFilters(c);
   const apps = await CachedRegistryManager.listApps(filters);
-  return c.json({ items: apps, count: apps.length });
+  return c.json({ items: apps.map(proxyTarballUrl), count: apps.length });
 });
 
 // GET /v1/failures
@@ -254,14 +268,51 @@ api.get("/v1/status", (c) => {
   return c.json({ ...CachedRegistryManager.getStatus(), commit: commitSha });
 });
 
-// GET /v1/tarballs/:filename — serve cached tarballs from disk
-api.get("/v1/tarballs/:filename", (c) => {
+// GET /v1/tarballs/:filename — serve cached tarballs from disk,
+// fetching from origin and caching on miss.
+api.get("/v1/tarballs/:filename", async (c) => {
   const filename = c.req.param("filename");
-  const code = filename.replace(/\.tar\.gz$/, "");
-  const path = CachedRegistryManager.getCachedTarballPath(code);
-  if (!existsSync(path)) {
-    return c.notFound();
+  const match = filename.match(/^(\d{8})-(.+)\.tar\.gz$/);
+  if (!match) return c.notFound();
+  const code = match[1]!;
+  const releaseHash = match[2]!;
+
+  // Fetch from origin and cache on miss
+  if (!CachedRegistryManager.hasCachedTarball(code, releaseHash)) {
+    const originUrl = CachedRegistryManager.getOriginTarballUrl(
+      code,
+      releaseHash,
+    );
+    if (!originUrl) return c.notFound();
+
+    try {
+      const dest = CachedRegistryManager.getCachedTarballPath(
+        code,
+        releaseHash,
+      );
+      const dir = dirname(dest);
+      if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+      const response = await fetch(originUrl);
+      if (!response.ok || !response.body) {
+        return c.json({ error: "Upstream fetch failed" }, 502);
+      }
+      await pipeline(response.body, createWriteStream(dest));
+    } catch (err) {
+      console.warn(`Failed to fetch tarball for ${code}:`, err);
+      return c.json({ error: "Failed to fetch tarball" }, 502);
+    }
   }
+
+  const path = CachedRegistryManager.getCachedTarballPath(code, releaseHash);
+  if (!existsSync(path)) return c.notFound();
+
+  const app = await CachedRegistryManager.getApp(code);
+  downloadsTotal.inc({
+    service: app.type === "success" ? app.value.id.service : "unknown",
+    app_code: code,
+  });
+
   c.header("Content-Type", "application/gzip");
   c.header("Cache-Control", "public, max-age=31536000, immutable");
   return c.body(Readable.toWeb(createReadStream(path)) as ReadableStream);

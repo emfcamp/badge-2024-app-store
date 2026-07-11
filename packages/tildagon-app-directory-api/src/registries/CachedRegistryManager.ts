@@ -11,13 +11,7 @@ import {
 import { disallowedApps } from "./disallowlist";
 import { CodebergRegistry } from "./sources/codeberg";
 import equal from "fast-deep-equal/es6";
-import {
-  writeFileSync,
-  readFileSync,
-  existsSync,
-  mkdirSync,
-  unlinkSync,
-} from "node:fs";
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
@@ -167,27 +161,17 @@ export function createCachedRegistryManager(
 
   // ── Tarball cache ───────────────────────────────────────
 
-  function tarballPath(code: string): string {
-    return join(TARBALL_DIR, `${code}.tar.gz`);
+  function tarballPath(code: string, releaseHash: string): string {
+    return join(TARBALL_DIR, `${code}-${releaseHash}.tar.gz`);
   }
 
-  function isTarballCached(code: string): boolean {
-    return existsSync(tarballPath(code));
-  }
-
-  function invalidateTarball(code: string): void {
-    const path = tarballPath(code);
-    if (existsSync(path)) {
-      try {
-        unlinkSync(path);
-      } catch (err) {
-        console.warn(`Failed to delete cached tarball ${code}:`, err);
-      }
-    }
+  function isTarballCached(code: string, releaseHash: string): boolean {
+    return existsSync(tarballPath(code, releaseHash));
   }
 
   async function fetchAndCacheTarball(
     code: string,
+    releaseHash: string,
     url: string,
   ): Promise<void> {
     try {
@@ -198,7 +182,7 @@ export function createCachedRegistryManager(
       if (!response.ok || !response.body) {
         throw new Error(`Fetch failed: ${response.status}`);
       }
-      const dest = tarballPath(code);
+      const dest = tarballPath(code, releaseHash);
       await pipeline(response.body, createWriteStream(dest));
     } catch (err) {
       console.warn(`Failed to cache tarball for ${code}:`, err);
@@ -273,11 +257,6 @@ export function createCachedRegistryManager(
     const svc = source.serviceName;
     refreshUpdateCounts.set(svc, (refreshUpdateCounts.get(svc) || 0) + 1);
 
-    // New release — invalidate old cached tarball
-    if (cached) {
-      invalidateTarball(code);
-    }
-
     try {
       const getStart = Date.now();
       const appResult = await source.get(code, listingResult);
@@ -291,11 +270,21 @@ export function createCachedRegistryManager(
         status: Result.isOk(appResult) ? "success" : "failure",
       });
       if (Result.isOk(appResult)) {
-        AppCache.set(code, {
-          app: TildagonAppReleaseSchema.parse(appResult.value),
-          sourceIndex,
-        });
+        const app = TildagonAppReleaseSchema.parse(appResult.value);
+        AppCache.set(code, { app, sourceIndex });
         ErrorCache.delete(code);
+
+        // Pre-fetch tarball in the background so the badge never hits the
+        // upstream origin. Each release gets its own cache key (releaseHash).
+        if (app.id.releaseHash) {
+          fetchAndCacheTarball(code, app.id.releaseHash, app.tarballUrl).catch(
+            (err) =>
+              console.warn(
+                `Background tarball pre-fetch failed for ${code}:`,
+                err,
+              ),
+          );
+        }
       } else {
         ErrorCache.set(code, appResult.failure);
         AppCache.delete(code);
@@ -643,19 +632,32 @@ export function createCachedRegistryManager(
       return loadFromDisk();
     },
 
-    /** Check if a tarball is cached on disk for the given app code. */
-    hasCachedTarball(code: string): boolean {
-      return isTarballCached(code);
+    /** Check if a tarball is cached on disk for the given app code and release hash. */
+    hasCachedTarball(code: string, releaseHash: string): boolean {
+      return isTarballCached(code, releaseHash);
     },
 
     /** Get the filesystem path to a cached tarball. */
-    getCachedTarballPath(code: string): string {
-      return tarballPath(code);
+    getCachedTarballPath(code: string, releaseHash: string): string {
+      return tarballPath(code, releaseHash);
     },
 
-    /** Download a tarball from a URL and cache it on disk (fire-and-forget). */
-    downloadTarball(code: string, url: string): void {
-      fetchAndCacheTarball(code, url);
+    /** Get the origin tarball URL from the app cache, if the releaseHash matches. */
+    getOriginTarballUrl(code: string, releaseHash: string): string | null {
+      const cached = AppCache.get(code);
+      if (cached && cached.app.id.releaseHash === releaseHash) {
+        return cached.app.tarballUrl;
+      }
+      return null;
+    },
+
+    /** Download a tarball from a URL and cache it on disk. */
+    downloadTarball(
+      code: string,
+      releaseHash: string,
+      url: string,
+    ): Promise<void> {
+      return fetchAndCacheTarball(code, releaseHash, url);
     },
   };
 }
