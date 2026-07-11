@@ -47,7 +47,7 @@ async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> 
           service: "codeberg",
           owner: repo.owner!.login!,
           title: repo.name!,
-          releaseHash: latestRelease.data.target_commitish!,
+          releaseHash: latestRelease.data.tag_name!,
         };
         return Result.Ok({
           id,
