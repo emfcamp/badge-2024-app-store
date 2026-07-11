@@ -246,12 +246,7 @@ api.get("/v1/apps/:code/download", async (c) => {
   }
 
   const redirectUrl = `${getBaseUrl(c)}/v1/tarballs/${code}-${rh}.tar.gz`;
-  // Badge firmware bug: only accepts Location with capital L.
-  // Use c.status/c.header/c.body instead of c.redirect to ensure
-  // the capital-L header is preserved.
-  c.status(302);
-  c.header("Location", redirectUrl);
-  return c.body(null);
+  return c.redirect(redirectUrl, 302);
 });
 
 // GET /v1/apps/:code
@@ -420,6 +415,12 @@ async function handleRequest(req: IncomingMessage, res: ServerResponse) {
     );
     res.statusCode = webRes.status;
     webRes.headers.forEach((v, k) => res.setHeader(k, v));
+    // Badge firmware bug: only accepts Location with capital L.
+    // Web Standard Headers API lowercases all names, so re-set it.
+    const location = webRes.headers.get("location");
+    if (location) {
+      res.setHeader("Location", location);
+    }
     if (webRes.body) {
       streamBody(webRes.body, res);
     } else {
