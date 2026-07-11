@@ -232,9 +232,10 @@ api.get("/v1/apps/:code/download", async (c) => {
     }
   }
 
-  const origin = new URL(c.req.url).origin;
+  const proto = c.req.header("x-forwarded-proto") || "http";
+  const host = c.req.header("host")!;
   return c.redirect(
-    `${origin}/v1/tarballs/${code}-${rh}.tar.gz`,
+    `${proto}://${host}/v1/tarballs/${code}-${rh}.tar.gz`,
     302,
   );
 });
