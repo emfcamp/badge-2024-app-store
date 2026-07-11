@@ -68,10 +68,23 @@ const responseCache = createResponseCache({
 
 // ── Helpers ──────────────────────────────────────────────────
 
+/** Get the base URL (proto + host) from the request context, respecting proxies. */
+function getBaseUrl(c: Context): string {
+  const proto = c.req.header("x-forwarded-proto") || "http";
+  const host = c.req.header("host")!;
+  return `${proto}://${host}`;
+}
+
 /** Rewrite an app's tarballUrl to point at our proxy/cache endpoint. */
-function proxyTarballUrl(app: TildagonAppRelease): TildagonAppRelease {
+function proxyTarballUrl(
+  app: TildagonAppRelease,
+  baseUrl: string,
+): TildagonAppRelease {
   const rh = app.id.releaseHash || "unknown";
-  return { ...app, tarballUrl: `/v1/tarballs/${app.code}-${rh}.tar.gz` };
+  return {
+    ...app,
+    tarballUrl: `${baseUrl}/v1/tarballs/${app.code}-${rh}.tar.gz`,
+  };
 }
 
 function parseAppFilters(c: Context): AppFilters | undefined {
@@ -232,10 +245,8 @@ api.get("/v1/apps/:code/download", async (c) => {
     }
   }
 
-  const proto = c.req.header("x-forwarded-proto") || "http";
-  const host = c.req.header("host")!;
   return c.redirect(
-    `${proto}://${host}/v1/tarballs/${code}-${rh}.tar.gz`,
+    `${getBaseUrl(c)}/v1/tarballs/${code}-${rh}.tar.gz`,
     302,
   );
 });
@@ -245,7 +256,7 @@ api.get("/v1/apps/:code", async (c) => {
   const code = c.req.param("code");
   const app = await CachedRegistryManager.getApp(code);
   if (app.type === "success") {
-    return c.json(proxyTarballUrl(app.value));
+    return c.json(proxyTarballUrl(app.value, getBaseUrl(c)));
   }
   return c.json(app.failure, 404);
 });
@@ -254,7 +265,7 @@ api.get("/v1/apps/:code", async (c) => {
 api.get("/v1/apps", async (c) => {
   const filters = parseAppFilters(c);
   const apps = await CachedRegistryManager.listApps(filters);
-  return c.json({ items: apps.map(proxyTarballUrl), count: apps.length });
+  return c.json({ items: apps.map((a) => proxyTarballUrl(a, getBaseUrl(c))), count: apps.length });
 });
 
 // GET /v1/failures
