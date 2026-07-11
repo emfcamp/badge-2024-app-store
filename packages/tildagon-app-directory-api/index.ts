@@ -232,7 +232,11 @@ api.get("/v1/apps/:code/download", async (c) => {
     }
   }
 
-  return c.redirect(`/v1/tarballs/${code}-${rh}.tar.gz`, 302);
+  const origin = new URL(c.req.url).origin;
+  return c.redirect(
+    `${origin}/v1/tarballs/${code}-${rh}.tar.gz`,
+    302,
+  );
 });
 
 // GET /v1/apps/:code
