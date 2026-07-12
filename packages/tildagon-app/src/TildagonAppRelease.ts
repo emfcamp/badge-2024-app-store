@@ -35,7 +35,7 @@ export const TildagonAppReleaseIdentifier = {
     const code = new Array(8)
       .fill("")
       .map((_, i) => {
-        return String.fromCharCode("0".charCodeAt(0) + (digest[i] % 5));
+        return String.fromCharCode("0".charCodeAt(0) + (digest[i] % 6));
       })
       .join("");
     return code;
