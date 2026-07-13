@@ -61,7 +61,7 @@ async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> 
           failure: {
             id: {
               service: "codeberg",
-              owner: repo.owner?.login_name,
+              owner: repo.owner?.login ?? "",
               title: repo.name,
             },
             reason: "No releases found for repository",
