@@ -456,6 +456,20 @@ export function createCachedRegistryManager(
           }
         }
 
+        // Also clean up ErrorCache entries for sources that succeeded but
+        // whose errors are no longer in the listing (e.g., owner name changes
+        // between the error and success paths).
+        for (const [code, failure] of ErrorCache) {
+          const sourceIndex = sources.findIndex(
+            (s) => s.serviceName === failure.id.service,
+          );
+          if (sourceIndex === -1) continue;
+          const seen = seenBySource.get(sourceIndex);
+          if (seen && !seen.has(code)) {
+            ErrorCache.delete(code);
+          }
+        }
+
         lastRefresh = new Date(ts);
 
         // Record refresh success metrics
