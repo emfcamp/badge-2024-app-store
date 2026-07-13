@@ -11,33 +11,41 @@ import { z } from "zod";
 import TOML from "@ltd/j-toml";
 import type { RegistrySource, RegistrySourceFailure } from "../RegistrySource";
 
-const maybeGitHubTokenSchema = z.union([
-  z.string().startsWith("ghp_"),
-  z.string().startsWith("github_pat_"),
-]);
-const githubTokenParseResult = maybeGitHubTokenSchema.safeParse(
-  process.env.GITHUB_TOKEN,
-);
-if (githubTokenParseResult.error) {
-  console.warn(githubTokenParseResult.error);
+// Lazy-created Octokit instance — not initialized at module load time
+// to avoid slowing down startup when not using real APIs or when
+// the server is serving from disk cache.
+let _octokit: Octokit | null = null;
+function getOctokit(): Octokit {
+  if (!_octokit) {
+    const maybeGitHubTokenSchema = z.union([
+      z.string().startsWith("ghp_"),
+      z.string().startsWith("github_pat_"),
+    ]);
+    const githubTokenParseResult = maybeGitHubTokenSchema.safeParse(
+      process.env.GITHUB_TOKEN,
+    );
+    if (githubTokenParseResult.error) {
+      console.warn(githubTokenParseResult.error);
+    }
+    const MyOctokit = Octokit.plugin(throttling);
+    _octokit = new MyOctokit({
+      auth: process.env.GITHUB_TOKEN,
+      throttle: {
+        onRateLimit: (retryAfter: number, _options: unknown) => {
+          console.warn(`GitHub rate limit hit, retrying after ${retryAfter}s`);
+          return true;
+        },
+        onSecondaryRateLimit: (retryAfter: number, _options: unknown) => {
+          console.warn(
+            `GitHub secondary rate limit hit, retrying after ${retryAfter}s`,
+          );
+          return true;
+        },
+      },
+    });
+  }
+  return _octokit;
 }
-const MyOctokit = Octokit.plugin(throttling);
-
-const octokit = new MyOctokit({
-  auth: process.env.GITHUB_TOKEN,
-  throttle: {
-    onRateLimit: (retryAfter: number, _options: unknown) => {
-      console.warn(`GitHub rate limit hit, retrying after ${retryAfter}s`);
-      return true;
-    },
-    onSecondaryRateLimit: (retryAfter: number, _options: unknown) => {
-      console.warn(
-        `GitHub secondary rate limit hit, retrying after ${retryAfter}s`,
-      );
-      return true;
-    },
-  },
-});
 
 const GitHubRegistryListQueryResultSchema = z.object({
   nameWithOwner: z.string(),
@@ -124,7 +132,7 @@ async function getTildagonApps(): Promise<
   for await (const page of pageThroughResource<GraphQlQueryResponseData>(
     async (after?: string) => {
       console.log(`Making GitHub List Page Query`);
-      return await octokit.graphql(LIST_QUERY, { after });
+      return await getOctokit().graphql(LIST_QUERY, { after });
     },
     (result: Record<string, unknown>): string | null => {
       if (!result || !result.search) {
@@ -247,7 +255,7 @@ async function getTildagonApp(
   let tomlContent: string | null = null;
 
   try {
-    const jsonResp = await octokit.rest.repos.getContent({
+    const jsonResp = await getOctokit().rest.repos.getContent({
       ...opts,
       path: "tildagon.json",
     });
@@ -263,7 +271,7 @@ async function getTildagonApp(
   }
 
   try {
-    const tomlResp = await octokit.rest.repos.getContent({
+    const tomlResp = await getOctokit().rest.repos.getContent({
       ...opts,
       path: "tildagon.toml",
     });

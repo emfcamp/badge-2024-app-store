@@ -36,6 +36,19 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { randomUUID } from "node:crypto";
 
+// ── Module evaluation start (post-import-resolution) ────────
+
+const T_MODULE_START = Date.now();
+console.log(`[module-eval +0.000s] index.ts module evaluation starting`);
+
+// ── Startup timing ─────────────────────────────────────────
+
+const tStartup = Date.now();
+function logTiming(label: string) {
+  const elapsed = ((Date.now() - tStartup) / 1000).toFixed(3);
+  console.log(`[startup +${elapsed}s] ${label}`);
+}
+
 // ── Container identity ─────────────────────────────────────
 
 const containerId = randomUUID().slice(0, 8);
@@ -465,30 +478,47 @@ function streamBody(body: ReadableStream<Uint8Array>, res: ServerResponse) {
 // ── Main entry point ────────────────────────────────────────
 
 async function main() {
+  logTiming("main() entered");
   const PORT = parseInt(process.env.PORT || "3000", 10);
 
-  // Step 1: Load cache from disk (if available), then run initial refresh.
-  // If a disk cache exists, serve from it immediately while doing the initial
-  // fetch in the background (cold start with stale data, then warm up).
-  // If no disk cache exists, block until the initial fetch completes.
+  // Step 1: Load cache from disk if available, then start initial refresh.
+  // Always start the HTTP server immediately — if there's no disk cache,
+  // serve an empty list while the refresh runs in the background. Never
+  // block the server startup on external API calls.
+  logTiming("loading disk cache...");
   const loadedFromDisk = CachedRegistryManager.loadFromDisk();
-  if (!loadedFromDisk) {
-    console.log("No disk cache found, running initial refresh...");
-    await CachedRegistryManager.refreshAllSources();
-    console.log(
-      `Initial refresh done. ${CachedRegistryManager.getStatus().cacheSize} apps loaded.`,
-    );
-  } else {
+  logTiming(`disk cache loadFromDisk returned ${loadedFromDisk}`);
+  if (loadedFromDisk) {
     console.log(
       `Disk cache loaded with ${CachedRegistryManager.getStatus().cacheSize} apps — starting background refresh.`,
     );
-    // Fire-and-forget: serve stale data now, warm up in the background
-    CachedRegistryManager.refreshAllSources().catch((err) =>
-      console.error("Background refresh after disk cache load failed:", err),
+  } else {
+    console.log(
+      "No disk cache found — starting with empty cache, refresh in background.",
     );
   }
+  // Always fire-and-forget: serve whatever we have (possibly nothing),
+  // populate in the background.
+  CachedRegistryManager.refreshAllSources().catch((err) =>
+    console.error("Initial refresh failed:", err),
+  );
 
-  // Step 2: Heartbeat — clear response cache after each successful refresh
+  // Step 2: Start the HTTP server immediately — the API (health checks,
+  // /v1/apps, etc.) is fully functional as soon as the disk cache is loaded.
+  // Astro SSR is loaded asynchronously afterwards so it doesn't block the
+  // container health check from passing.
+  const server = createServer(handleRequest);
+  server.setTimeout(120_000);
+
+  server.listen(PORT, () => {
+    logTiming(`server listening on port ${PORT}`);
+    const pidFile = `${process.cwd()}/.server.pid`;
+    writeFileSync(pidFile, process.pid.toString());
+    console.log(`Server process pid: ${process.pid}`);
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+
+  // Step 3: Heartbeat — clear response cache after each successful refresh
   setInterval(async () => {
     try {
       await CachedRegistryManager.refreshAllSources();
@@ -498,24 +528,22 @@ async function main() {
     }
   }, config.refreshIntervalMs);
 
-  // Step 3: Load Astro SSR handler (production)
-  try {
-    const handlerPath = "../tildagon-app-directory-site/dist/server/entry.mjs";
-    const astroEntry = await import(handlerPath);
-    astroHandler = astroEntry.handler;
-    console.log("Astro SSR handler loaded.");
-  } catch (err) {
-    console.warn("Astro SSR handler not found — serving API only:", err);
-  }
-  const server = createServer(handleRequest);
-  server.setTimeout(120_000);
-
-  server.listen(PORT, () => {
-    const pidFile = `${process.cwd()}/.server.pid`;
-    writeFileSync(pidFile, process.pid.toString());
-    console.log(`Server process pid: ${process.pid}`);
-    console.log(`Server running at http://localhost:${PORT}`);
-  });
+  // Step 4: Load Astro SSR handler in the background (production).
+  // Non-API routes will 404 until this completes, which is fine —
+  // health checks and API endpoints don't depend on it.
+  // NOTE: use a variable (not a string literal) so Rollup doesn't try
+  // to resolve this import during the Astro build.
+  logTiming("starting background Astro SSR import...");
+  const handlerPath = "../tildagon-app-directory-site/dist/server/entry.mjs";
+  import(handlerPath)
+    .then((astroEntry) => {
+      astroHandler = astroEntry.handler;
+      logTiming("Astro SSR handler loaded");
+    })
+    .catch((err) => {
+      logTiming("Astro SSR handler not found — serving API only");
+      console.warn("Astro SSR handler not found — serving API only:", err);
+    });
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

@@ -129,17 +129,32 @@ export function createCachedRegistryManager(
 
   function loadFromDisk(): boolean {
     try {
-      if (!existsSync(CACHE_FILE)) return false;
+      if (!existsSync(CACHE_FILE)) {
+        console.log(`[loadFromDisk] ${CACHE_FILE} not found`);
+        return false;
+      }
+      const t0 = Date.now();
       const raw: DiskCacheData = JSON.parse(readFileSync(CACHE_FILE, "utf-8"));
+      console.log(
+        `[loadFromDisk] read + parse: ${raw.apps.length} apps, ${raw.errors.length} errors (${Date.now() - t0}ms)`,
+      );
 
+      const t1 = Date.now();
+      let validated = 0;
+      let skipped = 0;
       for (const { sourceIndex, app } of raw.apps) {
         try {
-          const validated = TildagonAppReleaseSchema.parse(app);
-          AppCache.set(app.code, { app: validated, sourceIndex });
+          const v = TildagonAppReleaseSchema.parse(app);
+          AppCache.set(app.code, { app: v, sourceIndex });
+          validated++;
         } catch {
           console.warn(`Skipping invalid app in disk cache: ${app.code}`);
+          skipped++;
         }
       }
+      console.log(
+        `[loadFromDisk] Zod validated ${validated} apps, skipped ${skipped} (${Date.now() - t1}ms)`,
+      );
 
       for (const { code, failure } of raw.errors) {
         ErrorCache.set(code, failure);
@@ -150,7 +165,7 @@ export function createCachedRegistryManager(
       }
 
       console.log(
-        `Loaded ${AppCache.size} apps and ${ErrorCache.size} errors from disk cache`,
+        `[loadFromDisk] total ${AppCache.size} apps, ${ErrorCache.size} errors (${Date.now() - t0}ms total)`,
       );
       return true;
     } catch (err) {
