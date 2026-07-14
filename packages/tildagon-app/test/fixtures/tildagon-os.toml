@@ -1,0 +1,14 @@
+[app]
+name = "Min Tildagon OS App"
+category = ["Apps", "Games"]
+
+[metadata]
+author = "Test Author"
+license = "MIT"
+url = "https://example.com"
+description = "App that requires a minimum Tildagon OS version"
+version = "1.0.0"
+
+[[metadata.capabilities]]
+required = true
+feature = { type = "TildagonOSMinimumVersion", version = "2.0.0" }
