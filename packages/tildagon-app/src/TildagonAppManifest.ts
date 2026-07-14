@@ -39,7 +39,7 @@ export const Frontboard2026 = z.object({
 });
 
 export const TildagonOSMinimumVersion = z.object({
-  type: "TildagonOSMinimumVersion",
+  type: z.literal("TildagonOSMinimumVersion"),
   version: z.string(),
 });
 
@@ -60,7 +60,7 @@ export const FrontboardIdentifier = z.object({
 export const TildagonAppCapabilityAssociations = z.array(
   z.object({
     required: z.boolean(),
-    feature: z.union([FrontboardIdentifier, HexpansionIdentifier, Capability]),
+    feature: z.union([FrontboardIdentifier, HexpansionIdentifier, Capability, TildagonOSMinimumVersion]),
   }),
 );
 
