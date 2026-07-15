@@ -36,6 +36,9 @@ function capabilityLabel(feature: any): { label: string; filter: string } | null
     const { vid, pid, name } = feature.identifier;
     return { label: name || `VID:${vid} PID:${pid}`, filter: `vid=${encodeURIComponent(vid)}&pid=${encodeURIComponent(pid)}` };
   }
+  if (feature.type === "TildagonOSMinimumVersion") {
+    return { label: `Tildagon OS >= ${feature.version}`, filter: '' };
+  }
   if (typeof feature.type === "string" && feature.type.includes("Frontboard")) {
     return { label: feature.type, filter: `frontboard=${encodeURIComponent(feature.type)}` };
   }
