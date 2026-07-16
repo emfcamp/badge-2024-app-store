@@ -2,9 +2,7 @@ import type { TildagonAppRelease } from "tildagon-app";
 import { CachedRegistryManager } from "tildagon-app-directory-api";
 import type { APIContext } from "astro";
 
-const apps = await CachedRegistryManager.listApps();
-
-function buildData(baseUrl: string) {
+function buildData(apps: TildagonAppRelease[], baseUrl: string) {
   return {
     items: apps.map((app: TildagonAppRelease) => {
       const rh = app.id.releaseHash || "unknown";
@@ -27,8 +25,9 @@ function buildData(baseUrl: string) {
 export async function GET(context: APIContext) {
   // Astro.site is the production URL from config (https://apps.badge.emfcamp.org).
   // In SSR mode we use it directly; in static mode it's baked into the output.
+  const apps = await CachedRegistryManager.listApps();
   const baseUrl = context.site?.origin ?? "https://apps.badge.emfcamp.org";
-  return new Response(JSON.stringify(buildData(baseUrl)), {
+  return new Response(JSON.stringify(buildData(apps, baseUrl)), {
     headers: { "Access-Control-Allow-Origin": "*" },
   });
 }

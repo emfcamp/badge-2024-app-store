@@ -14,17 +14,28 @@ import {
 import TOML from "@ltd/j-toml";
 
 const API_BASE_URL = "https://codeberg.org";
-const api = forgejoApi(API_BASE_URL);
 
+// Lazy-created forgejo API instance — not initialized at module load time
+// to avoid slowing down startup when not using real APIs.
+let _api: ReturnType<typeof forgejoApi> | null = null;
+function getApi(): ReturnType<typeof forgejoApi> {
+  if (!_api) {
+    _api = forgejoApi(API_BASE_URL);
+  }
+  return _api;
+}
+
+// Use ReturnType of forgejoApi for the Repo type without instantiating early
+type ForgejoApi = ReturnType<typeof forgejoApi>;
 type Repo = NonNullable<
-  Awaited<ReturnType<typeof api.repos.repoSearch>>["data"]["data"]
+  Awaited<ReturnType<ForgejoApi["repos"]["repoSearch"]>>["data"]["data"]
 >[number];
 
 async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> {
   const repos: Repo[] = [];
   let page = 1;
   while (true) {
-    const results = await api.repos.repoSearch({
+    const results = await getApi().repos.repoSearch({
       q: "tildagon-app",
       topic: true,
       archived: false,
@@ -39,7 +50,7 @@ async function getTildagonApps(): RegistrySourceListResult<MetadataFromListing> 
   return await Promise.all(
     repos.map(async (repo) => {
       try {
-        const latestRelease = await api.repos.repoGetLatestRelease(
+        const latestRelease = await getApi().repos.repoGetLatestRelease(
           repo.owner!.login!,
           repo.name!,
         );
@@ -83,7 +94,7 @@ async function getTildagonApp(
   let tomlContent: string | null = null;
 
   try {
-    const jsonResp = await api.repos.repoGetContents(
+    const jsonResp = await getApi().repos.repoGetContents(
       id.owner,
       id.title,
       "tildagon.json",
@@ -97,7 +108,7 @@ async function getTildagonApp(
   }
 
   try {
-    const tomlResp = await api.repos.repoGetContents(
+    const tomlResp = await getApi().repos.repoGetContents(
       id.owner,
       id.title,
       "tildagon.toml",
