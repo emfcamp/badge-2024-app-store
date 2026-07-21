@@ -263,7 +263,10 @@ api.get("/v1/apps/:code", async (c) => {
 api.get("/v1/apps", async (c) => {
   const filters = parseAppFilters(c);
   const apps = await CachedRegistryManager.listApps(filters);
-  return c.json({ items: apps.map((a) => proxyTarballUrl(a, getBaseUrl(c))), count: apps.length });
+  return c.json({
+    items: apps.map((a) => proxyTarballUrl(a, getBaseUrl(c))),
+    count: apps.length,
+  });
 });
 
 // GET /v1/failures

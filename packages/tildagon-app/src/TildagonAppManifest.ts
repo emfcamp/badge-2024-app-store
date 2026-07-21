@@ -60,7 +60,12 @@ export const FrontboardIdentifier = z.object({
 export const TildagonAppCapabilityAssociations = z.array(
   z.object({
     required: z.boolean(),
-    feature: z.union([FrontboardIdentifier, HexpansionIdentifier, Capability, TildagonOSMinimumVersion]),
+    feature: z.union([
+      FrontboardIdentifier,
+      HexpansionIdentifier,
+      Capability,
+      TildagonOSMinimumVersion,
+    ]),
   }),
 );
 
