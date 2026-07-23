@@ -198,3 +198,4 @@ pnpm-debug.log*
 .turbo
 build
 mise.local.toml*
+tmp/
