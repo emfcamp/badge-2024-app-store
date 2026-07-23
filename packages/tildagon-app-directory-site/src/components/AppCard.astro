@@ -17,6 +17,7 @@ const { name, category } = release.manifest.app;
   <article style={{ "--badge-bg": CategoryColors[category[0]!] }}>
     <div class="panel-heading">
       <h4 class="manifest-name">{name}</h4>
+      <code>{code}</code>
     </div>
     <div class="panel-body">
       <p class="manifest-description">
@@ -39,7 +40,8 @@ const { name, category } = release.manifest.app;
     display: block;
     flex: 1 1 400px;
     text-decoration-color: #528329;
-
+    max-width: 100%;
+    min-width: 0;
     transition: all 0.15s ease;
   }
 
@@ -78,5 +80,23 @@ const { name, category } = release.manifest.app;
     margin: none;
     background-color: #d6c8a0;
     border-bottom: 4px solid var(--badge-bg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+
+    h4 {
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    code {
+      color: #1e1e1e;
+      flex-shrink: 0;
+    }
   }
 </style>
