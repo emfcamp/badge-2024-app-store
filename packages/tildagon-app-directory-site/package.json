@@ -17,7 +17,7 @@
     "@astrojs/node": "^10.1.4",
     "@fontsource/raleway": "^5.2.8",
     "@iconify-json/openmoji": "^1.2.27",
-    "astro": "^6.4.6",
+    "astro": "^7.1.0",
     "astro-icon": "^1.1.5",
     "tildagon-app-directory-core": "*"
   },
