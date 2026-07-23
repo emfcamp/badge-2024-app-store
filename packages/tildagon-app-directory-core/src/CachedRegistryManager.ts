@@ -1,33 +1,24 @@
-import { Result } from "../models";
-import type { RegistrySourceFailure, RegistrySource } from "./RegistrySource";
-import { GitHubRegistry } from "./sources/github";
-import { DummyRegistry } from "./sources/dummy";
+import { Result } from "./models/index.js";
+import type {
+  RegistrySourceFailure,
+  RegistrySource,
+} from "./RegistrySource.js";
+import { GitHubRegistry } from "./sources/github.js";
+import { DummyRegistry } from "./sources/dummy.js";
 import {
   TildagonAppReleaseIdentifier,
   type TildagonAppRelease,
   TildagonAppReleaseSchema,
 } from "tildagon-app";
 
-import { disallowedApps } from "./disallowlist";
-import { CodebergRegistry } from "./sources/codeberg";
-import equal from "fast-deep-equal/es6";
+import { disallowedApps } from "./disallowlist.js";
+import { CodebergRegistry } from "./sources/codeberg.js";
+import equal from "fast-deep-equal";
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { createWriteStream } from "node:fs";
 import { pipeline } from "node:stream/promises";
-import {
-  refreshTotal,
-  refreshDuration,
-  refreshLastSuccess,
-  refreshLastSuccessByService,
-  refreshInProgress as refreshInProgressGauge,
-  refreshAppsUpdated,
-  sourceApiRequests,
-  sourceApiDuration,
-  appCacheSize,
-  errorCacheSize,
-  appInfo,
-} from "../metrics.js";
+import type { MetricsCollector } from "./metrics.js";
 
 export interface AppFilters {
   category?: string;
@@ -76,27 +67,23 @@ async function mapWithConcurrency<T, R>(
     }
   }
 
-  const workerCount = Math.max(1, Math.min(concurrency, items.length));
-  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  await Promise.all(Array.from({ length: concurrency }, () => worker()));
   return results;
 }
 
-/**
- * Creates a CachedRegistryManager that orchestrates listing and fetching
- * apps from the given registry sources. Sources are injected so the
- * manager can be tested with mock registries.
- */
 export function createCachedRegistryManager(
   sources: RegistrySource<any>[],
   options?: {
     clock?: () => number;
     refreshIntervalMs?: number;
     getConcurrency?: number;
+    metrics?: MetricsCollector;
   },
 ) {
   const now = options?.clock ?? (() => Date.now());
   const refreshIntervalMs = options?.refreshIntervalMs ?? 600_000;
   const getConcurrency = options?.getConcurrency ?? 10;
+  let metrics = options?.metrics;
 
   // ── Disk cache ──────────────────────────────────────────
 
@@ -265,11 +252,11 @@ export function createCachedRegistryManager(
     try {
       const getStart = Date.now();
       const appResult = await source.get(code, listingResult);
-      sourceApiDuration.observe(
+      metrics?.sourceApiDuration?.observe(
         { service: source.serviceName, operation: "get" },
         (Date.now() - getStart) / 1000,
       );
-      sourceApiRequests.inc({
+      metrics?.sourceApiRequests?.inc({
         service: source.serviceName,
         operation: "get",
         status: Result.isOk(appResult) ? "success" : "failure",
@@ -312,15 +299,15 @@ export function createCachedRegistryManager(
       byService[svc] = (byService[svc] || 0) + 1;
     }
     for (const [svc, count] of Object.entries(byService)) {
-      appCacheSize.set({ service: svc }, count);
+      metrics?.appCacheSize?.set({ service: svc }, count);
     }
-    errorCacheSize.set(ErrorCache.size);
+    metrics?.errorCacheSize?.set(ErrorCache.size);
 
     // App info metric — reset and repopulate so removed apps are cleaned up
-    appInfo.reset();
+    metrics?.appInfo?.reset();
     for (const [, entry] of AppCache) {
       const app = entry.app;
-      appInfo.set(
+      metrics?.appInfo?.set(
         {
           service: app.id.service,
           app_code: app.code,
@@ -341,7 +328,7 @@ export function createCachedRegistryManager(
     async refreshAllSources(): Promise<void> {
       if (refreshInProgress) return;
       refreshInProgress = true;
-      refreshInProgressGauge.set(1);
+      metrics?.refreshInProgress?.set(1);
 
       const refreshStart = Date.now();
       try {
@@ -367,11 +354,11 @@ export function createCachedRegistryManager(
             try {
               const listStart = Date.now();
               const results = await source.list();
-              sourceApiDuration.observe(
+              metrics?.sourceApiDuration?.observe(
                 { service: source.serviceName, operation: "list" },
                 (Date.now() - listStart) / 1000,
               );
-              sourceApiRequests.inc({
+              metrics?.sourceApiRequests?.inc({
                 service: source.serviceName,
                 operation: "list",
                 status: "success",
@@ -379,7 +366,7 @@ export function createCachedRegistryManager(
               listingCache.set(sourceIndex, { results, fetchedAt: ts });
               return { source, sourceIndex, results, succeeded: true };
             } catch (err) {
-              sourceApiRequests.inc({
+              metrics?.sourceApiRequests?.inc({
                 service: source.serviceName,
                 operation: "list",
                 status: "error",
@@ -437,7 +424,7 @@ export function createCachedRegistryManager(
             });
           }
 
-          refreshLastSuccessByService.set(
+          metrics?.refreshLastSuccessByService?.set(
             { service: source.serviceName },
             ts / 1000,
           );
@@ -478,25 +465,25 @@ export function createCachedRegistryManager(
         lastRefresh = new Date(ts);
 
         // Record refresh success metrics
-        refreshDuration.observe((Date.now() - refreshStart) / 1000);
-        refreshTotal.inc({ status: "success" });
-        refreshLastSuccess.set(ts / 1000);
+        metrics?.refreshDuration?.observe((Date.now() - refreshStart) / 1000);
+        metrics?.refreshTotal?.inc({ status: "success" });
+        metrics?.refreshLastSuccess?.set(ts / 1000);
 
         // Emit per-service app-update counts and reset for next refresh
-        refreshAppsUpdated.reset();
+        metrics?.refreshAppsUpdated?.reset();
         for (const [svc, count] of refreshUpdateCounts) {
-          refreshAppsUpdated.set({ service: svc }, count);
+          metrics?.refreshAppsUpdated?.set({ service: svc }, count);
         }
         refreshUpdateCounts.clear();
 
         updateCacheMetrics();
         saveToDisk();
       } catch (err) {
-        refreshTotal.inc({ status: "failure" });
+        metrics?.refreshTotal?.inc({ status: "failure" });
         throw err;
       } finally {
         refreshInProgress = false;
-        refreshInProgressGauge.set(0);
+        metrics?.refreshInProgress?.set(0);
       }
     },
 
@@ -549,7 +536,11 @@ export function createCachedRegistryManager(
               return false;
             }
           }
-          if (filters.capabilities || filters.required_capabilities || filters.supported_capabilities) {
+          if (
+            filters.capabilities ||
+            filters.required_capabilities ||
+            filters.supported_capabilities
+          ) {
             const appCaps = app.manifest.metadata.capabilities ?? [];
 
             const matchCapGroup = (
@@ -667,6 +658,11 @@ export function createCachedRegistryManager(
           : null,
         refreshInProgress,
       };
+    },
+
+    /** Wire up metrics after creation (for the default singleton). */
+    setMetrics(m: MetricsCollector): void {
+      metrics = m;
     },
 
     /** Update Prometheus gauges from the current cache state. */

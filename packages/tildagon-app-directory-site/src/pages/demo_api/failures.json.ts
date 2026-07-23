@@ -1,4 +1,4 @@
-import { CachedRegistryManager } from "tildagon-app-directory-api";
+import { CachedRegistryManager } from "tildagon-app-directory-core";
 
 const items = await CachedRegistryManager.listErrors();
 

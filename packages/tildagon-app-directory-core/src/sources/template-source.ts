@@ -3,7 +3,7 @@ import type {
   RegistrySourceGetParams,
   RegistrySourceGetResult,
   RegistrySourceListResult,
-} from "../RegistrySource";
+} from "../RegistrySource.js";
 
 async function getTildagonApps(): RegistrySourceListResult {
   throw new Error("not implemented");

@@ -1,4 +1,4 @@
-import type { PartialBy, Result } from "../models";
+import type { PartialBy, Result } from "./models/index.js";
 import type {
   TildagonAppRelease,
   TildagonAppReleaseIdentifier,

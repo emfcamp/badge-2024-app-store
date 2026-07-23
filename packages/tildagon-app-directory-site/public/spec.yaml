@@ -11,17 +11,17 @@ paths:
       tags:
         - Apps
       parameters:
-        - $ref: "#/components/parameters/category"
-        - $ref: "#/components/parameters/author"
-        - $ref: "#/components/parameters/license"
-        - $ref: "#/components/parameters/service"
-        - $ref: "#/components/parameters/q"
-        - $ref: "#/components/parameters/capability"
-        - $ref: "#/components/parameters/vid"
-        - $ref: "#/components/parameters/pid"
-        - $ref: "#/components/parameters/frontboard"
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/author'
+        - $ref: '#/components/parameters/license'
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/capability'
+        - $ref: '#/components/parameters/vid'
+        - $ref: '#/components/parameters/pid'
+        - $ref: '#/components/parameters/frontboard'
       responses:
-        "200":
+        '200':
           description: A list of apps
           content:
             application/json:
@@ -31,7 +31,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "#/components/schemas/App"
+                      $ref: '#/components/schemas/App'
                   count:
                     type: integer
                     description: The total number of apps available
@@ -42,17 +42,17 @@ paths:
       tags:
         - Apps
       parameters:
-        - $ref: "#/components/parameters/category"
-        - $ref: "#/components/parameters/author"
-        - $ref: "#/components/parameters/license"
-        - $ref: "#/components/parameters/service"
-        - $ref: "#/components/parameters/q"
-        - $ref: "#/components/parameters/capability"
-        - $ref: "#/components/parameters/vid"
-        - $ref: "#/components/parameters/pid"
-        - $ref: "#/components/parameters/frontboard"
+        - $ref: '#/components/parameters/category'
+        - $ref: '#/components/parameters/author'
+        - $ref: '#/components/parameters/license'
+        - $ref: '#/components/parameters/service'
+        - $ref: '#/components/parameters/q'
+        - $ref: '#/components/parameters/capability'
+        - $ref: '#/components/parameters/vid'
+        - $ref: '#/components/parameters/pid'
+        - $ref: '#/components/parameters/frontboard'
       responses:
-        "200":
+        '200':
           description: RSS 2.0 feed of the 50 most recent apps
           content:
             application/rss+xml:
@@ -72,12 +72,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: An app with the specified ID
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/App"
+                $ref: '#/components/schemas/App'
   /v1/apps/{appId}/download:
     get:
       summary: Download an app tarball
@@ -92,14 +92,14 @@ paths:
           schema:
             type: string
       responses:
-        "302":
+        '302':
           description: Redirect to the tarball URL (cached locally or from the origin)
-        "404":
+        '404':
           description: App not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ReleaseFailure"
+                $ref: '#/components/schemas/ReleaseFailure'
   /v1/tarballs/{filename}:
     get:
       summary: Serve a cached tarball file
@@ -114,14 +114,14 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: The tarball file
           content:
             application/gzip:
               schema:
                 type: string
                 format: binary
-        "404":
+        '404':
           description: Tarball not found in cache
   /v1/failures:
     get:
@@ -130,7 +130,7 @@ paths:
       tags:
         - Monitoring
       responses:
-        "200":
+        '200':
           description: A list of apps
           content:
             application/json:
@@ -140,7 +140,7 @@ paths:
                   items:
                     type: array
                     items:
-                      $ref: "#/components/schemas/ReleaseFailure"
+                      $ref: '#/components/schemas/ReleaseFailure'
                   count:
                     type: integer
                     description: The total number of apps available
@@ -151,7 +151,7 @@ paths:
       tags:
         - Monitoring
       responses:
-        "200":
+        '200':
           description: Server is healthy
           content:
             application/json:
@@ -171,7 +171,7 @@ paths:
       tags:
         - Monitoring
       responses:
-        "200":
+        '200':
           description: Current cache state and build info
           content:
             application/json:
@@ -212,7 +212,7 @@ paths:
       tags:
         - Monitoring
       responses:
-        "200":
+        '200':
           description: Prometheus text-format metrics
           content:
             text/plain:
@@ -373,7 +373,7 @@ components:
         code:
           type: string
         id:
-          $ref: "#/components/schemas/AppId"
+          $ref: '#/components/schemas/AppId'
         releaseTime:
           type: string
           format: date-time
@@ -381,7 +381,7 @@ components:
           type: string
           format: uri
         manifest:
-          $ref: "#/components/schemas/AppManifest"
+          $ref: '#/components/schemas/AppManifest'
       required:
         - code
         - id
@@ -393,7 +393,7 @@ components:
       description: Contains information about a release that was identified but not successfully published to the Tildagon App Store.
       properties:
         id:
-          $ref: "#/components/schemas/AppId"
+          $ref: '#/components/schemas/AppId'
         reason:
           type: string
           description: The reason why the release failed to be published

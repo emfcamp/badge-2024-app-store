@@ -3,9 +3,9 @@ import {
   TildagonAppReleaseIdentifierSchema,
   TildagonAppReleaseSchema,
 } from "tildagon-app";
-import type { RegistrySource } from "../RegistrySource";
-import data from "./apps.json";
-import { Result } from "../../models";
+import type { RegistrySource } from "../RegistrySource.js";
+import data from "./apps.json" with { type: "json" };
+import { Result } from "../models/index.js";
 
 function appToIdMapper(app: (typeof data.items)[number]): {
   id: TildagonAppReleaseIdentifier;

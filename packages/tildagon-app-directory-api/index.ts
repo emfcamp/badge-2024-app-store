@@ -1,10 +1,9 @@
-export { CachedRegistryManager } from "./src/registries/index.ts";
-import { CachedRegistryManager } from "./src/registries/index.ts";
-import { config, cacheMaxAge } from "./src/config.ts";
+export { CachedRegistryManager } from "tildagon-app-directory-core";
+import { CachedRegistryManager, config } from "tildagon-app-directory-core";
 import { createResponseCache } from "./src/responseCache.ts";
 import { Hono } from "hono";
 import type { Context } from "hono";
-import type { AppFilters } from "./src/registries/CachedRegistryManager";
+import type { AppFilters } from "tildagon-app-directory-core";
 import {
   register,
   httpRequestsTotal,
@@ -15,6 +14,17 @@ import {
   refreshProcessMetrics,
   normalizeRoute,
   downloadsTotal,
+  refreshTotal,
+  refreshDuration,
+  refreshLastSuccess,
+  refreshLastSuccessByService,
+  refreshInProgress,
+  refreshAppsUpdated,
+  sourceApiRequests,
+  sourceApiDuration,
+  appCacheSize,
+  errorCacheSize,
+  appInfo,
 } from "./src/metrics.js";
 import {
   createServer,
@@ -59,6 +69,11 @@ try {
 }
 
 // ── Response cache ──────────────────────────────────────────
+
+/** Refresh interval in seconds, for Cache-Control max-age. */
+function cacheMaxAge(): number {
+  return Math.floor(config.refreshIntervalMs / 1000);
+}
 
 const responseCache = createResponseCache({
   ttlMs: config.refreshIntervalMs,
@@ -119,6 +134,22 @@ function parseAppFilters(c: Context): AppFilters | undefined {
 
   return Object.keys(filters).length > 0 ? filters : undefined;
 }
+
+// ── Wire metrics into the shared CachedRegistryManager singleton ─
+
+CachedRegistryManager.setMetrics({
+  refreshTotal,
+  refreshDuration,
+  refreshLastSuccess,
+  refreshLastSuccessByService,
+  refreshInProgress,
+  refreshAppsUpdated,
+  sourceApiRequests,
+  sourceApiDuration,
+  appCacheSize,
+  errorCacheSize,
+  appInfo,
+});
 
 // ── Hono app (API routes) ───────────────────────────────────
 
