@@ -1,58 +1,62 @@
 # Tildagon App Store
 
-Here's the implementation of the [app store](https://apps.badge.emfcamp.org/) for
-[Tildagon](https://tildagon.badge.emfcamp.org/), the EMFcamp badge.
+The [app store](https://apps.badge.emfcamp.org/) for
+[Tildagon](https://tildagon.badge.emfcamp.org/), the EMFcamp badge. Fetches apps
+from code forges (GitHub, Codeberg) and serves them via a REST API and Astro-powered
+website.
 
 ## Submitting an app
 
-To find out how to write and publish an app for the Tildagon, check out [our
-documentation](https://tildagon.badge.emfcamp.org/tildagon-apps/publish/).
+To find out how to write and publish an app for the Tildagon, check out the
+[Tildagon Apps documentation](https://tildagon.badge.emfcamp.org/tildagon-apps/publish/).
+
+## Architecture
+
+The app store is a TypeScript monorepo with the following packages:
+
+| Package                       | Description                                                                |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `tildagon-app`                | Shared types and Zod schemas for app manifests, releases, and identifiers  |
+| `tildagon-app-directory-api`  | Backend: fetches apps from registries, serves the HTTP API, runs Astro SSR |
+| `tildagon-app-directory-site` | Astro frontend (pages, components, layouts)                                |
+| `openapi-spec`                | Generates the OpenAPI 3.1 spec and TypeScript types from it                |
+
+The API and Astro SSR run in a **single Node.js process**. An in-memory
+`CachedRegistryManager` periodically refreshes app data from upstream sources
+(GitHub, Codeberg) and serves it from cache. Tarballs are cached to disk and served
+through a proxy. HTTP responses are cached with a TTL matching the refresh interval.
+
+### API Routes
+
+| Route                         | Description                                 |
+| ----------------------------- | ------------------------------------------- |
+| `GET /v1/apps`                | List all apps (supports filtering)          |
+| `GET /v1/apps/:code`          | Get a single app by its 8-digit code        |
+| `GET /v1/apps/:code/download` | Count download + redirect to cached tarball |
+| `GET /v1/failures`            | List all errors/failures                    |
+| `GET /v1/health`              | Health check                                |
+| `GET /v1/status`              | Cache status and refresh info               |
+| `GET /v1/tarballs/:filename`  | Serve cached tarball (fetches on miss)      |
+| `GET /metrics`                | Prometheus metrics                          |
 
 ## Hacking the App Store
-
-The app store is a little typescript monorepo containing some packages:
-
-- _tildagon-app-directory-api_: _a backend that fetches apps from implemented app
-  sources and exposes them to the web frontend and to the badges_
-- _tildagon-app-directory-site_: _a web frontend showing apps and installation
-  instructions_
-- tildagon-app: a library that is the core location to specify data structures
-  related to the functioning of the app store
-
-You could add additional app sources, modify the website, or add new features.
 
 ### Development
 
 #### Getting Started
 
-The repo is set up as a monorepo with separate packages for the API and the
-site.
-
-First, clone this repository.
-
-We use [mise](https://mise.jdx.dev/) to manage tools and our development tasks.
-Install it using the instructions [here](https://mise.jdx.dev/)
-
-We use node to run code, with tsx for typescript. To get started, install node
-and our node dependencies.
+Clone the repository. We use [mise](https://mise.jdx.dev/) to manage tools and
+development tasks — install it following the instructions [here](https://mise.jdx.dev/).
 
 ```bash
-mise install
-npm install
+mise install       # Install Node 24 and other tools
+npm install        # Install dependencies
+mise run dev       # Build library + start dev server
 ```
 
-To run the website run:
-
-```bash
-# This automatically also builds the library
-mise run dev
-```
-
-By default, in development, we mock the app store data to avoid accidentally
-getting our access tokens blocked. If you need to use real data, create a file
-called `mise.local.toml` in the root directory of the repository. This is how
-Mise allows for environmental variables to be used safely, without getting
-committed to the repository. The file should have the following contents:
+By default, `APP_STORE_MOCK=true` is set, which uses static mock data so you
+don't need API tokens. To use real data from GitHub and Codeberg, create a
+`mise.local.toml` file (gitignored):
 
 ```toml
 [env]
@@ -60,116 +64,78 @@ APP_STORE_MOCK = false
 GITHUB_TOKEN = "github_pat_[redacted]"
 ```
 
-You will need to create a [GitHub access
-token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
-in order to call the GitHub API.
+You'll need a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-In case it's interesting, the mock data is currently just the data pulled from
-the production app store on 2025-10-07.
+#### Useful Commands
 
-#### Implementing a Registry Source
+| Command             | Description                            |
+| ------------------- | -------------------------------------- |
+| `mise run dev`      | Start the dev server (with HMR)        |
+| `mise run test`     | Run all tests                          |
+| `mise run check`    | Run all checks (types, prettier, lint) |
+| `mise run prettier` | Format all files with Prettier         |
+| `mise run eslint`   | Lint and auto-fix with ESLint          |
 
-`RegistrySource` is the name for a common interface we implement to let the app
-store fetch apps from elsewhere. Because we have a `RegistrySource`
-implementation for GitHub, attendees (and other Tildagon users) can publish
-their Tildagon apps to GitHub.
+### Implementing a Registry Source
 
-If you want to add support for publishing apps to another service - for example
-another code forge, separate website, node package, or anything else you can
-imagine, you would need to implement a `RegistrySource` for your service so that
-the app store can read apps from the service.
+`RegistrySource` is the interface for fetching apps from an upstream service.
+Existing implementations include GitHub and Codeberg. To add a new source:
 
-To implement a registry source, you would create a file in
-`./packages/tildagon-app-directory-api/src/registries/sources/`, in that file
-export an object that implements the `RegistrySource` interface, and add your
-object to the `SOURCES` variable at the top of `CachedRegistryManager`, and to
-the `TildagonDirectoryBackendServiceSchema` in `TildagonAppRelease`.
+1. Create a file in `packages/tildagon-app-directory-api/src/registries/sources/`
+2. Export an object implementing the `RegistrySource<T>` interface
+3. Add it to the `DEFAULT_SOURCES` array in `CachedRegistryManager.ts`
+4. Add the service name to `TildagonDirectoryBackendServiceSchema` in `packages/tildagon-app/src/TildagonAppRelease.ts`
 
-App fetching is managed in two stages.
+App fetching happens in two stages:
 
-- Listing - the `RegistrySource` must provide a list of all of the apps that the
-  source provides, but it does not _necessarily_ have to fetch all the details
-  of every app at this stage
-- Individual app fetching - the `RegistrySource` must provide all the required
-  details for each app
+- **`list()`** — Returns app identifiers, optionally with extra metadata (like
+  `releaseTime`, `tarballUrl`). The extra metadata type is the generic parameter `T`.
+- **`get(code, { id, ...extraFromList })`** — Fetches the full `TildagonAppRelease`
+  for one app. Receives metadata from `list()` to avoid duplicate API calls.
 
-At the listing stage, a `RegistrySource` is only _required_ to return a list of
-identifiers of the apps - according to the `TildagonAppReleaseIdentifier` type.
-At the listing stage, the `RegistrySource` _may_ provide additional metadata.
-The additional metadata can then be passed along with the ID to the individual
-app fetching hook `get` exposed by the `RegistrySource`. This is to allow
-implementations of `RegistrySource` to avoid duplicate data fetching.
-
-A `TildagonAppReleaseIdentifier` is the minimum set of information about an App
-Release that is required to uniquely identify it. It consists of the name of the
-service that provides the app, the owner (ideally this should map to a user
-system with uniqueness guarantees in the upstream service), the name of the app
-(ideally also unique per user account within the upstream service), and the
-`releaseHash` (you could use a version number for this as long as it is unique).
-
-With some (but not all) code forge APIs, it's possible to get unique App
-Identifiers from the result of an (optionally paginated) search endpoint.
-Therefore the listing stage would only have to enumerate apps through a
-paginated search endpoint, and not have to make an individual request for every
-app.
-
-However, some code forge APIs (or other upstream registries or app sources) may
-not provide the `releaseHash` (or other metadata that's part of the
-`TildagonAppReleaseIdentifier`) in their search/listing API. In this case, it
-may be necessary to make an additional API call per individual app in the
-listing stage. While this slows down the app store listing, this _may be_ ok if
-justified by significant demand for publication of apps on the given upstream
-source. In this case, any additional information procured by the API call to get
-the individual app in the listing stage should be passed from the listing stage
-to the individual app fetching stage. This is facilitated by the generic type
-parameter on the `RegistrySource` interface.
+Both methods are async and return a `Result<Success, Failure>` type — never throw.
+Actionable error messages are encouraged, as they're shown to app authors on the website.
 
 ```ts
-const MyRegistrySource: RegistrySource<{createdAt: Date}> = {
+const MyRegistrySource: RegistrySource<{ createdAt: Date }> = {
   list: async () => {
-    const id: TildagonAppReleaseIdentifier = {...}
-    const createdAt = getMyAppCreationDate(id);
-    // The `list` method on the `RegistrySource` must return an object with an
-    // id as well as a `createdAt` value as specified in the additional data
-    // type parameter on the `RegistrySource<..>` type
-    return {id, createdAt}
+    // Return app IDs + optional metadata
+    return Result.Ok({ id: { ... }, createdAt: new Date() });
   },
-  get: async (args: RegistrySourceGetParams<{createdAt: Date}>) => {
-    // We can now reference the `createdAt` value that we returned from the
-    listing stage.
-    args.createdAt
+  get: async (args) => {
+    // args.createdAt is available from the listing stage
+    // Fetch manifest, tarball URL, etc.
+    return Result.Ok(fullRelease);
   }
-}
+};
 ```
 
-After the listing stage, the `get` method is called for each app that the list
-method returned. This is to fill in all the required metadata - the parts of a
-`TildagonAppRelease` other than the identifier. This includes the `releaseTime`,
-`tarballUrl`, and release manifest. If all this information is already available
-from the listing stage, this becomes an identity function - if however you need
-to read the `manifest.toml` from the release, you would do so in the `get`
-function.
+If you're interested in enabling app publication on an additional service, get in
+touch via IRC/Matrix or open an issue on GitHub.
 
-Both the `list` and `get` functions in the `RegistrySource` interface are
-asynchronous, and return a Result type. It is _encouraged_ to return actionable
-errors with the app identifier where possible. The App Store website collects
-and presents these errors to app authors who are attempting to publish their
-apps. The GitHub registry source has plenty of examples of actionable and
-attributed errors that are suitable for this use case.
+### Environment Variables
 
-If you're interested in enabling app publication on an additional code forge,
-website, or other service, we encourage you to get in touch in IRC/Matrix or by
-opening an issue on GitHub to discuss the proposal, and to get technical
-support.
+| Variable              | Default        | Purpose                                           |
+| --------------------- | -------------- | ------------------------------------------------- |
+| `GITHUB_TOKEN`        | (empty)        | GitHub API access token (not needed in mock mode) |
+| `APP_STORE_MOCK`      | `"true"`       | Use dummy data instead of real APIs               |
+| `PORT`                | `"3000"`       | Server port                                       |
+| `APP_STORE_STATIC`    | unset          | Build Astro as static (for GitHub Pages)          |
+| `REFRESH_INTERVAL_MS` | `"600000"`     | Refresh interval in ms (10 min default)           |
+| `CACHE_DIR`           | `"/app/cache"` | Disk cache directory                              |
 
-#### API
+## Deployment
 
-The API is a node server that uses zod to specify the domain models for the
-store, and implements upstream app "registries". The API is not currently used,
-but the code in this repository that interfaces with upstream registries is
-called directly by the website (rather than via the API).
+The app store is deployed as a Docker container. The workflow
+(`.github/workflows/build-container.yml`) builds and pushes to
+`ghcr.io/emfcamp/app-store` on pushes to `main`, PRs, and tags.
 
-#### Site
+```bash
+docker compose up -d
+```
 
-The site is an Astro site that uses the registry library to fetch apps and
-display them.
+The container runs the Hono API server and Astro SSR together. It mounts a volume
+at `/app/cache` for persistent disk cache across restarts.
+
+A legacy static GitHub Pages deployment also exists, built when
+`APP_STORE_STATIC=true`.
