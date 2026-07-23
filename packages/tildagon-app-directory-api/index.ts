@@ -363,12 +363,6 @@ api.get("/v1/tarballs/:filename", async (c) => {
   const path = CachedRegistryManager.getCachedTarballPath(code, releaseHash);
   if (!existsSync(path)) return c.notFound();
 
-  const app = await CachedRegistryManager.getApp(code);
-  downloadsTotal.inc({
-    service: app.type === "success" ? app.value.id.service : "unknown",
-    app_code: code,
-  });
-
   c.header("Content-Type", "application/gzip");
   c.header("Cache-Control", "public, max-age=31536000, immutable");
   return c.body(Readable.toWeb(createReadStream(path)) as ReadableStream);
