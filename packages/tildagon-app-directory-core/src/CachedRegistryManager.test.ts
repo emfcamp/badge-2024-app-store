@@ -4,7 +4,7 @@ import type {
   RegistrySource,
   RegistrySourceFailure,
 } from "./RegistrySource.js";
-import { Result } from "../models/index.js";
+import { Result } from "./models/index.js";
 import {
   TildagonAppReleaseIdentifier,
   type TildagonAppRelease,

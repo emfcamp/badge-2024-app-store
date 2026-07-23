@@ -11,7 +11,7 @@ PORT = "3000"
 
 [tasks.check]
 description = "Run all checks (types, prettier, lint)"
-depends = ["check-types", "check-astro", "check-prettier", "check-eslint"]
+depends = ["check-types", "check-astro", "check-prettier", "check-eslint", "build-core"]
 
 [tasks.test]
 description = "Run all tests"
@@ -19,7 +19,7 @@ run = "npm test"
 
 [tasks.check-types]
 description = "Typecheck all packages"
-depends = ["build-library", "build-spec"]
+depends = ["build-library", "build-spec", "build-core"]
 run = "npm run --workspaces --if-present check-types"
 
 [tasks.check-astro]
@@ -30,18 +30,23 @@ run = "npm --workspace='tildagon-app-directory-site' run astro check"
 description = "Build the tildagon-app library"
 run = "npm --workspace='tildagon-app' run build"
 
+[tasks.build-core]
+description = "Build the tildagon-app-directory-core library"
+depends = ["build-library"]
+run = "npm --workspace='tildagon-app-directory-core' run build"
+
 [tasks.build-spec]
 description = "Build the OpenAPI spec"
 run = "npm --workspace='openapi-spec' run build"
 
 [tasks.build-website]
 description = "Build the website"
-depends = ["build-library"]
+depends = ["build-library", "build-core"]
 run = "npm --workspace='tildagon-app-directory-site' run build"
 
 [tasks.dev]
 description = "Serve the website"
-depends = ["build-library"]
+depends = ["build-library", "build-core"]
 run = "npm --workspace='tildagon-app-directory-site' run dev"
 
 [tasks.check-prettier]

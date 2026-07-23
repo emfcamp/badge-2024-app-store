@@ -1,5 +1,5 @@
 import type { TildagonAppRelease } from "tildagon-app";
-import { CachedRegistryManager } from "tildagon-app-directory-api";
+import { CachedRegistryManager } from "tildagon-app-directory-core";
 import type { APIContext } from "astro";
 
 const apps = await CachedRegistryManager.listApps();

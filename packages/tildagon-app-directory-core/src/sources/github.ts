@@ -1,7 +1,7 @@
 import { Octokit } from "octokit";
 import { throttling } from "@octokit/plugin-throttling";
 import type { GraphQlQueryResponseData } from "@octokit/graphql";
-import type { Result } from "../../models";
+import type { Result } from "../models/index.js";
 import type { TildagonAppReleaseIdentifier } from "tildagon-app";
 import {
   TildagonAppManifestSchema,
@@ -9,7 +9,10 @@ import {
 } from "tildagon-app";
 import { z } from "zod";
 import TOML from "@ltd/j-toml";
-import type { RegistrySource, RegistrySourceFailure } from "../RegistrySource";
+import type {
+  RegistrySource,
+  RegistrySourceFailure,
+} from "../RegistrySource.js";
 
 const maybeGitHubTokenSchema = z.union([
   z.string().startsWith("ghp_"),

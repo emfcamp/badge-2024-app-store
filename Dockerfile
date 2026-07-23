@@ -9,6 +9,7 @@ COPY packages/ ./packages/
 RUN npm ci
 
 RUN npm --workspace=tildagon-app run build
+RUN npm --workspace=tildagon-app-directory-core run build
 RUN npm --workspace=tildagon-app-directory-site run build
 
 # ── Run stage ────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import type { GetStaticPaths } from "astro";
 import Layout from "../../layouts/Layout.astro";
 import AppsListing from "../../components/AppsListing.astro";
 import Alert from "../../components/Alert.astro";
-import { CachedRegistryManager } from "tildagon-app-directory-api";
+import { CachedRegistryManager } from "tildagon-app-directory-core";
 
 let { author } = Astro.params;
 author = decodeURIComponent(author!);

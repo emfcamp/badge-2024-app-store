@@ -15,11 +15,11 @@ export default defineConfig({
   ],
   vite: {
     ssr: {
-      // Don't bundle tildagon-app-directory-api — the Astro SSR pages should
+      // Don't bundle tildagon-app-directory-core — the Astro SSR pages should
       // use the same CachedRegistryManager singleton as the API server.
       // Otherwise Astro creates a second instance with an independent cache
       // that never gets a heartbeat refresh.
-      external: ["tildagon-app-directory-api"],
+      external: ["tildagon-app-directory-core"],
     },
   },
 });

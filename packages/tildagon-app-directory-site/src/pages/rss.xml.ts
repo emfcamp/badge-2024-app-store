@@ -1,4 +1,4 @@
-import { CachedRegistryManager } from "tildagon-app-directory-api";
+import { CachedRegistryManager } from "tildagon-app-directory-core";
 
 export async function GET() {
   const data = await CachedRegistryManager.listApps();

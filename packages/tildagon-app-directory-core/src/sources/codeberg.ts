@@ -4,8 +4,8 @@ import type {
   RegistrySourceGetParams,
   RegistrySourceGetResult,
   RegistrySourceListResult,
-} from "../RegistrySource";
-import { Result } from "../../models";
+} from "../RegistrySource.js";
+import { Result } from "../models/index.js";
 import {
   TildagonAppManifestSchema,
   type TildagonAppRelease,
