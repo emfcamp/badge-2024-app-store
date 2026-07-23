@@ -8,6 +8,7 @@ node = "24"
 GITHUB_TOKEN = { value = "${GITHUB_TOKEN:-}", redact = true }
 APP_STORE_MOCK = true
 PORT = "3000"
+CACHE_DIR = "tmp/cache"
 
 [tasks.check]
 description = "Run all checks (types, prettier, lint)"
