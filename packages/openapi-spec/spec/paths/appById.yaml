@@ -10,6 +10,7 @@ get:
       description: The ID of the app to retrieve
       schema:
         type: string
+    - $ref: "../parameters/originalTarballUrl.yaml"
   responses:
     "200":
       description: An app with the specified ID

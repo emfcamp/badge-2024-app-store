@@ -293,7 +293,10 @@ api.get("/v1/apps/:code", async (c) => {
   const code = c.req.param("code");
   const app = await CachedRegistryManager.getApp(code);
   if (app.type === "success") {
-    return c.json(proxyTarballUrl(app.value, getBaseUrl(c)));
+    const useOriginal = c.req.query("original_tarball_url") !== undefined;
+    return c.json(
+      useOriginal ? app.value : proxyTarballUrl(app.value, getBaseUrl(c)),
+    );
   }
   return c.json(app.failure, 404);
 });
@@ -302,8 +305,9 @@ api.get("/v1/apps/:code", async (c) => {
 api.get("/v1/apps", async (c) => {
   const filters = parseAppFilters(c);
   const apps = await CachedRegistryManager.listApps(filters);
+  const useOriginal = c.req.query("original_tarball_url") !== undefined;
   return c.json({
-    items: apps.map((a) => proxyTarballUrl(a, getBaseUrl(c))),
+    items: apps.map((a) => (useOriginal ? a : proxyTarballUrl(a, getBaseUrl(c)))),
     count: apps.length,
   });
 });

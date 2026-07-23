@@ -1,0 +1,6 @@
+name: original_tarball_url
+in: query
+required: false
+description: When set, returns the original upstream tarball URL instead of the proxied/cached URL. Any value will enable this behavior.
+schema:
+  type: string
