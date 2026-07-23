@@ -664,3 +664,252 @@ describe("listErrors", () => {
     expect(errors[0].reason).toBe("tildagon.toml parse error");
   });
 });
+
+// ── Capability filtering tests ─────────────────────────────
+
+describe("capability filtering", () => {
+  const CAP_POSITION =
+    "https://tildagon.badge.emfcamp.org/capabilities/registry/position/";
+  const CAP_NMEA =
+    "https://tildagon.badge.emfcamp.org/capabilities/registry/nmea/";
+  const CAP_NEOPIXELS =
+    "https://tildagon.badge.emfcamp.org/capabilities/registry/neopixels/";
+
+  /** Build an app with capabilities. */
+  function makeAppWithCaps(
+    name: string,
+    caps: { identifier: string; required: boolean }[],
+    opts: { id?: Partial<AppId> } = {},
+  ): TildagonAppRelease {
+    const base = makeApp({ name, id: opts.id });
+    return {
+      ...base,
+      manifest: {
+        ...base.manifest,
+        metadata: {
+          ...base.manifest.metadata,
+          capabilities: caps.map((c) => ({
+            required: c.required,
+            feature: { type: "Capability", identifier: c.identifier },
+          })),
+        },
+      },
+    };
+  }
+
+  test("filters by capability (either required or supported)", async () => {
+    const app = makeAppWithCaps("GPS App", [
+      { identifier: CAP_POSITION, required: true },
+      { identifier: CAP_NMEA, required: false },
+    ]);
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "test-owner/test-repo": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // Match required capability
+    let result = await mgr.listApps({ capabilities: [CAP_POSITION] });
+    expect(result).toHaveLength(1);
+
+    // Match supported capability
+    result = await mgr.listApps({ capabilities: [CAP_NMEA] });
+    expect(result).toHaveLength(1);
+
+    // No match for capability the app doesn't have
+    result = await mgr.listApps({ capabilities: [CAP_NEOPIXELS] });
+    expect(result).toHaveLength(0);
+  });
+
+  test("required_capability only matches required: true", async () => {
+    const app = makeAppWithCaps("GPS App", [
+      { identifier: CAP_POSITION, required: true },
+      { identifier: CAP_NMEA, required: false },
+    ]);
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "test-owner/test-repo": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // required_capability matches the required one
+    let result = await mgr.listApps({
+      required_capabilities: [CAP_POSITION],
+    });
+    expect(result).toHaveLength(1);
+
+    // required_capability does NOT match the supported one
+    result = await mgr.listApps({
+      required_capabilities: [CAP_NMEA],
+    });
+    expect(result).toHaveLength(0);
+  });
+
+  test("supported_capability only matches required: false", async () => {
+    const app = makeAppWithCaps("GPS App", [
+      { identifier: CAP_POSITION, required: true },
+      { identifier: CAP_NMEA, required: false },
+    ]);
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "test-owner/test-repo": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // supported_capability matches the supported one
+    let result = await mgr.listApps({
+      supported_capabilities: [CAP_NMEA],
+    });
+    expect(result).toHaveLength(1);
+
+    // supported_capability does NOT match the required one
+    result = await mgr.listApps({
+      supported_capabilities: [CAP_POSITION],
+    });
+    expect(result).toHaveLength(0);
+  });
+
+  test("AND across repeated params, OR within commas", async () => {
+    const app = makeAppWithCaps("Full App", [
+      { identifier: CAP_POSITION, required: true },
+      { identifier: CAP_NMEA, required: true },
+    ]);
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "test-owner/test-repo": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // AND: both must be present → match
+    let result = await mgr.listApps({
+      required_capabilities: [CAP_POSITION, CAP_NMEA],
+    });
+    expect(result).toHaveLength(1);
+
+    // AND: one missing → no match
+    result = await mgr.listApps({
+      required_capabilities: [CAP_POSITION, CAP_NEOPIXELS],
+    });
+    expect(result).toHaveLength(0);
+
+    // OR: comma-separated within one param → match on either
+    result = await mgr.listApps({
+      required_capabilities: [CAP_POSITION + "," + CAP_NEOPIXELS],
+    });
+    expect(result).toHaveLength(1);
+  });
+
+  test("capabilities without type field are ignored safely", async () => {
+    // Regression: old hexpansion features had no type field.
+    // The filter should not throw when encountering them.
+    const base = makeApp({ name: "Hexpansion App" });
+    const app: TildagonAppRelease = {
+      ...base,
+      manifest: {
+        ...base.manifest,
+        metadata: {
+          ...base.manifest.metadata,
+          capabilities: [
+            {
+              required: true,
+              feature: {
+                vid: "0xCAFE",
+                pid: "0x54E1",
+                name: "Matrix Hexpansion",
+              },
+            },
+          ],
+        },
+      },
+    };
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "test-owner/test-repo": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    // Should not throw and not match (hexpansion features have no type field)
+    const result = await mgr.listApps({
+      capabilities: [CAP_POSITION],
+    });
+    expect(result).toHaveLength(0);
+  });
+
+  test("frontboard filter matches by type field", async () => {
+    const base = makeApp({ name: "Frontboard App" });
+    const app: TildagonAppRelease = {
+      ...base,
+      manifest: {
+        ...base.manifest,
+        metadata: {
+          ...base.manifest.metadata,
+          capabilities: [
+            {
+              required: false,
+              feature: { type: "2026 Frontboard" },
+            },
+          ],
+        },
+      },
+    };
+    const source = mockSource({
+      listResults: [
+        Result.Ok({
+          id: app.id,
+          releaseTime: app.releaseTime,
+          tarballUrl: app.tarballUrl,
+        }),
+      ],
+      getResults: { "test-owner/test-repo": Result.Ok(app) },
+    });
+
+    const mgr = createManager([source]);
+    await mgr.refreshAllSources();
+
+    let result = await mgr.listApps({ frontboard: "2026 Frontboard" });
+    expect(result).toHaveLength(1);
+
+    result = await mgr.listApps({ frontboard: "2024 Frontboard" });
+    expect(result).toHaveLength(0);
+  });
+});

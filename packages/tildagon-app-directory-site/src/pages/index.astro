@@ -7,14 +7,28 @@ import type { AppFilters } from "tildagon-app-directory-api/src/registries/Cache
 
 const url = new URL(Astro.request.url);
 const filters: AppFilters = {};
-const capability = url.searchParams.get("capability");
+
+// Capability filters — support all three types with repeated params (AND) and commas (OR)
+const capabilities = url.searchParams.getAll("capability");
+const requiredCapabilities = url.searchParams.getAll("required_capability");
+const supportedCapabilities = url.searchParams.getAll("supported_capability");
+if (capabilities.length > 0) filters.capabilities = capabilities;
+if (requiredCapabilities.length > 0) filters.required_capabilities = requiredCapabilities;
+if (supportedCapabilities.length > 0) filters.supported_capabilities = supportedCapabilities;
+
 const vid = url.searchParams.get("vid");
 const pid = url.searchParams.get("pid");
 const frontboard = url.searchParams.get("frontboard");
-if (capability) filters.capabilities = [capability];
 if (vid) filters.vid = vid;
 if (pid) filters.pid = pid;
 if (frontboard) filters.frontboard = frontboard;
+
+// Determine the active capability mode from the first present param
+const capMode = requiredCapabilities.length > 0 ? "required"
+  : supportedCapabilities.length > 0 ? "supported"
+  : "any";
+const capValue = requiredCapabilities[0] ?? supportedCapabilities[0] ?? capabilities[0] ?? "";
+
 const hasFilters = Object.keys(filters).length > 0;
 
 const data = await CachedRegistryManager.listApps(hasFilters ? filters : undefined);
@@ -50,11 +64,22 @@ const copy = {
           Capability:
           <input
             type="text"
-            name="capability"
-            value={capability ?? ""}
+            name={capMode === "required" ? "required_capability" : capMode === "supported" ? "supported_capability" : "capability"}
+            value={capValue}
             list="capability-list"
             placeholder="https://tildagon.badge.emfcamp.org/capabilities/registry/example/"
           />
+          <select
+            style="margin-left: 0.25rem;"
+            onchange="
+              const input = this.form.querySelector('input[list=capability-list]');
+              input.name = this.value === 'required' ? 'required_capability' : this.value === 'supported' ? 'supported_capability' : 'capability';
+            "
+          >
+            <option value="any" selected={capMode === "any"}>either</option>
+            <option value="required" selected={capMode === "required"}>required</option>
+            <option value="supported" selected={capMode === "supported"}>supported</option>
+          </select>
         </label>
         <datalist id="capability-list">
           {uniqueCapabilities.map((c: string) => (<option value={c} />))}

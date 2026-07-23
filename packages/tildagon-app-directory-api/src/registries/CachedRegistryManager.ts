@@ -33,7 +33,12 @@ export interface AppFilters {
   category?: string;
   author?: string;
   license?: string;
+  /** Match apps that have this capability (required or supported). AND across entries, OR within comma-separated values. */
   capabilities?: string[];
+  /** Match apps that REQUIRE this capability (required: true). AND across entries, OR within comma-separated values. */
+  required_capabilities?: string[];
+  /** Match apps that SUPPORT this capability (required: false). AND across entries, OR within comma-separated values. */
+  supported_capabilities?: string[];
   vid?: string;
   pid?: string;
   frontboard?: string;
@@ -544,18 +549,44 @@ export function createCachedRegistryManager(
               return false;
             }
           }
-          if (filters.capabilities) {
+          if (filters.capabilities || filters.required_capabilities || filters.supported_capabilities) {
             const appCaps = app.manifest.metadata.capabilities ?? [];
-            const hasAll = filters.capabilities.every((capGroup) => {
+
+            const matchCapGroup = (
+              capGroup: string,
+              required: boolean | null,
+            ): boolean => {
               const orCaps = capGroup.split(",");
               return orCaps.some((c) =>
                 appCaps.some(
                   (assoc) =>
-                    typeof assoc.feature === "string" && assoc.feature === c,
+                    typeof assoc.feature === "object" &&
+                    "type" in assoc.feature &&
+                    assoc.feature.type === "Capability" &&
+                    assoc.feature.identifier === c &&
+                    (required === null || assoc.required === required),
                 ),
               );
-            });
-            if (!hasAll) return false;
+            };
+
+            if (filters.capabilities) {
+              const hasAll = filters.capabilities.every((capGroup) =>
+                matchCapGroup(capGroup, null),
+              );
+              if (!hasAll) return false;
+            }
+            if (filters.required_capabilities) {
+              const hasAll = filters.required_capabilities.every((capGroup) =>
+                matchCapGroup(capGroup, true),
+              );
+              if (!hasAll) return false;
+            }
+            if (filters.supported_capabilities) {
+              const hasAll = filters.supported_capabilities.every((capGroup) =>
+                matchCapGroup(capGroup, false),
+              );
+              if (!hasAll) return false;
+            }
           }
           if (filters.vid || filters.pid) {
             const appCaps = app.manifest.metadata.capabilities ?? [];
@@ -574,8 +605,10 @@ export function createCachedRegistryManager(
             const hasMatch = appCaps.some(
               (assoc) =>
                 typeof assoc.feature === "object" &&
-                "name" in assoc.feature &&
-                assoc.feature.name === filters.frontboard,
+                "type" in assoc.feature &&
+                typeof assoc.feature.type === "string" &&
+                assoc.feature.type.includes("Frontboard") &&
+                assoc.feature.type === filters.frontboard,
             );
             if (!hasMatch) return false;
           }

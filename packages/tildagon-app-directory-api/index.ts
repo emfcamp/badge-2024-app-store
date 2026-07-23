@@ -109,6 +109,14 @@ function parseAppFilters(c: Context): AppFilters | undefined {
   const caps = c.req.queries("capability");
   if (caps && caps.length > 0) filters.capabilities = caps;
 
+  const requiredCaps = c.req.queries("required_capability");
+  if (requiredCaps && requiredCaps.length > 0)
+    filters.required_capabilities = requiredCaps;
+
+  const supportedCaps = c.req.queries("supported_capability");
+  if (supportedCaps && supportedCaps.length > 0)
+    filters.supported_capabilities = supportedCaps;
+
   return Object.keys(filters).length > 0 ? filters : undefined;
 }
 
