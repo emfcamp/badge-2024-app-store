@@ -1,0 +1,6 @@
+name: codes
+in: query
+required: false
+description: Filter by app codes (comma-separated). e.g. `12345678,87654321`
+schema:
+  type: string

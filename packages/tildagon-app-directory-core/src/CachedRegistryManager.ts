@@ -35,6 +35,8 @@ export interface AppFilters {
   frontboard?: string;
   service?: string;
   q?: string;
+  /** Comma-separated 8-digit app codes for bulk lookup (e.g. "12345678,87654321"). */
+  codes?: string;
 }
 
 if (process.env.APP_STORE_MOCK === "true") {
@@ -610,6 +612,10 @@ export function createCachedRegistryManager(
               .toLowerCase()
               .includes(q);
             if (!inName && !inDesc) return false;
+          }
+          if (filters.codes) {
+            const codes = filters.codes.split(",");
+            if (!codes.includes(app.code)) return false;
           }
           return true;
         });

@@ -112,6 +112,7 @@ function parseAppFilters(c: Context): AppFilters | undefined {
   const pid = c.req.query("pid");
   const frontboard = c.req.query("frontboard");
   const q = c.req.query("q");
+  const codes = c.req.query("codes");
   if (category) filters.category = category;
   if (author) filters.author = author;
   if (license) filters.license = license;
@@ -120,6 +121,7 @@ function parseAppFilters(c: Context): AppFilters | undefined {
   if (pid) filters.pid = pid;
   if (frontboard) filters.frontboard = frontboard;
   if (q) filters.q = q;
+  if (codes) filters.codes = codes;
 
   const caps = c.req.queries("capability");
   if (caps && caps.length > 0) filters.capabilities = caps;

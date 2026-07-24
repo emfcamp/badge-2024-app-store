@@ -13,6 +13,7 @@ get:
     - $ref: "../parameters/vid.yaml"
     - $ref: "../parameters/pid.yaml"
     - $ref: "../parameters/frontboard.yaml"
+    - $ref: "../parameters/codes.yaml"
   responses:
     "200":
       description: RSS 2.0 feed of the 50 most recent apps
