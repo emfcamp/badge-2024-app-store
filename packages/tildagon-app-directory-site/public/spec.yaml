@@ -20,6 +20,9 @@ paths:
         - $ref: '#/components/parameters/vid'
         - $ref: '#/components/parameters/pid'
         - $ref: '#/components/parameters/frontboard'
+        - $ref: '#/components/parameters/required_capability'
+        - $ref: '#/components/parameters/supported_capability'
+        - $ref: '#/components/parameters/codes'
       responses:
         '200':
           description: A list of apps
@@ -51,6 +54,9 @@ paths:
         - $ref: '#/components/parameters/vid'
         - $ref: '#/components/parameters/pid'
         - $ref: '#/components/parameters/frontboard'
+        - $ref: '#/components/parameters/required_capability'
+        - $ref: '#/components/parameters/supported_capability'
+        - $ref: '#/components/parameters/codes'
       responses:
         '200':
           description: RSS 2.0 feed of the 50 most recent apps
@@ -259,7 +265,7 @@ components:
       name: capability
       in: query
       required: false
-      description: Filter by required capability. Repeat for AND logic. e.g. `?capability=MOTOR&capability=LED`
+      description: Filter by capability (matches both required and supported). Repeat for AND logic. Comma-separated for OR within a single parameter. Values are full capability URLs, e.g. `?capability=https://tildagon.badge.emfcamp.org/capabilities/registry/neopixels/`
       schema:
         type: string
     vid:
@@ -281,6 +287,27 @@ components:
       in: query
       required: false
       description: Filter by frontboard name
+      schema:
+        type: string
+    required_capability:
+      name: required_capability
+      in: query
+      required: false
+      description: Filter by capability that the badge MUST provide (apps that REQUIRE this). Repeat for AND logic. Comma-separated for OR within a single parameter. Values are full capability URLs, e.g. `?required_capability=https://tildagon.badge.emfcamp.org/capabilities/registry/neopixels/`
+      schema:
+        type: string
+    supported_capability:
+      name: supported_capability
+      in: query
+      required: false
+      description: Filter by capability that this app SUPPORTS (but does not require). Repeat for AND logic. Comma-separated for OR within a single parameter. Values are full capability URLs, e.g. `?supported_capability=https://tildagon.badge.emfcamp.org/capabilities/registry/nmea/`
+      schema:
+        type: string
+    codes:
+      name: codes
+      in: query
+      required: false
+      description: Filter by app codes (comma-separated). e.g. `12345678,87654321`
       schema:
         type: string
   schemas:
@@ -305,13 +332,95 @@ components:
         - service
         - owner
         - title
+    Capability:
+      title: Capability
+      description: A hardware or software capability identified by a URL from the Tildagon capability registry
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Capability
+        identifier:
+          type: string
+          format: uri
+          description: Full URL to the capability in the registry, e.g. https://tildagon.badge.emfcamp.org/capabilities/registry/neopixels/
+      required:
+        - type
+        - identifier
+    HexpansionIdentifier:
+      title: HexpansionIdentifier
+      description: Identifies a hexpansion hardware module by VID and PID
+      type: object
+      properties:
+        name:
+          type: string
+          description: Human-readable name of the hexpansion
+        creator:
+          type: string
+          description: Creator of the hexpansion
+        url:
+          type: string
+          format: uri
+          description: URL for more information about the hexpansion
+        vid:
+          type: string
+          description: Vendor ID of the hexpansion
+        pid:
+          type: string
+          description: Product ID of the hexpansion
+      required:
+        - vid
+        - pid
+    HexpansionDefinition:
+      title: HexpansionDefinition
+      description: A hexpansion hardware module requirement or capability
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Hexpansion
+        identifier:
+          $ref: '#/components/schemas/HexpansionIdentifier'
+      required:
+        - type
+        - identifier
+    FrontboardIdentifier:
+      title: FrontboardIdentifier
+      description: Identifies a badge frontboard type (e.g. "2024 Frontboard" or "2026 Frontboard")
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - 2024 Frontboard
+            - 2026 Frontboard
+      required:
+        - type
+    TildagonOSMinimumVersion:
+      title: TildagonOSMinimumVersion
+      description: Specifies a minimum TildagonOS version required by the app
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - TildagonOSMinimumVersion
+        version:
+          type: string
+          description: Minimum TildagonOS version string
+      required:
+        - type
+        - version
     AppManifest:
       title: AppManifest
       description: The author-provided app manifest (tildagon.toml or tildagon.json)
+      type: object
       properties:
         app:
           type: object
-          description: The app's manifest
+          description: The app's identity and classification
           properties:
             name:
               type: string
@@ -353,12 +462,37 @@ components:
               description: The version of the app
             capabilities:
               type: array
-              description: Hardware capabilities required or provided by this app
+              description: Hardware/software capability associations for this app (required or supported)
               items:
                 type: object
                 properties:
+                  required:
+                    type: boolean
+                    description: Whether this capability is required (true) or merely supported (false)
                   feature:
-                    description: A string capability name, or a hexpansion/frontboard identifier
+                    oneOf:
+                      - $ref: '#/components/schemas/Capability'
+                      - $ref: '#/components/schemas/HexpansionDefinition'
+                      - $ref: '#/components/schemas/FrontboardIdentifier'
+                      - $ref: '#/components/schemas/TildagonOSMinimumVersion'
+                required:
+                  - required
+                  - feature
+            providedCapabilities:
+              type: array
+              description: Capabilities that this app provides to other apps
+              items:
+                type: object
+                properties:
+                  type:
+                    type: string
+                    enum:
+                      - ProvidedCapability
+                  capability:
+                    $ref: '#/components/schemas/Capability'
+                required:
+                  - type
+                  - capability
           required:
             - author
             - license

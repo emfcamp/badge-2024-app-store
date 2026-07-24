@@ -1,0 +1,11 @@
+title: FrontboardIdentifier
+description: Identifies a badge frontboard type (e.g. "2024 Frontboard" or "2026 Frontboard")
+type: object
+properties:
+  type:
+    type: string
+    enum:
+      - "2024 Frontboard"
+      - "2026 Frontboard"
+required:
+  - type

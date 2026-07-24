@@ -1,0 +1,15 @@
+title: Capability
+description: A hardware or software capability identified by a URL from the Tildagon capability registry
+type: object
+properties:
+  type:
+    type: string
+    enum:
+      - Capability
+  identifier:
+    type: string
+    format: uri
+    description: Full URL to the capability in the registry, e.g. https://tildagon.badge.emfcamp.org/capabilities/registry/neopixels/
+required:
+  - type
+  - identifier

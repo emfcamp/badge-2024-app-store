@@ -1,0 +1,14 @@
+title: TildagonOSMinimumVersion
+description: Specifies a minimum TildagonOS version required by the app
+type: object
+properties:
+  type:
+    type: string
+    enum:
+      - TildagonOSMinimumVersion
+  version:
+    type: string
+    description: Minimum TildagonOS version string
+required:
+  - type
+  - version

@@ -1,0 +1,23 @@
+title: HexpansionIdentifier
+description: Identifies a hexpansion hardware module by VID and PID
+type: object
+properties:
+  name:
+    type: string
+    description: Human-readable name of the hexpansion
+  creator:
+    type: string
+    description: Creator of the hexpansion
+  url:
+    type: string
+    format: uri
+    description: URL for more information about the hexpansion
+  vid:
+    type: string
+    description: Vendor ID of the hexpansion
+  pid:
+    type: string
+    description: Product ID of the hexpansion
+required:
+  - vid
+  - pid

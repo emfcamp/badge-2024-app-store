@@ -1,0 +1,6 @@
+name: supported_capability
+in: query
+required: false
+description: Filter by capability that this app SUPPORTS (but does not require). Repeat for AND logic. Comma-separated for OR within a single parameter. Values are full capability URLs, e.g. `?supported_capability=https://tildagon.badge.emfcamp.org/capabilities/registry/nmea/`
+schema:
+  type: string

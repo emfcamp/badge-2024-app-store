@@ -1,9 +1,10 @@
 title: AppManifest
 description: The author-provided app manifest (tildagon.toml or tildagon.json)
+type: object
 properties:
   app:
     type: object
-    description: The app's manifest
+    description: The app's identity and classification
     properties:
       name:
         type: string
@@ -45,12 +46,37 @@ properties:
         description: The version of the app
       capabilities:
         type: array
-        description: Hardware capabilities required or provided by this app
+        description: Hardware/software capability associations for this app (required or supported)
         items:
           type: object
           properties:
+            required:
+              type: boolean
+              description: Whether this capability is required (true) or merely supported (false)
             feature:
-              description: A string capability name, or a hexpansion/frontboard identifier
+              oneOf:
+                - $ref: "./Capability.yaml"
+                - $ref: "./HexpansionDefinition.yaml"
+                - $ref: "./FrontboardIdentifier.yaml"
+                - $ref: "./TildagonOSMinimumVersion.yaml"
+          required:
+            - required
+            - feature
+      providedCapabilities:
+        type: array
+        description: Capabilities that this app provides to other apps
+        items:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - ProvidedCapability
+            capability:
+              $ref: "./Capability.yaml"
+          required:
+            - type
+            - capability
     required:
       - author
       - license

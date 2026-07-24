@@ -1,6 +1,6 @@
 name: capability
 in: query
 required: false
-description: Filter by required capability. Repeat for AND logic. e.g. `?capability=MOTOR&capability=LED`
+description: Filter by capability (matches both required and supported). Repeat for AND logic. Comma-separated for OR within a single parameter. Values are full capability URLs, e.g. `?capability=https://tildagon.badge.emfcamp.org/capabilities/registry/neopixels/`
 schema:
   type: string

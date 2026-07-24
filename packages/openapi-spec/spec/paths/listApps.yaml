@@ -13,6 +13,8 @@ get:
     - $ref: "../parameters/vid.yaml"
     - $ref: "../parameters/pid.yaml"
     - $ref: "../parameters/frontboard.yaml"
+    - $ref: "../parameters/required_capability.yaml"
+    - $ref: "../parameters/supported_capability.yaml"
     - $ref: "../parameters/codes.yaml"
   responses:
     "200":

@@ -1,0 +1,13 @@
+title: HexpansionDefinition
+description: A hexpansion hardware module requirement or capability
+type: object
+properties:
+  type:
+    type: string
+    enum:
+      - Hexpansion
+  identifier:
+    $ref: "./HexpansionIdentifier.yaml"
+required:
+  - type
+  - identifier

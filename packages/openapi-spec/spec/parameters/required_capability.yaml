@@ -1,0 +1,6 @@
+name: required_capability
+in: query
+required: false
+description: Filter by capability that the badge MUST provide (apps that REQUIRE this). Repeat for AND logic. Comma-separated for OR within a single parameter. Values are full capability URLs, e.g. `?required_capability=https://tildagon.badge.emfcamp.org/capabilities/registry/neopixels/`
+schema:
+  type: string
