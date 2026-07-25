@@ -1,0 +1,240 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import AppCard from "../../components/AppCard.astro";
+import { CachedRegistryManager } from "tildagon-app-directory-api";
+import type { TildagonAppRelease } from "tildagon-app";
+
+const allApps = await CachedRegistryManager.listApps();
+
+// ── Group apps by capability ──────────────────────────────
+
+type CapabilityKey = string; // stable string key for each distinct capability
+interface CapabilityGroup {
+  label: string;        // human-readable label
+  sortKey: string;      // for ordering groups
+  apps: { release: TildagonAppRelease; required: boolean }[];
+}
+
+const groups = new Map<CapabilityKey, CapabilityGroup>();
+
+function groupKey(type: string, id: string): string {
+  return `${type}::${id}`;
+}
+
+for (const app of allApps) {
+  const caps = app.manifest.metadata.capabilities ?? [];
+  for (const assoc of caps) {
+    const feature = assoc.feature;
+    let key: string;
+    let label: string;
+    let sortKey: string;
+
+    if (typeof feature === "string") {
+      // Shouldn't happen with current schema but handle gracefully
+      key = groupKey("unknown", feature);
+      label = feature;
+      sortKey = `zzz-${feature}`;
+    } else if ("type" in feature && feature.type === "Capability") {
+      const id = feature.identifier;
+      key = groupKey("capability", id);
+      // Shorten long capability URLs for display
+      const short = id.replace(/^https?:\/\//, "").replace(/\/$/, "");
+      label = short;
+      sortKey = `1-capability-${id}`;
+    } else if ("vid" in feature && "pid" in feature) {
+      const hw = feature;
+      const id = `${hw.vid}:${hw.pid}`;
+      key = groupKey("hexpansion", id);
+      label = hw.name
+        ? `${hw.name} (VID:${hw.vid} PID:${hw.pid})`
+        : `Hexpansion VID:${hw.vid} PID:${hw.pid}`;
+      if (hw.creator) label += ` by ${hw.creator}`;
+      sortKey = `2-hexpansion-${hw.vid}:${hw.pid}`;
+    } else if ("type" in feature && (feature.type === "2024 Frontboard" || feature.type === "2026 Frontboard")) {
+      const id = feature.type;
+      key = groupKey("frontboard", id);
+      label = id;
+      sortKey = `3-frontboard-${id}`;
+    } else if ("type" in feature && feature.type === "TildagonOSMinimumVersion") {
+      const id = feature.version;
+      key = groupKey("os-min", id);
+      label = `TildagonOS ≥ ${id}`;
+      sortKey = `4-osmin-${id}`;
+    } else {
+      // Fallback for unknown types
+      const id = JSON.stringify(feature);
+      key = groupKey("other", id);
+      label = id;
+      sortKey = `zzz-${id}`;
+    }
+
+    const existing = groups.get(key);
+    if (existing) {
+      existing.apps.push({ release: app, required: assoc.required });
+    } else {
+      groups.set(key, {
+        label,
+        sortKey,
+        apps: [{ release: app, required: assoc.required }],
+      });
+    }
+  }
+}
+
+// Sort groups
+const sortedGroups = Array.from(groups.values()).sort((a, b) =>
+  a.sortKey.localeCompare(b.sortKey),
+);
+---
+
+<Layout
+  title="Apps by Capability — Tildagon App Store"
+  description="Browse Tildagon apps grouped by the capabilities they require or support"
+>
+  <main class="col-md-12">
+    <a href="/">&#8592; All apps</a>
+    <h1>Apps by Capability</h1>
+    <p>
+      Apps grouped by the hardware and software capabilities they require or
+      support. <strong>Required</strong> capabilities are marked with a
+      lock icon.
+    </p>
+
+    <nav class="toc" aria-label="Capability index">
+      <h2>Jump to:</h2>
+      <ul>
+        {
+          sortedGroups.map((g) => (
+            <li>
+              <a href={`#${g.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                {g.label}
+              </a>
+              <small>({g.apps.length} app{g.apps.length !== 1 ? "s" : ""})</small>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <hr />
+
+    {
+      sortedGroups.map((group) => (
+        <section
+          id={group.label.toLowerCase().replace(/[^a-z0-9]+/g, "-")}
+          class="capability-section"
+        >
+          <h2>{group.label}</h2>
+          <p class="app-count">
+            {group.apps.length} app{group.apps.length !== 1 ? "s" : ""}
+          </p>
+          <div class="apps">
+            {
+              group.apps
+                .sort((a, b) =>
+                  a.release.manifest.app.name
+                    .toLowerCase()
+                    .localeCompare(b.release.manifest.app.name.toLowerCase()),
+                )
+                .map(({ release, required }) => (
+                  <div class="app-wrapper">
+                    {required && (
+                      <span class="required-badge" title="Required capability">
+                        🔒 Required
+                      </span>
+                    )}
+                    <AppCard release={release} />
+                  </div>
+                ))
+            }
+          </div>
+          <hr />
+        </section>
+      ))
+    }
+
+    {
+      sortedGroups.length === 0 && (
+        <p>No apps with capabilities found.</p>
+      )
+    }
+  </main>
+</Layout>
+
+<style>
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .toc {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  .toc h2 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+  }
+
+  .toc ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+
+  .toc a {
+    color: #afc944;
+    text-decoration: underline;
+  }
+
+  .capability-section {
+    margin-bottom: 2rem;
+  }
+
+  .capability-section h2 {
+    word-break: break-all;
+  }
+
+  .app-count {
+    color: #999;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .apps {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .app-wrapper {
+    position: relative;
+    flex: 1 1 400px;
+  }
+
+  .required-badge {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+    z-index: 1;
+    background: #f5515e;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+
+  hr {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin: 1.5rem 0;
+  }
+</style>
