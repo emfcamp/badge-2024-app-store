@@ -17,7 +17,7 @@
     "lint": "npx -p @seriousme/openapi-schema-validator spec/openapi.yaml"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@redocly/cli": "^2.36.0",
